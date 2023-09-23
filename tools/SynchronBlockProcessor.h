@@ -36,7 +36,7 @@ public:
      * @param channels 
      * @param desiredSize 
      */
-    void preparetoProcess(int channels, int desiredSize); 
+    void prepareSynchronProcessing(int channels, int desiredSize); 
     /**
      * @brief the typical JUCE call just forward the call in Processor
      * 

@@ -13,27 +13,12 @@ YourPluginNameAudioProcessor::YourPluginNameAudioProcessor()
                        )
 {
 
-    // It is important to have the paramter set in the m_paramVector
-    // e.g. (a better solution is to ue this function in the components)
-/*        m_paramVector.push_back(std::make_unique<AudioParameterFloat>(paramHpCutoff.ID,
-        paramHpCutoff.name,
-        NormalisableRange<float>(paramHpCutoff.minValue, paramHpCutoff.maxValue),
-        paramHpCutoff.defaultValue,
-        paramHpCutoff.unitName,
-        AudioProcessorParameter::genericParameter,
-        [](float value, int MaxLen) { value = int(exp(value) * 10) * 0.1;  return (String(value, MaxLen) + " Hz"); },
-        [](const String& text) {return text.getFloatValue(); }));
-//*/
-    // this is just a placeholder (necessary for compiling/testing the template)
-    m_paramVector.push_back(std::make_unique<AudioParameterFloat>("ExampleID",
-        "Example Name",
-        NormalisableRange<float>(1.f, 2.f),
-        1.5f,
-        "unitname",
-        AudioProcessorParameter::genericParameter));
-    
+    m_algo.addParameter(m_paramVector);
+
     m_parameterVTS = std::make_unique<AudioProcessorValueTreeState>(*this, nullptr, Identifier("YourPluginNameVTS"),
         AudioProcessorValueTreeState::ParameterLayout(m_paramVector.begin(), m_paramVector.end()));
+
+    m_algo.prepareParameter(m_parameterVTS);
 
 	m_presets.setAudioValueTreeState(m_parameterVTS.get());
     // if needed add categories
@@ -42,8 +27,10 @@ YourPluginNameAudioProcessor::YourPluginNameAudioProcessor()
 #ifdef FACTORY_PRESETS    
     m_presets.DeployFactoryPresets();
 #endif
-
+    
 	m_presets.loadfromFileAllUserPresets();    
+
+    setLatencySamples(m_algo.getLatency());
 }
 
 YourPluginNameAudioProcessor::~YourPluginNameAudioProcessor()
@@ -84,8 +71,10 @@ bool YourPluginNameAudioProcessor::isMidiEffect() const
    #endif
 }
 
+
 double YourPluginNameAudioProcessor::getTailLengthSeconds() const
 {
+
     return 0.0;
 }
 
@@ -129,6 +118,7 @@ void YourPluginNameAudioProcessor::prepareToPlay (double sampleRate, int samples
 
     juce::ignoreUnused (samplesPerBlock);
     m_fs = sampleRate;
+    m_algo.prepareToPlay(sampleRate,samplesPerBlock,nrofchannels);
 }
 
 void YourPluginNameAudioProcessor::releaseResources()
@@ -187,12 +177,9 @@ void YourPluginNameAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
-        juce::ignoreUnused (channelData);
-        // ..do something to the data...
-    }
+
+    m_algo.processBlock(buffer,midiMessages);
+
 #if WITH_MIDIKEYBOARD  
     midiMessages.clear(); // except you want to create new midi messages, but than say so 
     // by setting NEEDS_MIDI_OUTPUT in CMakeLists.txt

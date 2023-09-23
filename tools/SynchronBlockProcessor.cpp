@@ -3,9 +3,9 @@
 SynchronBlockProcessor::SynchronBlockProcessor()
 :m_NrOfChannels(2),m_OutBlockSize(256)
 {
-    preparetoProcess(m_NrOfChannels,m_OutBlockSize);
+    prepareSynchronProcessing(m_NrOfChannels,m_OutBlockSize);
 }
-void SynchronBlockProcessor::preparetoProcess(int channels, int desiredSize)
+void SynchronBlockProcessor::prepareSynchronProcessing(int channels, int desiredSize)
 {
     m_protectBlock.enter();
     m_OutBlockSize = desiredSize;
@@ -27,6 +27,7 @@ void SynchronBlockProcessor::processBlock(juce::AudioBuffer<float>& data, juce::
     auto readdatapointers = data.getArrayOfReadPointers();
     auto writedatapointers = data.getArrayOfWritePointers();
     int nrOfInputSamples = data.getNumSamples();
+    int nrOfChannels = data.getNumChannels();
     auto blockreaddatapointers = m_block.getArrayOfReadPointers();
     auto blockwritedatapointers = m_block.getArrayOfWritePointers();
     auto memreaddatapointers = m_memory.getArrayOfReadPointers();
@@ -34,7 +35,7 @@ void SynchronBlockProcessor::processBlock(juce::AudioBuffer<float>& data, juce::
 
     for (auto kk = 0; kk < nrOfInputSamples; ++kk)
     {
-        for (auto cc = 0; cc < m_NrOfChannels; ++cc)
+        for (auto cc = 0; cc < nrOfChannels; ++cc)
         {
             blockwritedatapointers[cc][m_InCounter] = readdatapointers[cc][kk];
             writedatapointers[cc][kk] = memreaddatapointers[cc][m_OutCounter];
@@ -58,7 +59,7 @@ void SynchronBlockProcessor::processBlock(juce::AudioBuffer<float>& data, juce::
                 // copy block into mem
             if (m_OutCounter < m_OutBlockSize)
             {
-                for (auto channel = 0; channel < m_NrOfChannels; ++channel)
+                for (auto channel = 0; channel < nrOfChannels; ++channel)
                 {
                     for (auto sample = 0; sample < m_OutBlockSize; ++sample)
                     {
@@ -69,7 +70,7 @@ void SynchronBlockProcessor::processBlock(juce::AudioBuffer<float>& data, juce::
             }
             else
             {
-                for (auto channel = 0; channel < m_NrOfChannels; ++channel)
+                for (auto channel = 0; channel < nrOfChannels; ++channel)
                 {
                     for (auto sample = 0; sample < m_OutBlockSize; ++sample)
                     {

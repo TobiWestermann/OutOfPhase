@@ -60,6 +60,7 @@ target_sources(AudioPluginYourPluginName
     PRIVATE
         PluginEditor.cpp
         PluginProcessor.cpp
+        YourPluginName.cpp
         tools/MidiModPitchState.cpp
         tools/PresetHandler.cpp
         tools/SynchronBlockProcessor.cpp
