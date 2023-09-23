@@ -1,7 +1,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "PlugInGUISettings.h"
+#include "PluginSettings.h"
 
 //==============================================================================
 #if WITH_MIDIKEYBOARD   
@@ -40,8 +40,6 @@ void YourPluginNameAudioProcessorEditor::paint (juce::Graphics& g)
     g.setFont (15.0f);
     g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 }
-const int g_minPresetHandlerHeight(30);
-const float g_midikeyboardratio(0.13);
 void YourPluginNameAudioProcessorEditor::resized()
 {
     int height = getHeight();

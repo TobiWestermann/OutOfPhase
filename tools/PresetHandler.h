@@ -39,7 +39,7 @@
 #include <list>
 #include <vector>
 
-#include "../PlugInGUISettings.h"
+#include "../PluginSettings.h"
 const int g_maxNumberOfCategories = 20;
 
 class PresetHandler

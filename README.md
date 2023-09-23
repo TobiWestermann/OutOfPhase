@@ -2,18 +2,17 @@
 A template for quick development of audio plugins on a semi-professional level.
 
 Dependencies:
-TGMLib (to be created) as static lib and header files
 
-CMake Basic Files from AudioDev. (to generate the lib)
+CMake Basic Files from AudioDev.
 
 ## Purpose
 This template provides some basic features for effects and synth, like:
 * synchron block processing for arbitrary block sizes
-* preset handler
-* resizable GUI
-* saving/loading of plugin state (with GUI size)
+* preset handler (done)
+* resizable GUI (done)
+* saving/loading of plugin state (with GUI size) (done)
 * keyboard  + pitch-wheel and modulation-wheel (midi insert and display) 
-* a basic audioProcessing class for the core dsp code 
+* a template plugin cpp and h for easy start.
   
 
 ## Usage
