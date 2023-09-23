@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
 #include <juce_audio_processors/juce_audio_processors.h>
-#include "PresetHandler.h"
+#include "tools/MidiModPitchState.h"
+#include "tools/PresetHandler.h"
 //==============================================================================
 class YourPluginNameAudioProcessor  : public juce::AudioProcessor
 {

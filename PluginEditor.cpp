@@ -47,7 +47,7 @@ void YourPluginNameAudioProcessorEditor::resized()
     int height = getHeight();
     // necessary to change fontsize of comboboxes and PopUpmenus
     // 0.5 is a good compromisecould be slightly higher or lower
-    m_jadeLAF.setFontSize(0.5*height*g_minPresetHandlerHeight/g_minGuiSize_y);
+    // m_jadeLAF.setFontSize(0.5*height*g_minPresetHandlerHeight/g_minGuiSize_y);
     // top presethandler
     m_presetGUI.setBounds(0, 0, getWidth(), height*g_minPresetHandlerHeight/g_minGuiSize_y);
     // bottom a small midkeyboard

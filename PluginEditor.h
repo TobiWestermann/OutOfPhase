@@ -1,8 +1,8 @@
 #pragma once
 
 #include "PluginProcessor.h"
-#include "JadeLookAndFeel.h"
-#include "PresetHandler.h"
+// #include "JadeLookAndFeel.h"
+#include "tools/PresetHandler.h"
 
 
 //==============================================================================
@@ -18,7 +18,7 @@ public:
     void resized() override;
 
 private:
-    JadeLookAndFeel m_jadeLAF;
+    // JadeLookAndFeel m_jadeLAF;
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     YourPluginNameAudioProcessor& m_processorRef;

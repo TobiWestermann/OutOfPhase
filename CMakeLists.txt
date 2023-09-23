@@ -60,6 +60,9 @@ target_sources(AudioPluginYourPluginName
     PRIVATE
         PluginEditor.cpp
         PluginProcessor.cpp
+        tools/MidiModPitchState.cpp
+        tools/PresetHandler.cpp
+        tools/SynchronBlockProcessor.cpp
         ${TGMLIBCPPS}
         )
 
