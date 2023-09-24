@@ -22,8 +22,8 @@ YourPluginNameAudioProcessor::YourPluginNameAudioProcessor()
 
 	m_presets.setAudioValueTreeState(m_parameterVTS.get());
     // if needed add categories
-    // m_presets.addCategory(StringArray("Unknown", "Soft", "Medium", "Hard", "Experimental"));
-    // m_presets.addCategory(JadeSynthCategories);
+    m_presets.addCategory(g_PresetCategories);
+    
 #ifdef FACTORY_PRESETS    
     m_presets.DeployFactoryPresets();
 #endif

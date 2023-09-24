@@ -28,11 +28,7 @@ This template provides some basic features for effects and synth, like:
 ## Options:
 * In the CMakeLists.txt you can add some defines (FACTORY_PRESETS and WITH_MIDIKEYBOARD). The second is recommended for synth.
 
-## Extension (tbd)
-
-LookAndFeel for your own GUI style. Juce allows to change more or less everything.
-
-## Example to use
+## Example to use (tbd)
 
 Gain plugin (of course)
 
