@@ -9,6 +9,7 @@ YourPluginNameAudio::YourPluginNameAudio()
 
 void YourPluginNameAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, int max_channels)
 {
+    juce::ignoreUnused(max_samplesPerBlock,max_channels);
     int synchronblocksize;
     synchronblocksize = (g_desired_blocksize_ms*sampleRate*0.001);
     if (g_forcePowerOf2)
@@ -22,8 +23,9 @@ void YourPluginNameAudio::prepareToPlay(double sampleRate, int max_samplesPerBlo
 
 }
 
-int YourPluginNameAudio::processSynchronBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &midiMessages)
+int YourPluginNameAudio::processSynchronBlock(juce::AudioBuffer<float> & buffer, juce::MidiBuffer &midiMessages)
 {
+    juce::ignoreUnused(buffer, midiMessages);
     return 0;
 }
 
@@ -47,8 +49,36 @@ void YourPluginNameAudio::addParameter(std::vector<std::unique_ptr<juce::RangedA
 
 void YourPluginNameAudio::prepareParameter(std::unique_ptr<juce::AudioProcessorValueTreeState> &vts)
 {
+    juce::ignoreUnused(vts);
 }
 
-YourPluginNameGUI::YourPluginNameGUI()
+
+YourPluginNameGUI::YourPluginNameGUI(juce::AudioProcessorValueTreeState& apvts)
+:m_apvts(apvts)
 {
+    
+}
+
+void YourPluginNameGUI::paint(juce::Graphics &g)
+{
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId).brighter(0.3));
+
+    g.setColour (juce::Colours::white);
+    g.setFont (15.0f);
+    g.drawFittedText ("YourPluginName", getLocalBounds(), juce::Justification::centred, 1);
+
+}
+
+void YourPluginNameGUI::resized()
+{
+	auto r = getLocalBounds();
+    
+    // if you have to place several components, use scaleFactor
+    //int width = r.getWidth();
+	//float scaleFactor = float(width)/g_minGuiSize_x;
+
+    // use the given canvas in r
+    juce::ignoreUnused(r);
+
+
 }

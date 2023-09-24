@@ -7,13 +7,12 @@ CMake Basic Files from AudioDev.
 
 ## Purpose
 This template provides some basic features for effects and synth, like:
-* synchron block processing for arbitrary block sizes
+* synchron block processing for arbitrary block sizes (done, not tested)
 * preset handler (done)
 * resizable GUI (done)
 * saving/loading of plugin state (with GUI size) (done)
-* keyboard  + pitch-wheel and modulation-wheel (midi insert and display) 
-* a template plugin cpp and h for easy start.
-  
+* keyboard  + pitch-wheel and modulation-wheel (midi insert and display) (done) 
+* a template plugin cpp and h for easy start. (done)
 
 ## Usage
 
@@ -28,6 +27,14 @@ This template provides some basic features for effects and synth, like:
 
 ## Options:
 * In the CMakeLists.txt you can add some defines (FACTORY_PRESETS and WITH_MIDIKEYBOARD). The second is recommended for synth.
+
+## Extension (tbd)
+
+LookAndFeel for your own GUI style. Juce allows to change more or less everything.
+
+## Example to use
+
+Gain plugin (of course)
 
 
 

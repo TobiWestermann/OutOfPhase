@@ -7,7 +7,8 @@
 #if WITH_MIDIKEYBOARD   
 YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPluginNameAudioProcessor& p)
     : AudioProcessorEditor (&p), m_processorRef (p), m_presetGUI(p.m_presets),
-    	m_keyboard(m_processorRef.m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard)
+    	m_keyboard(m_processorRef.m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard), 
+        m_wheels(p.m_wheelState), m_editor(*p.m_parameterVTS)
 #else
 YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPluginNameAudioProcessor& p)
     : AudioProcessorEditor (&p), m_processorRef (p), m_presetGUI(p.m_presets)
@@ -22,7 +23,11 @@ YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPlug
 	addAndMakeVisible(m_presetGUI);
 #if WITH_MIDIKEYBOARD      
 	addAndMakeVisible(m_keyboard);
+    addAndMakeVisible(m_wheels);    
 #endif
+
+    // from here your algo editor ---------
+    addAndMakeVisible(m_editor);
 
 }
 
@@ -50,7 +55,9 @@ void YourPluginNameAudioProcessorEditor::resized()
     m_presetGUI.setBounds(0, 0, getWidth(), height*g_minPresetHandlerHeight/g_minGuiSize_y);
     // bottom a small midkeyboard
 #if WITH_MIDIKEYBOARD    
-    m_keyboard.setBounds(0, height*(1-g_midikeyboardratio), getWidth(), height*g_midikeyboardratio);
+    m_wheels.setBounds(0, height*(1-g_midikeyboardratio), g_wheelstokeyboardratio*getWidth(), height*g_midikeyboardratio);
+    m_keyboard.setBounds(g_wheelstokeyboardratio*getWidth(), height*(1-g_midikeyboardratio), (1.0-g_wheelstokeyboardratio)*getWidth(), height*g_midikeyboardratio);
+
 #endif
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
@@ -59,4 +66,7 @@ void YourPluginNameAudioProcessorEditor::resized()
 	float scaleFactor = float(width)/g_minGuiSize_x;
     m_processorRef.setScaleFactor(scaleFactor);
     // use setBounds with scaleFactor
+    m_editor.setBounds(0, height*g_minPresetHandlerHeight/g_minGuiSize_y + 1, 
+                        getWidth(), height*(1-g_midikeyboardratio) - (height*g_minPresetHandlerHeight/g_minGuiSize_y + 1) );
+
 }

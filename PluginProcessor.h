@@ -60,6 +60,7 @@ private:
     float m_pluginScaleFactor = 1.0;    
 #if WITH_MIDIKEYBOARD    
     MidiKeyboardState m_keyboardState;
+    MidiModPitchBendState m_wheelState;
 #endif
     // Your plugin stuff
 

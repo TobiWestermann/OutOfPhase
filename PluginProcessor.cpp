@@ -154,6 +154,7 @@ void YourPluginNameAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 {
  #if WITH_MIDIKEYBOARD  
 	m_keyboardState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+    m_wheelState.processNextMidiBuffer(midiMessages,true);
 #else
     juce::ignoreUnused (midiMessages);
 #endif

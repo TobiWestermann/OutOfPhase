@@ -18,5 +18,6 @@ const int g_minPresetHandlerHeight(30); // in pixels
 #define MIN_ELEMENT_HEIGHT_PRESET 20
 
 const float g_midikeyboardratio(0.13); // in percent of height()
+const float g_wheelstokeyboardratio(0.1);
 
 

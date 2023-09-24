@@ -37,9 +37,14 @@ private:
     int m_Latency = 0;
 };
 
-class YourPluginNameGUI
+class YourPluginNameGUI : public Component
 {
 public:
-    YourPluginNameGUI();
+	YourPluginNameGUI(juce::AudioProcessorValueTreeState& apvts);
+
+	void paint(juce::Graphics& g) override;
+	void resized() override;
+private:
+    AudioProcessorValueTreeState& m_apvts; 
 
 };

@@ -63,7 +63,7 @@ MidiModPitchBendStateComponent::MidiModPitchBendStateComponent(MidiModPitchBendS
     m_ModSlider.onValueChange = [this]{m_state.setModState(m_ModSlider.getValue());};
     addAndMakeVisible (m_ModSlider);
 
-    m_PitchBendLabel.setFont(Font(3,0));
+    //m_PitchBendLabel.setFont(Font(3,0));
    	m_PitchBendLabel.setText("P", NotificationType::dontSendNotification);
 	m_PitchBendLabel.setJustificationType(Justification::centred);
 	m_PitchBendLabel.attachToComponent (&m_PitchBendSlider, false);
