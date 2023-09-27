@@ -14,6 +14,7 @@
 								  save (no unknown categories-> set to Unknown))
 
 	// Version 1.2.0 18.01.20 JB: added submenus for categories (if provided)
+	// Version 1.2.1 18.09.23 JB: add category changed to prevent empty strings
 
   ==============================================================================
 */

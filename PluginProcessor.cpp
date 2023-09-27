@@ -21,9 +21,9 @@ YourPluginNameAudioProcessor::YourPluginNameAudioProcessor()
     m_algo.prepareParameter(m_parameterVTS);
 
 	m_presets.setAudioValueTreeState(m_parameterVTS.get());
-    // if needed add categories
+    // if needed add categories, if g_PresetCategories contains one empty string "", nothing happened
     m_presets.addCategory(g_PresetCategories);
-    
+
 #ifdef FACTORY_PRESETS    
     m_presets.DeployFactoryPresets();
 #endif
