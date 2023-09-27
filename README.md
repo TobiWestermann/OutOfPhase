@@ -18,11 +18,20 @@ This template provides some basic features for effects and synth, like:
 
 1. Create a new directory (better create a new repository in GitHub)
 2. (if Github): Checkout your new project
-3. copy template files
-4. rename all instances of "YourPluginName" in the Files with something apropriate 
-    (use a renaming-tool like   "sed -i 's/YourPluginName/YourNewProjectName/g' *.*")   
-5. Add your new subdiretory to the main CMakeLists.txt (in main directory AudioDev) file
-6. Start coding your plugin
+3. copy template files (https://github.com/JoergBitzer/AdvancedAudioTemplate)
+4. rename all instances of "YourPluginName" in the Files with something appropriate 
+    (use a renaming-tool like   
+```console    
+    sed -i 's/YourPluginName/YourNewProjectName/g' *.*
+```    
+5. Rename YourPluginName.cpp and YourPluginName.h into YourNewProjectName.cpp and YourNewProjectName.h (e.g. Linux: 
+```console    
+    rename 's/YourPluginName/YourNewProjectName/' *.*     
+```    
+6. Add your new subdiretory to the main CMakeLists.txt (in main directory AudioDev) file
+7. add or remove add_compile_definitions to your intention (Do you need a preset manager (default is yes), 
+                                                            Do you need a midi-keyboard display (default is no)) 
+8. Start coding your plugin
 
 
 ## Options:
@@ -30,7 +39,13 @@ This template provides some basic features for effects and synth, like:
 
 ## Example to use (tbd)
 
-Gain plugin (of course)
+### Gain plugin (of course)
+
+Apply Usage
+for the 4th step: sed -i 's/YourPluginName/GainPlugin/g' *.*
+for the 5th step: rename 's/YourPluginName/GainPlugin/' *.*     
+
+for the 7th step switch off PresetHandlerGUI (for a simple gain not necessary) 
 
 
 

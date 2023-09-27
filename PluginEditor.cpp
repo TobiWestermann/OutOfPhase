@@ -11,7 +11,7 @@ YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPlug
         m_wheels(p.m_wheelState), m_editor(*p.m_parameterVTS)
 #else
 YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPluginNameAudioProcessor& p)
-    : AudioProcessorEditor (&p), m_processorRef (p), m_presetGUI(p.m_presets)
+    : AudioProcessorEditor (&p), m_processorRef (p), m_presetGUI(p.m_presets), m_editor(*p.m_parameterVTS)
 #endif
 {
     float scaleFactor = m_processorRef.getScaleFactor();
@@ -52,12 +52,13 @@ void YourPluginNameAudioProcessorEditor::resized()
     // 0.5 is a good compromisecould be slightly higher or lower
     // m_jadeLAF.setFontSize(0.5*height*g_minPresetHandlerHeight/g_minGuiSize_y);
     // top presethandler
+#if WITH_PRESETHANDLERGUI    
     m_presetGUI.setBounds(0, 0, getWidth(), height*g_minPresetHandlerHeight/g_minGuiSize_y);
+#endif
     // bottom a small midkeyboard
 #if WITH_MIDIKEYBOARD    
     m_wheels.setBounds(0, height*(1-g_midikeyboardratio), g_wheelstokeyboardratio*getWidth(), height*g_midikeyboardratio);
     m_keyboard.setBounds(g_wheelstokeyboardratio*getWidth(), height*(1-g_midikeyboardratio), (1.0-g_wheelstokeyboardratio)*getWidth(), height*g_midikeyboardratio);
-
 #endif
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
@@ -66,7 +67,22 @@ void YourPluginNameAudioProcessorEditor::resized()
 	float scaleFactor = float(width)/g_minGuiSize_x;
     m_processorRef.setScaleFactor(scaleFactor);
     // use setBounds with scaleFactor
+#if WITH_MIDIKEYBOARD    
+    #if WITH_PRESETHANDLERGUI    
     m_editor.setBounds(0, height*g_minPresetHandlerHeight/g_minGuiSize_y + 1, 
                         getWidth(), height*(1-g_midikeyboardratio) - (height*g_minPresetHandlerHeight/g_minGuiSize_y + 1) );
+    #else
+    m_editor.setBounds(0, 0, getWidth(), height*(1-g_midikeyboardratio) );
+
+    #endif                        
+#else
+    #if WITH_PRESETHANDLERGUI    
+    m_editor.setBounds(0, height*g_minPresetHandlerHeight/g_minGuiSize_y + 1, 
+                        getWidth(), height - (height*g_minPresetHandlerHeight/g_minGuiSize_y + 1) );
+    #else
+    m_editor.setBounds(0, 0, getWidth(), height);
+
+    #endif                        
+#endif
 
 }
