@@ -13,7 +13,7 @@ const float g_guiratio = float(g_minGuiSize_y)/g_minGuiSize_x;
 // ---------- presethandler ----------
 //const StringArray g_PresetCategories("Unknown", "Lead", "Brass", "Template", "Bass",
 //	"Key", "Organ" , "Pad", "Drums_Perc", "SpecialEffect","Sequence", "String" );
-const StringArray g_PresetCategories(""); // keep empty for "no categories"
+const juce::StringArray g_PresetCategories(""); // keep empty for "no categories"
 
 const int g_minPresetHandlerHeight(30); // in pixels
 #define MIN_COMBO_WITH_PRESET 120
