@@ -25,12 +25,26 @@ This template provides some basic features for effects and synth, like:
     sed -i 's/YourPluginName/YourNewProjectName/g' *.*
 ```    
 for MacOS (https://stackoverflow.com/questions/4247068/sed-command-with-i-option-failing-on-mac-but-works-on-linux)
-for Windows: (https://stackoverflow.com/questions/17144355/how-can-i-replace-every-occurrence-of-a-string-in-a-file-with-powershell)  (for multiple files the solution is further down) or start the windows subsystem for linux
+for Windows: (https://stackoverflow.com/questions/17144355/how-can-i-replace-every-occurrence-of-a-string-in-a-file-with-powershell)  
+
+```console    
+ C:\AudioDev\AAT_Test> Get-ChildItem '*.*' -Recurse | ForEach {
+      (Get-Content $_ | ForEach  { $_ -replace 'YourPluginName', 'YourNewProjectName' }) |
+      Set-Content $_ }
+```    
+or start the windows subsystem for linux
+
+or use the tools given by visual studio code.
 
 5. Rename YourPluginName.cpp and YourPluginName.h into YourNewProjectName.cpp and YourNewProjectName.h (e.g. Linux: 
 ```console    
     rename 's/YourPluginName/YourNewProjectName/' *.*     
 ```    
+and Windows (cmd, not PS)
+```console    
+ren YourPluginName.* YourNewProjectName.*
+```    
+
 6. Add your new subdiretory to the main CMakeLists.txt (in main directory AudioDev) file
 7. add or remove add_compile_definitions to your intention (Do you need a preset manager (default is yes), 
                                                             Do you need a midi-keyboard display (default is no)) 
