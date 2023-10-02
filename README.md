@@ -48,23 +48,26 @@ ren YourPluginName.* YourNewProjectName.*
 6. Add your new subdiretory to the main CMakeLists.txt (in main directory AudioDev) file
 7. add or remove add_compile_definitions to your intention (Do you need a preset manager (default is yes), 
                                                             Do you need a midi-keyboard display (default is no)) 
-8. Start coding your plugin
+8. Test if the template builds (should without error) and start coding your plugin
 
 
-## Options:
-* In the CMakeLists.txt you can add some defines (FACTORY_PRESETS and WITH_MIDIKEYBOARD). The second is recommended for synth.
-
-## Example to use (tbd)
+## Example to use the template
 
 ### Gain plugin (of course) 
-[source code at](https://github.com/JoergBitzer/AAT_GainExample). I would use it 
+[source code at](https://github.com/JoergBitzer/AAT_GainExample). I would use it only as a backup, if something goes wrong.
 
 1. Think about a name: Here, GainPlugin
 
 2. Apply Usage
 for the 4th step: sed -i 's/YourPluginName/GainPlugin/g' *.*
 for MacOS, see (https://stackoverflow.com/questions/4247068/sed-command-with-i-option-failing-on-mac-but-works-on-linux)
-for Windows: (https://stackoverflow.com/questions/17144355/how-can-i-replace-every-occurrence-of-a-string-in-a-file-with-powershell)  (for multiple files the solution is further down) or start the windows subsystem for linux
+for Windows: (https://stackoverflow.com/questions/17144355/how-can-i-replace-every-occurrence-of-a-string-in-a-file-with-powershell) 
+```console    
+ C:\AudioDev\AAT_Test> Get-ChildItem '*.*' -Recurse | ForEach {
+      (Get-Content $_ | ForEach  { $_ -replace 'YourPluginName', 'YourNewProjectName' }) |
+      Set-Content $_ }
+```    
+or use the tools given in Visual Studio Code
 
 for the 5th step: rename 's/YourPluginName/GainPlugin/' *.* or by hand (just 2 files)
 
@@ -151,7 +154,7 @@ private:
 
 9. Component adjustment (add one slide)
 
-In the header add the necessary variables it should like that
+In the header add the necessary variables it should read like this
 ```cpp
 private:
     AudioProcessorValueTreeState& m_apvts; 
@@ -180,8 +183,20 @@ and the setbounds method
 Some remarks
 For most parameter it is better to use small synchron blocks (e.g. 2ms) and smooth the update. If you need smoothing on a sample base (like for gains) use applyRamp from the buffer (it is linear, but faster compared to a sample-based smoothing). 
 
+(a german video exist to build the Gain)
 
+## Second Example EQ (Peak, one band)
 
+This example is very short in the description here. You will find the source code on Github (AAT_EQ1)
 
+1. Solve your math first. You will find the formulas for Equalizer by searching for the "RBJ cookbook".
+2. Understand what a second order section filter is. (LTI System, with 3 transversal (b0,b1,b2) and 2 recursive coefficients (a1,a2))
+3. Build the audio class (3 parameter (Gain, Freq, Q))
+4. Build the GUI (3 rotary knobs)
+5. Done
 
+(a german video exist to build the EQ)
+
+### Remarks
+For a general solution with more possibilities for Equalizer (cut, shelf), use the given TGMLib
 
