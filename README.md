@@ -28,7 +28,7 @@ for MacOS (https://stackoverflow.com/questions/4247068/sed-command-with-i-option
 for Windows: (https://stackoverflow.com/questions/17144355/how-can-i-replace-every-occurrence-of-a-string-in-a-file-with-powershell)  
 
 ```console    
- C:\AudioDev\AAT_Test> Get-ChildItem '*.*' -Recurse | ForEach {
+ Get-ChildItem '*.*' -Recurse | ForEach {
       (Get-Content $_ | ForEach  { $_ -replace 'YourPluginName', 'YourNewProjectName' }) |
       Set-Content $_ }
 ```    
@@ -63,7 +63,7 @@ for the 4th step: sed -i 's/YourPluginName/GainPlugin/g' *.*
 for MacOS, see (https://stackoverflow.com/questions/4247068/sed-command-with-i-option-failing-on-mac-but-works-on-linux)
 for Windows: (https://stackoverflow.com/questions/17144355/how-can-i-replace-every-occurrence-of-a-string-in-a-file-with-powershell) 
 ```console    
- C:\AudioDev\AAT_Test> Get-ChildItem '*.*' -Recurse | ForEach {
+  Get-ChildItem '*.*' -Recurse | ForEach {
       (Get-Content $_ | ForEach  { $_ -replace 'YourPluginName', 'YourNewProjectName' }) |
       Set-Content $_ }
 ```    

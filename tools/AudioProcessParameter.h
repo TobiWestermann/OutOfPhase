@@ -9,7 +9,8 @@ public:
         notransform,
         db2gaintransform,
         db2powtransform,
-        sqrttransform
+        sqrttransform,
+        exptransform,
     };
     AudioProcessParameter(){
         changeTransformer(transformerFunc::notransform);
@@ -40,6 +41,9 @@ public:
                 break;
             case transformerFunc::sqrttransform:
                 m_transformParam = [this](){return sqrt(m_ParamOld);};
+                break;
+            case transformerFunc::exptransform:
+                m_transformParam = [this](){return exp(m_ParamOld);};
                 break;
 
             default:
