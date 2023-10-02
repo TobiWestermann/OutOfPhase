@@ -7,12 +7,12 @@ CMake Basic Files from AudioDev.
 
 ## Purpose
 This template provides some basic features for effects and synth, like:
-* synchron block processing for arbitrary block sizes (done, not tested)
-* preset handler (done)
-* resizable GUI (done)
-* saving/loading of plugin state (with GUI size) (done)
-* keyboard  + pitch-wheel and modulation-wheel (midi insert and display) (done) 
-* a template plugin cpp and h for easy start. (done)
+* synchron block processing for arbitrary block sizes 
+* preset handler 
+* resizable GUI 
+* saving/loading of plugin state (with GUI size) 
+* keyboard  + pitch-wheel and modulation-wheel (midi insert and display)  
+* a template plugin cpp and h for easy start. 
 
 ## Usage
 
@@ -152,7 +152,7 @@ private:
     }
 ```
 
-9. Component adjustment (add one slide)
+9. Component adjustment (add one slider)
 
 In the header add the necessary variables it should read like this
 ```cpp
