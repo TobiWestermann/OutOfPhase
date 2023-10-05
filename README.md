@@ -2,8 +2,23 @@
 A template for quick development of audio plugins on a semi-professional level.
 
 Dependencies:
+This template is based on JUCE. So you need to clone JUCE and you need one more CMakeLists.txt file from the repository AudioDevOrga.
 
-CMake Basic Files from AudioDev.
+Your directory structure should look like this
+
+YourDevDir
+    CMakeLists.txt (from AudioDevOrga)
+    JUCE (directory)
+    YourNewProjectDir (see Usage section of this ReadMe)
+        CMakeLists.txt (from this template)
+        tools (template dir)
+        PluginEditor.cpp
+        PluginEditor.h
+        PluginProcessor.cpp
+        PluginProcessor.h
+        PluginSettings.h
+        YourPluginName.cpp (keep this name for the file, it will be renamed later)
+        YourPluginName.h (keep this name for the file, it will be renamed later)
 
 ## Purpose
 This template provides some basic features for effects and synth, like:
@@ -12,7 +27,7 @@ This template provides some basic features for effects and synth, like:
 * resizable GUI 
 * saving/loading of plugin state (with GUI size) 
 * keyboard  + pitch-wheel and modulation-wheel (midi insert and display)  
-* a template plugin cpp and h for easy start. 
+* a template plugin cpp and h for easy start (named YourPluginName.cpp and h). 
 
 ## Usage
 
@@ -45,7 +60,7 @@ and Windows (cmd, not PS)
 ren YourPluginName.* YourNewProjectName.*
 ```    
 
-6. Add your new subdiretory to the main CMakeLists.txt (in main directory AudioDev) file
+6. Add your new subdiretory to the main CMakeLists.txt (in main directory YourDevDir (e.g. AudioDev)) file
 7. add or remove add_compile_definitions to your intention (Do you need a preset manager (default is yes), 
                                                             Do you need a midi-keyboard display (default is no)) 
 8. Test if the template builds (should without error) and start coding your plugin
@@ -187,7 +202,7 @@ For most parameter it is better to use small synchron blocks (e.g. 2ms) and smoo
 
 ## Second Example EQ (Peak, one band)
 
-This example is very short in the description here. You will find the source code on Github (AAT_EQ1)
+The description of this example is very short. You will find the source code on Github (AAT_EQ1)
 
 1. Solve your math first. You will find the formulas for Equalizer by searching for the "RBJ cookbook".
 2. Understand what a second order section filter is. (LTI System, with 3 transversal (b0,b1,b2) and 2 recursive coefficients (a1,a2))
@@ -195,8 +210,9 @@ This example is very short in the description here. You will find the source cod
 4. Build the GUI (3 rotary knobs)
 5. Done
 
-(a german video exist to build the EQ)
+(videos exist to build the EQ (in German only))
 
 ### Remarks
 For a general solution with more possibilities for Equalizer (cut, shelf), use the given TGMLib
+
 
