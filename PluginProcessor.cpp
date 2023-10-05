@@ -230,7 +230,12 @@ void YourPluginNameAudioProcessor::setStateInformation (const void* data, int si
             {
                 float val = subvt.getProperty("ScaleFactor");
                 m_pluginScaleFactor = val;
+                vt.removeChild(subvt, nullptr);
+
             }
+            juce::String presetname(xmlState->getStringAttribute("presetname"));
+            m_presets.setCurrentPresetName(presetname);
+
 			m_parameterVTS->replaceState(vt);
         }
 
