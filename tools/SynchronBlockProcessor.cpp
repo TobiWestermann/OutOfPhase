@@ -1,3 +1,6 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "SynchronBlockProcessor.h"
 
 SynchronBlockProcessor::SynchronBlockProcessor()
@@ -124,3 +127,218 @@ int SynchronBlockProcessor::getDelay()
                 DBG(String("InCounter= " + String(m_InCounter) + "kk = " + String(kk) ));
             }
 //*/
+
+WOLA::WOLA()
+:m_FullBlockSize(1024),m_NrOfChannels(2),m_InCounter(0),m_OutCounter(0),m_nrOfBlocks(3),m_wolaType(WOLAType::SqrtHann_over50)
+{
+    prepareWOLAprocessing(m_NrOfChannels,m_FullBlockSize);
+}
+
+WOLA::~WOLA()
+{
+}
+
+int WOLA::prepareWOLAprocessing(int channels, int desiredSize, WOLAType wolalaptype)
+{
+    m_NrOfChannels = channels;
+    m_FullBlockSize = desiredSize;
+    m_wolaType = wolalaptype;
+
+    m_analWin.setSize(1,m_FullBlockSize);
+    m_analWin.clear();
+    m_synWin.setSize(1,m_FullBlockSize);
+    m_synWin.clear();
+    m_audioBlock.setSize(m_NrOfChannels,m_FullBlockSize);
+    m_audioBlock.clear();
+    m_mem50aOut.setSize(m_NrOfChannels,m_FullBlockSize/2);
+    m_mem50aOut.clear();
+    m_mem50bOut.setSize(m_NrOfChannels,m_FullBlockSize/2);
+    m_mem50bOut.clear();
+    m_mem50aIn.setSize(m_NrOfChannels,m_FullBlockSize/2);
+    m_mem50aIn.clear();
+    m_mem50bIn.setSize(m_NrOfChannels,m_FullBlockSize/2);
+    m_mem50bIn.clear();
+    // 75% Overlap
+    m_mem25aIn.setSize(m_NrOfChannels,m_FullBlockSize/4);
+    m_mem25aIn.clear();
+    m_mem25bIn.setSize(m_NrOfChannels,m_FullBlockSize/4);
+    m_mem25bIn.clear();
+    m_mem25cIn.setSize(m_NrOfChannels,m_FullBlockSize/4);
+    m_mem25cIn.clear();
+    m_mem25dIn.setSize(m_NrOfChannels,m_FullBlockSize/4);
+    m_mem25dIn.clear();
+    m_mem25aOut.setSize(m_NrOfChannels,3*m_FullBlockSize/4);
+    m_mem25aOut.clear();
+    m_mem25bOut.setSize(m_NrOfChannels,3*m_FullBlockSize/4);
+    m_mem25bOut.clear();
+    m_mem25cOut.setSize(m_NrOfChannels,3*m_FullBlockSize/4);
+    m_mem25cOut.clear();
+    m_mem25dOut.setSize(m_NrOfChannels,3*m_FullBlockSize/4);
+    m_mem25dOut.clear();
+    
+    m_OutCounter = 0;
+    m_InCounter = 0;
+
+    switch (m_wolaType)
+    {
+    case WOLAType::NoWin_over75:
+        getWindow(m_analWin, WinType::Rect);
+        getWindow(m_synWin, WinType::Rect);
+        prepareSynchronProcessing(m_NrOfChannels,m_FullBlockSize/4);
+        break;
+    case WOLAType::NoWin_over50:
+        getWindow(m_analWin, WinType::Rect);
+        getWindow(m_synWin, WinType::Rect);
+        prepareSynchronProcessing(m_NrOfChannels,m_FullBlockSize/2);
+        break;
+    case WOLAType::HannRect_over75: 
+        getWindow(m_analWin, WinType::Hann);
+        getWindow(m_synWin, WinType::Rect);
+        prepareSynchronProcessing(m_NrOfChannels,m_FullBlockSize/4);
+        break;
+    case WOLAType::HannRect_over50:
+        getWindow(m_analWin, WinType::Hann);
+        getWindow(m_synWin, WinType::Rect);
+        prepareSynchronProcessing(m_NrOfChannels,m_FullBlockSize/2);
+        break;
+    case WOLAType::SqrtHann_over75:
+        getWindow(m_analWin, WinType::SqrtHann);
+        getWindow(m_synWin, WinType::SqrtHann);
+        prepareSynchronProcessing(m_NrOfChannels,m_FullBlockSize/4);
+        break;
+    case WOLAType::SqrtHann_over50:
+        getWindow(m_analWin, WinType::SqrtHann);
+        getWindow(m_synWin, WinType::SqrtHann);
+        prepareSynchronProcessing(m_NrOfChannels,m_FullBlockSize/2);
+
+        break;
+    default:
+        break;
+    }
+
+
+    return 0;
+}
+
+int WOLA::processSynchronBlock(juce::AudioBuffer<float> &inBlock, juce::MidiBuffer &midiMessages)
+{
+    //m_protectBlock.enter();
+    int nrOfChannels = inBlock.getNumChannels();
+    
+    for (auto kk = 0; kk < nrOfChannels; ++kk)
+    {
+        if ((m_wolaType == WOLAType::NoWin_over50) | (m_wolaType == WOLAType::SqrtHann_over50) | (m_wolaType == WOLAType::HannRect_over50))
+        {
+            m_audioBlock.copyFrom(kk,m_FullBlockSize/2,inBlock,kk,0,m_FullBlockSize/2);
+            m_audioBlock.copyFrom(kk,0,m_mem50aIn,kk,0,m_FullBlockSize/2);
+            m_mem50aIn.copyFrom(kk,0,inBlock,kk,0,m_FullBlockSize/2);
+
+        }
+        else if ((m_wolaType == WOLAType::NoWin_over75) | (m_wolaType == WOLAType::SqrtHann_over75) | (m_wolaType == WOLAType::HannRect_over75))
+        {
+            m_audioBlock.copyFrom(kk,3*m_FullBlockSize/4,inBlock,kk,0,m_FullBlockSize/4);
+            m_audioBlock.copyFrom(kk,2*m_FullBlockSize/4,m_mem25aIn, kk,0,m_FullBlockSize/4);
+            m_audioBlock.copyFrom(kk,1*m_FullBlockSize/4,m_mem25bIn, kk,0,m_FullBlockSize/4);
+            m_audioBlock.copyFrom(kk,0*m_FullBlockSize/4,m_mem25cIn, kk,0,m_FullBlockSize/4);
+            // This can be solved in a better way by changing pointers
+            m_mem25cIn.copyFrom(kk,0,m_mem25bIn,kk,0,m_FullBlockSize/4);
+            m_mem25bIn.copyFrom(kk,0,m_mem25aIn,kk,0,m_FullBlockSize/4);
+            m_mem25aIn.copyFrom(kk,0,inBlock,kk,0,m_FullBlockSize/4);
+
+        }
+        // apply window
+        auto winptr = m_analWin.getReadPointer(0);
+        auto audioptr = m_audioBlock.getWritePointer(kk);
+        for (auto ss = 0; ss < m_FullBlockSize; ++ss)
+        {
+            audioptr[ss] *= winptr[ss];
+        }
+    }
+    // processing
+    processWOLA(m_audioBlock,midiMessages);
+
+    // defines outputs
+    for (auto kk = 0; kk < nrOfChannels; ++kk)
+    {
+        // apply sythesis window
+        auto winptr = m_synWin.getReadPointer(0);
+        auto audioptr = m_audioBlock.getWritePointer(kk);
+        for (auto ss = 0; ss < m_FullBlockSize; ++ss)
+        {
+            audioptr[ss] *= winptr[ss];
+        }
+
+        if ((m_wolaType == WOLAType::NoWin_over50) | (m_wolaType == WOLAType::SqrtHann_over50) | (m_wolaType == WOLAType::HannRect_over50))
+        {
+            inBlock.copyFrom(kk,0,m_audioBlock,kk,0,m_FullBlockSize/2);
+            inBlock.addFrom(kk,0,m_mem50aOut,kk,0,m_FullBlockSize/2);
+            m_mem50aOut.copyFrom(kk,0,m_audioBlock,kk,m_FullBlockSize/2,m_FullBlockSize/2);
+        }
+        else if ((m_wolaType == WOLAType::NoWin_over75) | (m_wolaType == WOLAType::SqrtHann_over75) | (m_wolaType == WOLAType::HannRect_over75))
+        {
+            inBlock.copyFrom(kk,0,m_audioBlock,kk,0,m_FullBlockSize/4);
+            int whichPartCounter = (m_OutCounter-1+3)%m_nrOfBlocks;
+            inBlock.addFrom(kk,0,m_mem25aOut,kk,whichPartCounter*m_FullBlockSize/4,m_FullBlockSize/4);
+            whichPartCounter = (m_OutCounter-2+3)%m_nrOfBlocks;
+            inBlock.addFrom(kk,0,m_mem25bOut,kk,whichPartCounter*m_FullBlockSize/4,m_FullBlockSize/4);
+            whichPartCounter = (m_OutCounter-3+3)%m_nrOfBlocks;
+            inBlock.addFrom(kk,0,m_mem25cOut,kk,whichPartCounter*m_FullBlockSize/4,m_FullBlockSize/4);
+
+            if (m_OutCounter == 0)
+            {
+                m_mem25aOut.copyFrom(kk,0,m_audioBlock,kk,m_FullBlockSize/4,3*m_FullBlockSize/4);
+            }
+            else if (m_OutCounter == 1)
+            {
+                m_mem25bOut.copyFrom(kk,0,m_audioBlock,kk,m_FullBlockSize/4,3*m_FullBlockSize/4);
+            }
+            else if (m_OutCounter == 2)
+            {
+                m_mem25cOut.copyFrom(kk,0,m_audioBlock,kk,m_FullBlockSize/4,3*m_FullBlockSize/4);
+            }
+            m_OutCounter++;
+            if (m_OutCounter == m_nrOfBlocks)
+            {
+                m_OutCounter = 0;
+            }
+            
+        }
+    }
+
+
+    return 0;
+}
+
+int WOLA::getDelay()
+{
+    return m_FullBlockSize;
+}
+
+int WOLA::getWindow(juce::AudioBuffer<float> &win, WinType wintype)
+{
+    int len = win.getNumSamples();
+    auto winptr = win.getWritePointer(0);
+    if (wintype == WinType::SqrtHann)
+    {
+        for (auto kk = 0; kk < len; ++kk)
+        {
+            winptr[kk] = sqrt(0.5f*(1.f - cos(2.f*kk*M_PI / (len - 1))));
+        }
+    }
+    else if (wintype == WinType::Hann)
+    {
+        for (auto kk = 0; kk < len; ++kk)
+        {
+            winptr[kk] = 0.5f*(1.f - cos(2.f*kk*M_PI / (len - 1)));
+        }
+    }
+    else if (wintype == WinType::Rect)
+    {
+        for (auto kk = 0; kk < len; ++kk)
+        {
+            winptr[kk] = 1.f;
+        }
+    }
+
+    return 0;
+}

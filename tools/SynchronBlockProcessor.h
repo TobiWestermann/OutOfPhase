@@ -29,6 +29,7 @@ class SynchronBlockProcessor
 {
 public:
     SynchronBlockProcessor();
+    ~SynchronBlockProcessor(){};
     /**
      * @brief preparetoprocess sets the desired blocksize for a given numer of channels
      * it can be called at any time (threadsafe), but it will cause audio-glitches (not realtime safe)
@@ -69,4 +70,62 @@ private:
 
     MidiBuffer m_mididata;
     int m_pastSamples;
+};
+
+class WOLA : public SynchronBlockProcessor
+{
+public: 
+    enum class WOLAType
+    {
+        NoWin_over75,
+        NoWin_over50,
+        HannRect_over75,
+        HannRect_over50,
+        SqrtHann_over75,
+        SqrtHann_over50,
+    };
+    enum class WinType
+    {
+        Rect,
+        Hann,
+        SqrtHann,
+    };
+
+    WOLA();
+    ~WOLA();
+    int prepareWOLAprocessing(int channels, int desiredSize, WOLAType wolalaptype = WOLAType::SqrtHann_over50); 
+    int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages);    
+    virtual int processWOLA(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages) = 0;
+    int getDelay();
+
+private:
+    int m_FullBlockSize;
+    int m_NrOfChannels;
+    int m_InCounter;
+    int m_OutCounter;
+    int m_nrOfBlocks;
+    WOLAType m_wolaType;
+
+    juce::AudioBuffer<float> m_audioBlock;
+    juce::AudioBuffer<float> m_analWin;
+    juce::AudioBuffer<float> m_synWin;
+    
+    // memory blocks for 50% overlap
+    juce::AudioBuffer<float> m_mem50aOut;
+    juce::AudioBuffer<float> m_mem50bOut;
+    juce::AudioBuffer<float> m_mem50aIn;
+    juce::AudioBuffer<float> m_mem50bIn;
+
+    // memory blocks for 75% overlap
+    juce::AudioBuffer<float> m_mem25aIn;
+    juce::AudioBuffer<float> m_mem25bIn;
+    juce::AudioBuffer<float> m_mem25cIn;
+    juce::AudioBuffer<float> m_mem25dIn;
+
+    juce::AudioBuffer<float> m_mem25aOut;
+    juce::AudioBuffer<float> m_mem25bOut;
+    juce::AudioBuffer<float> m_mem25cOut;
+    juce::AudioBuffer<float> m_mem25dOut;
+
+    int getWindow(juce::AudioBuffer<float>&, WinType wintype = WinType::Hann);
 };
