@@ -81,6 +81,8 @@ public:
         NoWin_over50,
         HannRect_over75,
         HannRect_over50,
+        RectHann_over75,
+        RectHann_over50,
         SqrtHann_over75,
         SqrtHann_over50,
     };
@@ -93,11 +95,12 @@ public:
 
     WOLA();
     ~WOLA();
-    int prepareWOLAprocessing(int channels, int desiredSize, WOLAType wolalaptype = WOLAType::SqrtHann_over50); 
+    int prepareWOLAprocessing(int channels, int desiredSize, WOLAType wolalaptype = WOLAType::NoWin_over50); 
     int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages);    
     virtual int processWOLA(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages) = 0;
     int getDelay();
-
+    int getWindow(juce::AudioBuffer<float>&, WinType wintype = WinType::Hann);
+    
 private:
     int m_FullBlockSize;
     int m_NrOfChannels;
@@ -127,5 +130,5 @@ private:
     juce::AudioBuffer<float> m_mem25cOut;
     juce::AudioBuffer<float> m_mem25dOut;
 
-    int getWindow(juce::AudioBuffer<float>&, WinType wintype = WinType::Hann);
+
 };

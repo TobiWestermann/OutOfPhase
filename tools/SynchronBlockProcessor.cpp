@@ -1,5 +1,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <fstream>
+#include <iostream>
+
 
 #include "SynchronBlockProcessor.h"
 
@@ -129,7 +132,7 @@ int SynchronBlockProcessor::getDelay()
 //*/
 
 WOLA::WOLA()
-:m_FullBlockSize(1024),m_NrOfChannels(2),m_InCounter(0),m_OutCounter(0),m_nrOfBlocks(3),m_wolaType(WOLAType::SqrtHann_over50)
+:m_FullBlockSize(1024),m_NrOfChannels(2),m_InCounter(0),m_OutCounter(0),m_nrOfBlocks(3),m_wolaType(WOLAType::SqrtHann_over75)
 {
     prepareWOLAprocessing(m_NrOfChannels,m_FullBlockSize);
 }
@@ -201,6 +204,16 @@ int WOLA::prepareWOLAprocessing(int channels, int desiredSize, WOLAType wolalapt
         getWindow(m_synWin, WinType::Rect);
         prepareSynchronProcessing(m_NrOfChannels,m_FullBlockSize/2);
         break;
+    case WOLAType::RectHann_over75: 
+        getWindow(m_synWin, WinType::Hann);
+        getWindow(m_analWin, WinType::Rect);
+        prepareSynchronProcessing(m_NrOfChannels,m_FullBlockSize/4);
+        break;
+    case WOLAType::RectHann_over50:
+        getWindow(m_synWin, WinType::Hann);
+        getWindow(m_analWin, WinType::Rect);
+        prepareSynchronProcessing(m_NrOfChannels,m_FullBlockSize/2);
+        break;
     case WOLAType::SqrtHann_over75:
         getWindow(m_analWin, WinType::SqrtHann);
         getWindow(m_synWin, WinType::SqrtHann);
@@ -227,14 +240,14 @@ int WOLA::processSynchronBlock(juce::AudioBuffer<float> &inBlock, juce::MidiBuff
     
     for (auto kk = 0; kk < nrOfChannels; ++kk)
     {
-        if ((m_wolaType == WOLAType::NoWin_over50) | (m_wolaType == WOLAType::SqrtHann_over50) | (m_wolaType == WOLAType::HannRect_over50))
+        if ((m_wolaType == WOLAType::NoWin_over50) | (m_wolaType == WOLAType::SqrtHann_over50) | (m_wolaType == WOLAType::HannRect_over50) | (m_wolaType == WOLAType::RectHann_over50))
         {
             m_audioBlock.copyFrom(kk,m_FullBlockSize/2,inBlock,kk,0,m_FullBlockSize/2);
             m_audioBlock.copyFrom(kk,0,m_mem50aIn,kk,0,m_FullBlockSize/2);
             m_mem50aIn.copyFrom(kk,0,inBlock,kk,0,m_FullBlockSize/2);
 
         }
-        else if ((m_wolaType == WOLAType::NoWin_over75) | (m_wolaType == WOLAType::SqrtHann_over75) | (m_wolaType == WOLAType::HannRect_over75))
+        else if ((m_wolaType == WOLAType::NoWin_over75) | (m_wolaType == WOLAType::SqrtHann_over75) | (m_wolaType == WOLAType::HannRect_over75)| (m_wolaType == WOLAType::RectHann_over75))
         {
             m_audioBlock.copyFrom(kk,3*m_FullBlockSize/4,inBlock,kk,0,m_FullBlockSize/4);
             m_audioBlock.copyFrom(kk,2*m_FullBlockSize/4,m_mem25aIn, kk,0,m_FullBlockSize/4);
@@ -255,6 +268,22 @@ int WOLA::processSynchronBlock(juce::AudioBuffer<float> &inBlock, juce::MidiBuff
         }
     }
     // processing
+
+/*     char filename[256];
+    sprintf(filename,"./tester/WOLATest/OneAudioBlock.txt");
+
+    std::ofstream file1(filename);
+
+    file1 << "data_ab = np.array([";
+    auto dataptr = m_audioBlock.getReadPointer(0);
+    for (auto kk = 0; kk < m_audioBlock.getNumSamples(); ++kk)
+    {
+        file1 << dataptr[kk] << ", ";
+    }
+    file1 << "])" << std::endl;
+    file1.close();
+ */
+
     processWOLA(m_audioBlock,midiMessages);
 
     // defines outputs
@@ -268,20 +297,20 @@ int WOLA::processSynchronBlock(juce::AudioBuffer<float> &inBlock, juce::MidiBuff
             audioptr[ss] *= winptr[ss];
         }
 
-        if ((m_wolaType == WOLAType::NoWin_over50) | (m_wolaType == WOLAType::SqrtHann_over50) | (m_wolaType == WOLAType::HannRect_over50))
+        if ((m_wolaType == WOLAType::NoWin_over50) | (m_wolaType == WOLAType::SqrtHann_over50) | (m_wolaType == WOLAType::HannRect_over50) | (m_wolaType == WOLAType::RectHann_over50))
         {
             inBlock.copyFrom(kk,0,m_audioBlock,kk,0,m_FullBlockSize/2);
             inBlock.addFrom(kk,0,m_mem50aOut,kk,0,m_FullBlockSize/2);
             m_mem50aOut.copyFrom(kk,0,m_audioBlock,kk,m_FullBlockSize/2,m_FullBlockSize/2);
         }
-        else if ((m_wolaType == WOLAType::NoWin_over75) | (m_wolaType == WOLAType::SqrtHann_over75) | (m_wolaType == WOLAType::HannRect_over75))
+        else if ((m_wolaType == WOLAType::NoWin_over75) | (m_wolaType == WOLAType::SqrtHann_over75) | (m_wolaType == WOLAType::HannRect_over75) | (m_wolaType == WOLAType::RectHann_over75))
         {
             inBlock.copyFrom(kk,0,m_audioBlock,kk,0,m_FullBlockSize/4);
-            int whichPartCounter = (m_OutCounter-1+3)%m_nrOfBlocks;
+            int whichPartCounter = (m_OutCounter+2)%m_nrOfBlocks;
             inBlock.addFrom(kk,0,m_mem25aOut,kk,whichPartCounter*m_FullBlockSize/4,m_FullBlockSize/4);
-            whichPartCounter = (m_OutCounter-2+3)%m_nrOfBlocks;
+            whichPartCounter = (m_OutCounter+1)%m_nrOfBlocks;
             inBlock.addFrom(kk,0,m_mem25bOut,kk,whichPartCounter*m_FullBlockSize/4,m_FullBlockSize/4);
-            whichPartCounter = (m_OutCounter-3+3)%m_nrOfBlocks;
+            whichPartCounter = (m_OutCounter)%m_nrOfBlocks;
             inBlock.addFrom(kk,0,m_mem25cOut,kk,whichPartCounter*m_FullBlockSize/4,m_FullBlockSize/4);
 
             if (m_OutCounter == 0)
@@ -296,15 +325,42 @@ int WOLA::processSynchronBlock(juce::AudioBuffer<float> &inBlock, juce::MidiBuff
             {
                 m_mem25cOut.copyFrom(kk,0,m_audioBlock,kk,m_FullBlockSize/4,3*m_FullBlockSize/4);
             }
-            m_OutCounter++;
-            if (m_OutCounter == m_nrOfBlocks)
-            {
-                m_OutCounter = 0;
-            }
             
         }
     }
+    m_OutCounter++;
+    if (m_OutCounter == m_nrOfBlocks)
+    {
+        m_OutCounter = 0;
+    }
 
+    switch (m_wolaType)
+    {
+    case WOLAType::NoWin_over75:
+        inBlock.applyGain(0.25f);
+        break;
+    case WOLAType::NoWin_over50:
+        inBlock.applyGain(0.5f);
+        break;
+    case WOLAType::HannRect_over75: 
+        inBlock.applyGain(0.5f);
+        break;
+    case WOLAType::HannRect_over50:
+        break;
+    case WOLAType::RectHann_over75: 
+        inBlock.applyGain(0.5f);
+        break;
+    case WOLAType::RectHann_over50:
+        break;
+    case WOLAType::SqrtHann_over75:
+        inBlock.applyGain(0.5f);
+        break;
+    case WOLAType::SqrtHann_over50:
+
+        break;
+    default:
+        break;
+    }
 
     return 0;
 }
