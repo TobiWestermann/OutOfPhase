@@ -213,6 +213,6 @@ The description of this example is very short. You will find the source code on 
 (videos exist to build the EQ (in German only))
 
 ### Remarks
-For a general solution with more possibilities for Equalizer (cut, shelf), use the given TGMLib
+For a general solution with more possibilities for Equalizer (cut, shelf), use the given TGMLib / TGMStaticLib
 
 
