@@ -4,7 +4,9 @@
 # `project()` command. `project()` sets up some helpful variables that describe source/binary
 # directories, and the current project version. This is a standard CMake command.
 
-project(AUDIO_PLUGIN_YourPluginName VERSION 0.0.1)
+set(TARGET_NAME YourPluginName)
+
+project(${TARGET_NAME} VERSION 0.0.1)
 
 # `VST3_CATEGORIES`
 #  - Should be one or more, separated by spaces, of the following: `Fx`, `Instrument`, `Analyzer`,
@@ -23,7 +25,7 @@ project(AUDIO_PLUGIN_YourPluginName VERSION 0.0.1)
 # add_compile_definitions(WITH_MIDIKEYBOARD)
 add_compile_definitions(WITH_PRESETHANDLERGUI)
 
-juce_add_plugin(AudioPluginYourPluginName
+juce_add_plugin(${TARGET_NAME}
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
     # ICON_SMALL ...
@@ -49,7 +51,7 @@ juce_add_plugin(AudioPluginYourPluginName
 # probably don't need to call this.
 
 # juce_generate_juce_header(AudioPluginExample)
-juce_generate_juce_header(AudioPluginYourPluginName)
+juce_generate_juce_header(${TARGET_NAME})
 
 # `target_sources` adds source files to a target. We pass the target that needs the sources as the
 # first argument, then a visibility parameter for the sources which should normally be PRIVATE.
@@ -57,7 +59,7 @@ juce_generate_juce_header(AudioPluginYourPluginName)
 # CMake command.
 
 
-target_sources(AudioPluginYourPluginName
+target_sources(${TARGET_NAME}
     PRIVATE
         PluginEditor.cpp
         PluginProcessor.cpp
@@ -65,19 +67,16 @@ target_sources(AudioPluginYourPluginName
         tools/MidiModPitchState.cpp
         tools/PresetHandler.cpp
         tools/SynchronBlockProcessor.cpp
-        ${TGMLIBCPPS}
         )
 
 
 
 
-target_compile_definitions(AudioPluginYourPluginName
+target_compile_definitions(${TARGET_NAME}
     PUBLIC
         # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
         JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
         JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
-        JUCE_DISPLAY_SPLASH_SCREEN=1
-        JUCE_REPORT_APP_USAGE=0
         JUCE_VST3_CAN_REPLACE_VST2=0)
 
 # for binaries you can add them directly or recursevly (examples for both methods below, dont forget to 
@@ -89,7 +88,7 @@ target_compile_definitions(AudioPluginYourPluginName
 # static library. These source files can be of any kind (wav data, images, fonts, icons etc.).
 # Conversion to binary-data will happen when your target is built.
 
-# juce_add_binary_data(AudioPluginData SOURCES ...)
+# juce_add_binary_data(${TARGET_NAME}-binary SOURCES ...)
 
 # `target_link_libraries` links libraries and JUCE modules to other libraries or executables. Here,
 # we're linking our executable target to the `juce::juce_audio_utils` module. Inter-module
@@ -104,11 +103,11 @@ target_compile_definitions(AudioPluginYourPluginName
 #  res/*.xml
 #  )
 
-#juce_add_binary_data( AudioPluginYourPluginName-binary
+#juce_add_binary_data( ${TARGET_NAME}-binary
 #  SOURCES ${TEMPLATE_RESOURCES_GLOB}
 #)
 #if( UNIX AND NOT APPLE )
-#set_target_properties(AudioPluginYourPluginName-binary PROPERTIES
+#set_target_properties(${TARGET_NAME}-binary PROPERTIES
 #    POSITION_INDEPENDENT_CODE TRUE)
 #endif()
 
