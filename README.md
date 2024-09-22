@@ -27,6 +27,7 @@ This template provides some basic features for effects and synth, like:
 * resizable GUI 
 * saving/loading of plugin state (with GUI size) 
 * keyboard  + pitch-wheel and modulation-wheel (midi insert and display)  
+* Access to Version Number given in CMakeLists.txt
 * a template plugin cpp and h for easy start (named YourPluginName.cpp and h). 
 
 ## Usage

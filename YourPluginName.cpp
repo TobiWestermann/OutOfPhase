@@ -65,7 +65,9 @@ void YourPluginNameGUI::paint(juce::Graphics &g)
 
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("YourPluginName", getLocalBounds(), juce::Justification::centred, 1);
+    
+    juce::String text2display = "YourPluginName V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
+    g.drawFittedText (text2display, getLocalBounds(), juce::Justification::centred, 1);
 
 }
 

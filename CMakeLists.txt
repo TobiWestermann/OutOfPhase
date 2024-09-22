@@ -8,6 +8,8 @@ set(TARGET_NAME YourPluginName)
 
 project(${TARGET_NAME} VERSION 0.0.1)
 
+configure_file(Versioning.h.in Versioning.h)
+
 # `VST3_CATEGORIES`
 #  - Should be one or more, separated by spaces, of the following: `Fx`, `Instrument`, `Analyzer`,
 #    `Delay`, `Distortion`, `Drum`, `Dynamics`, `EQ`, `External`, `Filter`, `Generator`, `Mastering`,
@@ -30,7 +32,7 @@ juce_add_plugin(${TARGET_NAME}
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
     # ICON_SMALL ...
     # COMPANY_NAME ...                          # Specify the name of the plugin's author
-    COMPANY_NAME  "Jade Hochschule"             # Specify the name of the plugin's author
+    COMPANY_NAME  "Jade_Hochschule"             # Specify the name of the plugin's author
     IS_SYNTH FALSE                       # Is this a synth or an effect?
     NEEDS_MIDI_INPUT FALSE               # Does the plugin need midi input?
     NEEDS_MIDI_OUTPUT FALSE              # Does the plugin need midi output?
@@ -113,7 +115,7 @@ target_compile_definitions(${TARGET_NAME}
 
 
 
-target_link_libraries(AudioPluginYourPluginName
+target_link_libraries(${TARGET_NAME}
     PRIVATE
         # AudioPluginData           # If we'd created a binary data target, we'd link to it here
         # AudioPluginYourPluginName-binary # or here if we used the recursice method
@@ -123,3 +125,7 @@ target_link_libraries(AudioPluginYourPluginName
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
+
+target_include_directories(${TARGET_NAME} PUBLIC
+        "${PROJECT_BINARY_DIR}"
+        )        
