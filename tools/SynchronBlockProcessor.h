@@ -13,10 +13,12 @@
 
 // class to rebuffer an JUCE AudioBuffer and MidiMessageQueue of arbitrary length to AudioBuffer of a given length
 // Useful for fft processing or faster parameter updates and modulation
+// if desiredSize is < 1 (zero or negative) , the processing will be done directly without buffering
 // Usage: Inherit from this class and override ProcessSynchronBlock
 // (c) J. Bitzer @ Jade HS, BSD Licence
 //
 // Version 2.0 (only JUCE AUdioBUffer, without std::vector)
+// Version 2.1 (added directthrue option and changed CriticalSection to ScopedLock (RAII))
 
 /* ToDO:
 1) rewrite as template class for double
@@ -70,6 +72,7 @@ private:
 
     MidiBuffer m_mididata;
     int m_pastSamples;
+    bool m_directthrue = false;
 };
 
 class WOLA : public SynchronBlockProcessor

@@ -13,7 +13,8 @@ SynchronBlockProcessor::SynchronBlockProcessor()
 }
 void SynchronBlockProcessor::prepareSynchronProcessing(int channels, int desiredSize)
 {
-    m_protectBlock.enter();
+    ScopedLock lock(m_protectBlock);
+    //m_protectBlock.enter();
     m_OutBlockSize = desiredSize;
     m_NrOfChannels = channels;
     m_memory.setSize(m_NrOfChannels,2*m_OutBlockSize);
@@ -24,11 +25,20 @@ void SynchronBlockProcessor::prepareSynchronProcessing(int channels, int desired
     m_InCounter = 0;
     m_mididata.clear();
     m_pastSamples = 0;
-    m_protectBlock.exit();
+    if (desiredSize < 1)
+        m_directthrue = true;
+    else
+        m_directthrue = false;
+    //m_protectBlock.exit();
 }
 void SynchronBlockProcessor::processBlock(juce::AudioBuffer<float>& data, juce::MidiBuffer& midiMessages)
 {
-    m_protectBlock.enter();
+    ScopedLock lock(m_protectBlock);
+    if (m_directthrue == true)
+    {
+        processSynchronBlock(data, midiMessages);
+    }
+    // m_protectBlock.enter();
     int nrofBlockProcessed = 0;
     auto readdatapointers = data.getArrayOfReadPointers();
     auto writedatapointers = data.getArrayOfWritePointers();
@@ -102,12 +112,15 @@ void SynchronBlockProcessor::processBlock(juce::AudioBuffer<float>& data, juce::
         m_mididata.addEvents(midiMessages,0,nrOfInputSamples,m_pastSamples);
         m_pastSamples += nrOfInputSamples;
     }
-    m_protectBlock.exit();
+    //m_protectBlock.exit();
 }
 
 int SynchronBlockProcessor::getDelay()
 {
-    return m_OutBlockSize;
+    if (m_directthrue)
+        return 0;
+    else
+        return m_OutBlockSize;
 }
 /* // Midi Debugcode
     auto a = midiMessages.getNumEvents();
@@ -378,14 +391,14 @@ int WOLA::getWindow(juce::AudioBuffer<float> &win, WinType wintype)
     {
         for (auto kk = 0; kk < len; ++kk)
         {
-            winptr[kk] = sqrt(0.5f*(1.f - cos(2.f*kk*M_PI / (len - 1))));
+            winptr[kk] = sqrtf(0.5f*(1.f - static_cast<float>(cos(2.f*kk*M_PI / (len - 1)))));
         }
     }
     else if (wintype == WinType::Hann)
     {
         for (auto kk = 0; kk < len; ++kk)
         {
-            winptr[kk] = 0.5f*(1.f - cos(2.f*kk*M_PI / (len - 1)));
+            winptr[kk] = 0.5f*(1.f - static_cast<float>(cos(2.f*kk*M_PI / (len - 1))));
         }
     }
     else if (wintype == WinType::Rect)
