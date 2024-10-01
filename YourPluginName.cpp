@@ -38,7 +38,8 @@ void YourPluginNameAudio::addParameter(std::vector<std::unique_ptr<juce::RangedA
         g_paramExample.defaultValue,
         g_paramExample.unitName,
         AudioProcessorParameter::genericParameter));
-// these are to additional lines wit lambdas to convert data (delete )); and uncomment to activate)
+        // these are two additional lines with lambdas to convert data (to use delete )); after 
+        // AudioProcessorParameter::genericParameter and uncomment to activate)
         // [](float value, int MaxLen) { value = int(exp(value) * 10) * 0.1;  return (String(value, MaxLen) + " Hz"); },
         // [](const String& text) {return text.getFloatValue(); }));
 
