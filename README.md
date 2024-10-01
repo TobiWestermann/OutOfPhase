@@ -50,7 +50,7 @@ for Windows: (https://stackoverflow.com/questions/17144355/how-can-i-replace-eve
 ```    
 or start the windows subsystem for linux
 
-or use the tools given by visual studio code.
+or use the tools given by visual studio code (Crtl + Shift + H (replace in files)) and use your new diretory./YOUR_PLuggIn_Folder as a filter in "files to include".
 
 5. Rename YourPluginName.cpp and YourPluginName.h into YourNewProjectName.cpp and YourNewProjectName.h (e.g. Linux: 
 ```console    
@@ -66,6 +66,15 @@ ren YourPluginName.* YourNewProjectName.*
                                                             Do you need a midi-keyboard display (default is no)) 
 8. Test if the template builds (should without error) and start coding your plugin
 
+## Important files to look for 
+
+### PluginSettingsh
+In this file you can set the block size of your internal synchronous (fixed size) data processor.
+Furthermore all global graphic adjustments are defined here.
+
+### YourPluginName.cpp and .h
+
+After renaming the file you use these two files to implement the algorithm and the GUI. Always start with the definition of the parameters.
 
 ## Example to use the template
 
@@ -83,7 +92,7 @@ for Windows: (https://stackoverflow.com/questions/17144355/how-can-i-replace-eve
       (Get-Content $_ | ForEach  { $_ -replace 'YourPluginName', 'YourNewProjectName' }) |
       Set-Content $_ }
 ```    
-or use the tools given in Visual Studio Code
+or use the tools given by visual studio code (Crtl + Shift + H (replace in files)) and use your new diretory./YOUR_PLuggIn_Folder as a filter in "files to include".
 
 for the 5th step: rename 's/YourPluginName/GainPlugin/' *.* or by hand (just 2 files)
 
@@ -137,7 +146,7 @@ private:
 7. change the smoothing time for the SmoothedValues in prepareToPlay
 ```cpp
     // here your code
-    m_smoothedGain.reset(sampleRate,0.0015); // 50ms is enough for a smooth gain, 
+    m_smoothedGain.reset(sampleRate,0.02); // 20ms is enough for a smooth gain, 
 ```
 
 8. Change the processSynchronBlock method (delete ignore method)
@@ -199,7 +208,7 @@ and the setbounds method
 Some remarks
 For most parameter it is better to use small synchron blocks (e.g. 2ms) and smooth the update. If you need smoothing on a sample base (like for gains) use applyRamp from the buffer (it is linear, but faster compared to a sample-based smoothing). 
 
-(a german video exist to build the Gain)
+(a german video exist to build Gain PLugins)
 
 ## Second Example EQ (Peak, one band)
 
@@ -210,8 +219,6 @@ The description of this example is very short. You will find the source code on 
 3. Build the audio class (3 parameter (Gain, Freq, Q))
 4. Build the GUI (3 rotary knobs)
 5. Done
-
-(videos exist to build the EQ (in German only))
 
 ### Remarks
 For a general solution with more possibilities for Equalizer (cut, shelf), use the given TGMLib / TGMStaticLib
