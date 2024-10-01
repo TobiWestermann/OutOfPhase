@@ -11,7 +11,7 @@ void YourPluginNameAudio::prepareToPlay(double sampleRate, int max_samplesPerBlo
 {
     juce::ignoreUnused(max_samplesPerBlock,max_channels);
     int synchronblocksize;
-    synchronblocksize = (g_desired_blocksize_ms*sampleRate*0.001);
+    synchronblocksize = static_cast<int>(round(g_desired_blocksize_ms * sampleRate * 0.001)); // 0.001 to transform ms to seconds;
     if (g_forcePowerOf2)
     {
         int nextpowerof2 = int(log2(synchronblocksize))+1;
@@ -59,7 +59,7 @@ YourPluginNameGUI::YourPluginNameGUI(juce::AudioProcessorValueTreeState& apvts)
 
 void YourPluginNameGUI::paint(juce::Graphics &g)
 {
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId).brighter(0.3));
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId).brighter(0.3f));
 
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
