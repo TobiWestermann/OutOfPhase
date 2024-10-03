@@ -379,18 +379,18 @@ void PresetComponent::resized()
 	int xmidPos = newWidth / 2;
 	
 	// combo
-	float comboWidthRatio = 0.2;
+	float comboWidthRatio = 0.2f;
 	int newComboWidth = jmax(MIN_COMBO_WITH_PRESET,int(newWidth*comboWidthRatio));
 	int comboWidthHalf = newComboWidth/2;
 
 	// Element
-	float elementDistRatio = 0.02;
+	float elementDistRatio = 0.02f;
 	int newElementDist = jmax(MIN_ELEMENT_DIST_PRESET,int(elementDistRatio*newWidth));
-	float elementHeightRatio = 0.92;
+	float elementHeightRatio = 0.92f;
 	int newElementHeight = jmax(MIN_ELEMENT_HEIGHT_PRESET,int(elementHeightRatio*newHeight));
 
 	// Button
-	float buttonWidthRatio = 0.08;
+	float buttonWidthRatio = 0.08f;
 	int newButtonWidth = jmax(MIN_BUTTON_WIDTH_PRESET, int(buttonWidthRatio*newWidth));
 	
 	m_presetCombo.setBounds(xmidPos - comboWidthHalf, 3, newComboWidth, newElementHeight);
