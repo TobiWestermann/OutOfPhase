@@ -1,3 +1,13 @@
+/* 
+    AudioProcessParameter.h
+    Author: J. Bitzer @ TGM, Jade Hochschule
+    Date: 2021-07-01
+    Description: This class is used to handle parameter in JUCE AudioProcessor. 
+    It can transform the parameter value to a different representation.
+    Version 1.0 
+    Version 1.1: changed variable names to be more descriptive
+    License: MIT
+*/
 #pragma once
 #include <vector>
 
@@ -21,33 +31,32 @@ public:
         if (*m_param != m_ParamOld)
         {
             m_ParamOld = *m_param;
-            m_transformedParamOld =  m_transformParam();
-            //return powf(10.f,m_ParamOld/20.f);
+            m_transformedParam =  m_transformParamFunc();
         }
-        return m_transformedParamOld;
+        return m_transformedParam;
     };
     void changeTransformer(transformerFunc tf)
     {
         switch (tf)
         {
             case transformerFunc::notransform:
-                m_transformParam = [this](){return m_ParamOld;};
+                m_transformParamFunc = [this](){return m_ParamOld;};
                 break;
             case transformerFunc::db2gaintransform:
-                m_transformParam = [this](){return pow(10.0,m_ParamOld/20.0);};
+                m_transformParamFunc = [this](){return pow(10.0,m_ParamOld/20.0);};
                 break;
             case transformerFunc::db2powtransform:
-                m_transformParam = [this](){return pow(10.0,m_ParamOld/10.0);};
+                m_transformParamFunc = [this](){return pow(10.0,m_ParamOld/10.0);};
                 break;
             case transformerFunc::sqrttransform:
-                m_transformParam = [this](){return sqrt(m_ParamOld);};
+                m_transformParamFunc = [this](){return sqrt(m_ParamOld);};
                 break;
             case transformerFunc::exptransform:
-                m_transformParam = [this](){return exp(m_ParamOld);};
+                m_transformParamFunc = [this](){return exp(m_ParamOld);};
                 break;
 
             default:
-                m_transformParam = [this](){return m_ParamOld;};
+                m_transformParamFunc = [this](){return m_ParamOld;};
                 break;
 
         }
@@ -58,8 +67,8 @@ public:
 private:
     std::atomic<T>* m_param = nullptr; 
     T m_ParamOld = std::numeric_limits<T>::min(); //smallest possible number, will change in the first block
-    T m_transformedParamOld = std::numeric_limits<T>::min(); //smallest possible number, will change in the first block
+    T m_transformedParam = std::numeric_limits<T>::min(); //smallest possible number, will change in the first block
 
-    std::function<T(void)> m_transformParam;
+    std::function<T(void)> m_transformParamFunc;
 
 };
