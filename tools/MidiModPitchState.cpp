@@ -2,7 +2,7 @@
 
 
 MidiModPitchBendState::MidiModPitchBendState()
-:m_PitchBendState(8192.0), m_ModState(0)
+:m_PitchBendState(8192), m_ModState(0)
 {
 
 }
@@ -60,7 +60,7 @@ MidiModPitchBendStateComponent::MidiModPitchBendStateComponent(MidiModPitchBendS
     m_ModSlider.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
     m_ModSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 60, 20);
     m_ModSlider.setValue(0.0);
-    m_ModSlider.onValueChange = [this]{m_state.setModState(m_ModSlider.getValue());};
+    m_ModSlider.onValueChange = [this]{m_state.setModState(static_cast<int>(m_ModSlider.getValue()));};
     addAndMakeVisible (m_ModSlider);
 
     //m_PitchBendLabel.setFont(Font(3,0));
@@ -74,15 +74,15 @@ MidiModPitchBendStateComponent::MidiModPitchBendStateComponent(MidiModPitchBendS
     m_PitchBendSlider.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
     m_PitchBendSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 60, 20);
     m_PitchBendSlider.setValue(8192.0);
-    m_PitchBendSlider.onValueChange = [this]{m_state.setPitchBendState(m_PitchBendSlider.getValue());};
-    m_PitchBendSlider.onDragEnd = [this]{m_state.setPitchBendState(8192.0);};
+    m_PitchBendSlider.onValueChange = [this]{m_state.setPitchBendState(static_cast<int>(m_PitchBendSlider.getValue()));};
+    m_PitchBendSlider.onDragEnd = [this]{m_state.setPitchBendState(8192);};
     addAndMakeVisible (m_PitchBendSlider);
     startTimer (50);    
 
 }
 void MidiModPitchBendStateComponent::paint(Graphics& g)
 {
-	g.fillAll((getLookAndFeel().findColour(ResizableWindow::backgroundColourId)).darker(0.2));
+	g.fillAll((getLookAndFeel().findColour(ResizableWindow::backgroundColourId)).darker(0.2f));
     
 }
 void MidiModPitchBendStateComponent::resized()

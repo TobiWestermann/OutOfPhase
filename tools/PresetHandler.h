@@ -66,7 +66,7 @@ public:
 	int loadPresetAndActivate(String name);
 	int deletePresetFile(String name);
 	int loadfromFileAllUserPresets();
-	int getNrOfPresets() { return m_presetList.size(); };
+	size_t getNrOfPresets() { return m_presetList.size(); };
 	int getAllKeys(std::vector<String>& keys, std::vector<String>& presetcats);
 
 	bool isAlreadyAPreset(String name)
@@ -82,7 +82,7 @@ public:
     	if (it != m_categoryList.end()) 
     	{
         	// calculating the index of K
-        	position = it - m_categoryList.begin();
+        	position = static_cast<int>(it - m_categoryList.begin());
 			return true;
 	    }
     	else 

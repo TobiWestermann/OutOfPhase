@@ -73,7 +73,7 @@ int PresetHandler::addOrChangeCurrentPreset(String name, String category, String
 
 ValueTree PresetHandler::getPreset(String name)
 {
-	int isKey = m_presetList.count(name);
+	auto isKey = m_presetList.count(name);
 	if (isKey == 1)
 	{
 		ValueTree vt = m_presetList.at(name);
@@ -96,8 +96,8 @@ int PresetHandler::changePreset(ValueTree& newpreset)
 
 int PresetHandler::changePresetCategory(String name, String category)
 {
-	int isKey = m_presetList.count(name);
-	if (isKey == true)
+	auto isKey = m_presetList.count(name);
+	if (isKey > 0)
 		m_presetList[name].setProperty("category", category, nullptr);
 	return 0;
 }

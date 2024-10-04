@@ -15,10 +15,10 @@ YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPlug
 #endif
 {
     float scaleFactor = m_processorRef.getScaleFactor();
-    setResizeLimits (g_minGuiSize_x,g_minGuiSize_x*g_guiratio , g_maxGuiSize_x, g_maxGuiSize_x*g_guiratio);
+    setResizeLimits (g_minGuiSize_x,static_cast<int>(g_minGuiSize_x*g_guiratio) , g_maxGuiSize_x, static_cast<int>(g_maxGuiSize_x*g_guiratio));
     setResizable(true,true);
     getConstrainer()->setFixedAspectRatio(1./g_guiratio);
-    setSize (scaleFactor*g_minGuiSize_x, scaleFactor*g_minGuiSize_x*g_guiratio);
+    setSize (static_cast<int>(scaleFactor*g_minGuiSize_x), static_cast<int>(scaleFactor*g_minGuiSize_x*g_guiratio));
 
 	addAndMakeVisible(m_presetGUI);
 #if WITH_MIDIKEYBOARD      
