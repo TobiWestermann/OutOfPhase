@@ -11,6 +11,8 @@
 #pragma once
 #include <vector>
 
+namespace jade
+{
 template <class T> class AudioProcessParameter
 {
 public:
@@ -34,6 +36,17 @@ public:
             m_transformedParam =  m_transformParamFunc();
         }
         return m_transformedParam;
+    };
+    bool updateWithNotification(T& param){
+        if (*m_param != m_ParamOld)
+        {
+            m_ParamOld = *m_param;
+            m_transformedParam =  m_transformParamFunc();
+            param = m_transformedParam;
+            return true;
+        }
+        param = m_transformedParam;
+        return false;
     };
     void changeTransformer(transformerFunc tf)
     {
@@ -72,3 +85,4 @@ private:
     std::function<T(void)> m_transformParamFunc;
 
 };
+}
