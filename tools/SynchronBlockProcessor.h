@@ -53,7 +53,7 @@ public:
      * @param midiMessages 
      * @return int 
      */
-    virtual int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages) = 0;
+    virtual int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages, int NrOfBlocksSinceLastProcessBlock = 0) = 0;
     /**
      * @brief Get the Delay object
      * 
@@ -99,7 +99,7 @@ public:
     WOLA();
     ~WOLA();
     int prepareWOLAprocessing(int channels, int desiredSize, WOLAType wolalaptype = WOLAType::NoWin_over50); 
-    int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages);    
+    int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages, int NrOfBlocksSinceLastProcessBlock);    
     virtual int processWOLA(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages) = 0;
     int getDelay();
     int getWindow(juce::AudioBuffer<float>&, WinType wintype = WinType::Hann);

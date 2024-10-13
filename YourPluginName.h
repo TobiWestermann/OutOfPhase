@@ -25,7 +25,7 @@ class YourPluginNameAudio : public SynchronBlockProcessor
 public:
     YourPluginNameAudio(juce::AudioProcessor* processor);
     void prepareToPlay(double sampleRate, int max_samplesPerBlock, int max_channels);
-    virtual int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages);
+    virtual int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages, int NrOfBlocksSinceLastProcessBlock);
 
     // parameter handling
   	void addParameter(std::vector < std::unique_ptr<juce::RangedAudioParameter>>& paramVector);

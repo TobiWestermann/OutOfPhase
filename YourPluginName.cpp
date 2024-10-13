@@ -23,9 +23,9 @@ void YourPluginNameAudio::prepareToPlay(double sampleRate, int max_samplesPerBlo
 
 }
 
-int YourPluginNameAudio::processSynchronBlock(juce::AudioBuffer<float> & buffer, juce::MidiBuffer &midiMessages)
+int YourPluginNameAudio::processSynchronBlock(juce::AudioBuffer<float> & buffer, juce::MidiBuffer &midiMessages, int NrOfBlocksSinceLastProcessBlock)
 {
-    juce::ignoreUnused(buffer, midiMessages);
+    juce::ignoreUnused(buffer, midiMessages, NrOfBlocksSinceLastProcessBlock);
     return 0;
 }
 

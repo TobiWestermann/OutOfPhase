@@ -34,12 +34,12 @@ void SynchronBlockProcessor::prepareSynchronProcessing(int channels, int desired
 void SynchronBlockProcessor::processBlock(juce::AudioBuffer<float>& data, juce::MidiBuffer& midiMessages)
 {
     ScopedLock lock(m_protectBlock);
+    int nrofBlockProcessed = 0;
     if (m_directthrue == true)
     {
-        processSynchronBlock(data, midiMessages);
+        processSynchronBlock(data, midiMessages, nrofBlockProcessed);
     }
     // m_protectBlock.enter();
-    int nrofBlockProcessed = 0;
     auto readdatapointers = data.getArrayOfReadPointers();
     auto writedatapointers = data.getArrayOfWritePointers();
     int nrOfInputSamples = data.getNumSamples();
@@ -67,8 +67,8 @@ void SynchronBlockProcessor::processBlock(juce::AudioBuffer<float>& data, juce::
                 m_mididata.addEvents(midiMessages,kk-m_OutBlockSize,m_OutBlockSize,-(kk-m_OutBlockSize));
             }
 
+            processSynchronBlock(m_block, m_mididata, nrofBlockProcessed);
             nrofBlockProcessed++;
-            processSynchronBlock(m_block, m_mididata);
             m_mididata.clear();
             m_pastSamples = 0;
 
@@ -246,8 +246,9 @@ int WOLA::prepareWOLAprocessing(int channels, int desiredSize, WOLAType wolalapt
     return 0;
 }
 
-int WOLA::processSynchronBlock(juce::AudioBuffer<float> &inBlock, juce::MidiBuffer &midiMessages)
+int WOLA::processSynchronBlock(juce::AudioBuffer<float> &inBlock, juce::MidiBuffer &midiMessages, int NrOfBlocksSinceLastProcessBlock)
 {
+    juce::ignoreUnused(NrOfBlocksSinceLastProcessBlock);
     //m_protectBlock.enter();
     int nrOfChannels = inBlock.getNumChannels();
     
