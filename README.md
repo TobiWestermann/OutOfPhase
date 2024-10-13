@@ -30,6 +30,10 @@ This template provides some basic features for effects and synth, like:
 * Access to Version Number given in CMakeLists.txt
 * a template plugin cpp and h for easy start (named YourPluginName.cpp and h). 
 
+## History / Versioning
+V1.0 basic usage is possible
+V1.1 added access to AudioProcessor in the Algo and GUI (necessary for AudioPlayHead and to have getter function for the GUI)
+
 ## Usage
 
 1. Create a new directory (better create a new repository in GitHub)
