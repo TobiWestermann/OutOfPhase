@@ -2,8 +2,8 @@
 #include "YourPluginName.h"
 
 
-YourPluginNameAudio::YourPluginNameAudio()
-:SynchronBlockProcessor()
+YourPluginNameAudio::YourPluginNameAudio(juce::AudioProcessor* processor)
+:SynchronBlockProcessor(), m_processor(processor)
 {
 }
 
@@ -51,8 +51,8 @@ void YourPluginNameAudio::prepareParameter(std::unique_ptr<juce::AudioProcessorV
 }
 
 
-YourPluginNameGUI::YourPluginNameGUI(juce::AudioProcessorValueTreeState& apvts)
-:m_apvts(apvts)
+YourPluginNameGUI::YourPluginNameGUI(YourPluginNameAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts)
+:m_processor(p) ,m_apvts(apvts)
 {
     
 }

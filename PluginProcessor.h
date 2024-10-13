@@ -48,13 +48,15 @@ public:
 
     float getScaleFactor(){return m_pluginScaleFactor;};
     void setScaleFactor(float newscalefactor){m_pluginScaleFactor = newscalefactor;};
-
+    
+    // Algo component and ValueTreeState must be public to be accessed by the editor
+    YourPluginNameAudio m_algo;
+    std::unique_ptr<AudioProcessorValueTreeState> m_parameterVTS;
 private:
     CriticalSection m_protect;
     float m_fs; // sampling rate is always needed
 
     //Parameterhandling
-    std::unique_ptr<AudioProcessorValueTreeState> m_parameterVTS;
     std::vector <std::unique_ptr<RangedAudioParameter>> m_paramVector;
 	PresetHandler m_presets;
     float m_pluginScaleFactor = 1.0;    
@@ -62,9 +64,7 @@ private:
     MidiKeyboardState m_keyboardState;
     MidiModPitchBendState m_wheelState;
 #endif
-    // Your plugin stuff
 
-    YourPluginNameAudio m_algo;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (YourPluginNameAudioProcessor)
 };

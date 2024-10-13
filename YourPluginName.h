@@ -6,6 +6,7 @@
 #include "tools/SynchronBlockProcessor.h"
 #include "PluginSettings.h"
 
+class YourPluginNameAudioProcessor;
 
 // This is how we define our parameter as globals to use it in the audio processor as well as in the editor
 const struct
@@ -22,7 +23,7 @@ const struct
 class YourPluginNameAudio : public SynchronBlockProcessor
 {
 public:
-    YourPluginNameAudio();
+    YourPluginNameAudio(juce::AudioProcessor* processor);
     void prepareToPlay(double sampleRate, int max_samplesPerBlock, int max_channels);
     virtual int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages);
 
@@ -34,17 +35,19 @@ public:
     int getLatency(){return m_Latency;};
 
 private:
+	juce::AudioProcessor* m_processor;
     int m_Latency = 0;
 };
 
 class YourPluginNameGUI : public juce::Component
 {
 public:
-	YourPluginNameGUI(juce::AudioProcessorValueTreeState& apvts);
+	YourPluginNameGUI(YourPluginNameAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts);
 
 	void paint(juce::Graphics& g) override;
 	void resized() override;
 private:
+	YourPluginNameAudioProcessor& m_processor;
     juce::AudioProcessorValueTreeState& m_apvts; 
 
 };

@@ -8,10 +8,10 @@
 YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPluginNameAudioProcessor& p)
     : AudioProcessorEditor (&p), m_processorRef (p), m_presetGUI(p.m_presets),
     	m_keyboard(m_processorRef.m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard), 
-        m_wheels(p.m_wheelState), m_editor(*p.m_parameterVTS)
+        m_wheels(p.m_wheelState), m_editor(p,*p.m_parameterVTS)
 #else
 YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPluginNameAudioProcessor& p)
-    : AudioProcessorEditor (&p), m_processorRef (p), m_presetGUI(p.m_presets), m_editor(*p.m_parameterVTS)
+    : AudioProcessorEditor (&p), m_processorRef (p), m_presetGUI(p.m_presets), m_editor(p,*p.m_parameterVTS)
 #endif
 {
     float scaleFactor = m_processorRef.getScaleFactor();
