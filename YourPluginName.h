@@ -23,7 +23,7 @@ const struct
 class YourPluginNameAudio : public SynchronBlockProcessor
 {
 public:
-    YourPluginNameAudio(juce::AudioProcessor* processor);
+    YourPluginNameAudio(YourPluginNameAudioProcessor* processor);
     void prepareToPlay(double sampleRate, int max_samplesPerBlock, int max_channels);
     virtual int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages, int NrOfBlocksSinceLastProcessBlock);
 
@@ -35,7 +35,7 @@ public:
     int getLatency(){return m_Latency;};
 
 private:
-	juce::AudioProcessor* m_processor;
+	YourPluginNameAudioProcessor* m_processor;
     int m_Latency = 0;
 };
 

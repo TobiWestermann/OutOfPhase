@@ -1,8 +1,9 @@
 #include <math.h>
 #include "YourPluginName.h"
 
+#include "PluginProcessor.h"
 
-YourPluginNameAudio::YourPluginNameAudio(juce::AudioProcessor* processor)
+YourPluginNameAudio::YourPluginNameAudio(YourPluginNameAudioProcessor* processor)
 :SynchronBlockProcessor(), m_processor(processor)
 {
 }
