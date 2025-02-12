@@ -3,16 +3,16 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "tools/MidiModPitchState.h"
 #include "tools/PresetHandler.h"
-#include "YourPluginName.h"
+#include "OutOfPhase.h"
 
 //==============================================================================
-class YourPluginNameAudioProcessor  : public juce::AudioProcessor
+class OutOfPhaseAudioProcessor  : public juce::AudioProcessor
 {
 public:
-    friend class YourPluginNameAudioProcessorEditor;
+    friend class OutOfPhaseAudioProcessorEditor;
     //==============================================================================
-    YourPluginNameAudioProcessor();
-    ~YourPluginNameAudioProcessor() override;
+    OutOfPhaseAudioProcessor();
+    ~OutOfPhaseAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -50,7 +50,7 @@ public:
     void setScaleFactor(float newscalefactor){m_pluginScaleFactor = newscalefactor;};
     
     // Algo component and ValueTreeState must be public to be accessed by the editor
-    YourPluginNameAudio m_algo;
+    OutOfPhaseAudio m_algo;
     std::unique_ptr<AudioProcessorValueTreeState> m_parameterVTS;
 private:
     CriticalSection m_protect;
@@ -66,5 +66,5 @@ private:
 #endif
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (YourPluginNameAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutOfPhaseAudioProcessor)
 };

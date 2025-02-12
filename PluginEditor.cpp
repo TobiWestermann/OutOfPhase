@@ -5,12 +5,12 @@
 
 //==============================================================================
 #if WITH_MIDIKEYBOARD   
-YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPluginNameAudioProcessor& p)
+OutOfPhaseAudioProcessorEditor::OutOfPhaseAudioProcessorEditor (OutOfPhaseAudioProcessor& p)
     : AudioProcessorEditor (&p), m_processorRef (p), m_presetGUI(p.m_presets),
     	m_keyboard(m_processorRef.m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard), 
         m_wheels(p.m_wheelState), m_editor(p,*p.m_parameterVTS)
 #else
-YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPluginNameAudioProcessor& p)
+OutOfPhaseAudioProcessorEditor::OutOfPhaseAudioProcessorEditor (OutOfPhaseAudioProcessor& p)
     : AudioProcessorEditor (&p), m_processorRef (p), m_presetGUI(p.m_presets), m_editor(p,*p.m_parameterVTS)
 #endif
 {
@@ -31,12 +31,12 @@ YourPluginNameAudioProcessorEditor::YourPluginNameAudioProcessorEditor (YourPlug
 
 }
 
-YourPluginNameAudioProcessorEditor::~YourPluginNameAudioProcessorEditor()
+OutOfPhaseAudioProcessorEditor::~OutOfPhaseAudioProcessorEditor()
 {
 }
 
 //==============================================================================
-void YourPluginNameAudioProcessorEditor::paint (juce::Graphics& g)
+void OutOfPhaseAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
@@ -46,7 +46,7 @@ void YourPluginNameAudioProcessorEditor::paint (juce::Graphics& g)
     juce::String text2display = "Hello World! V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
     g.drawFittedText (text2display, getLocalBounds(), juce::Justification::centred, 1);
 }
-void YourPluginNameAudioProcessorEditor::resized()
+void OutOfPhaseAudioProcessorEditor::resized()
 {
     int height = getHeight();
     // necessary to change fontsize of comboboxes and PopUpmenus

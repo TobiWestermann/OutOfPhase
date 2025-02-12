@@ -4,7 +4,7 @@
 # `project()` command. `project()` sets up some helpful variables that describe source/binary
 # directories, and the current project version. This is a standard CMake command.
 
-set(TARGET_NAME YourPluginName)
+set(TARGET_NAME OutOfPhase)
 
 project(${TARGET_NAME} VERSION 0.0.1)
 
@@ -40,11 +40,11 @@ juce_add_plugin(${TARGET_NAME}
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
     VST3_CATEGORIES "Fx" "EQ"                        
     AU_MAIN_TYPE "kAudioUnitType_Effect"
-    COPY_PLUGIN_AFTER_BUILD FALSE               # Should the plugin be installed to a default location after building?
+    COPY_PLUGIN_AFTER_BUILD TRUE               # Should the plugin be installed to a default location after building?
     PLUGIN_MANUFACTURER_CODE IHAJ               # A four-character manufacturer id with at least one upper-case character
     PLUGIN_CODE tep1                            # A unique four-character plugin id with at least one upper-case character
     FORMATS AU VST3 Standalone                  # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-    PRODUCT_NAME "YourPluginName")     # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "OutOfPhase")     # The name of the final executable, which can differ from the target name
 #
 # `juce_generate_juce_header` will create a JuceHeader.h for a given target, which will be generated
 # into your build tree. This should be included with `#include <JuceHeader.h>`. The include path for
@@ -65,7 +65,7 @@ target_sources(${TARGET_NAME}
     PRIVATE
         PluginEditor.cpp
         PluginProcessor.cpp
-        YourPluginName.cpp
+        OutOfPhase.cpp
         tools/MidiModPitchState.cpp
         tools/PresetHandler.cpp
         tools/SynchronBlockProcessor.cpp
@@ -118,7 +118,7 @@ target_compile_definitions(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
     PRIVATE
         # AudioPluginData           # If we'd created a binary data target, we'd link to it here
-        # AudioPluginYourPluginName-binary # or here if we used the recursice method
+        # AudioPluginOutOfPhase-binary # or here if we used the recursice method
         juce::juce_audio_utils
         # juce::juce_opengl  # if we want to use opengl
     PUBLIC
