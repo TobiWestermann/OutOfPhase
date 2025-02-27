@@ -65,6 +65,8 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     m_DryWetSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 20);
     addAndMakeVisible(m_DryWetSlider);
 
+    addAndMakeVisible(m_ComboBoxDistribution);
+
 }
 
 void OutOfPhaseGUI::paint(juce::Graphics &g)
@@ -91,7 +93,7 @@ void OutOfPhaseGUI::resized()
     // general button size
     int knobWidth = 80 * scaleFactor;
     int knobHeight = 80 * scaleFactor;
-    int distance = 20 * scaleFactor;
+    int distance = 40 * scaleFactor;
 
     int comboxWidth = 150 * scaleFactor;
     int comboxHeight = 20 * scaleFactor;
@@ -106,5 +108,24 @@ void OutOfPhaseGUI::resized()
     int comboxY = r.getY() + r.getHeight() / 2 - comboxHeight / 2;
     int comboxX = r.getX() + r.getWidth() / 2 - comboxWidth / 2;
     m_ComboBoxWithArrows.setBounds(comboxX, comboxY, comboxWidth, comboxHeight);
+
+    // button blocksize left from combobox
+    int blocksizeX = comboxX - knobWidth - distance;
+    int blocksizeY = comboxY;
+    m_BlocksizeSlider.setBounds(blocksizeX, blocksizeY, knobWidth, knobHeight);
+
+    // button drywet right from combobox
+    int drywetX = comboxX + comboxWidth + distance;
+    int drywetY = comboxY;
+    m_DryWetSlider.setBounds(drywetX, drywetY, knobWidth, knobHeight);
+
+    // if mode selected is random, provide distribution option
+    // int selectedId = m_ComboBoxWithArrows.getSelectedItemId();
+    // if (selectedId == 3)
+    // {
+    //     int distributionX = comboxX;
+    //     int distributionY = comboxY + comboxHeight + distance;
+    //     m_ComboBoxDistribution.setBounds(distributionX, distributionY, comboxWidth, comboxHeight);
+    // }
 
 }

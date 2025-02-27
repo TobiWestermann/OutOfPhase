@@ -56,4 +56,6 @@ private:
 	juce::Slider m_DryWetSlider;
 	ComboBoxWithArrows m_ComboBoxWithArrows;
 
+	juce::ComboBox m_ComboBoxDistribution;
+
 };
