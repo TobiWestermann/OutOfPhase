@@ -6,6 +6,8 @@
 #include "tools/SynchronBlockProcessor.h"
 #include "PluginSettings.h"
 
+#include "ComboBoxWithArrows.h"
+
 class OutOfPhaseAudioProcessor;
 
 // This is how we define our parameter as globals to use it in the audio processor as well as in the editor
@@ -49,5 +51,9 @@ public:
 private:
 	OutOfPhaseAudioProcessor& m_processor;
     juce::AudioProcessorValueTreeState& m_apvts; 
+
+	juce::Slider m_BlocksizeSlider;
+	juce::Slider m_DryWetSlider;
+	ComboBoxWithArrows m_ComboBoxWithArrows;
 
 };

@@ -55,7 +55,16 @@ void OutOfPhaseAudio::prepareParameter(std::unique_ptr<juce::AudioProcessorValue
 OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts)
 :m_processor(p) ,m_apvts(apvts)
 {
-    
+    addAndMakeVisible(m_ComboBoxWithArrows);
+
+    m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    m_BlocksizeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 20);
+    addAndMakeVisible(m_BlocksizeSlider);
+
+    m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    m_DryWetSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 20);
+    addAndMakeVisible(m_DryWetSlider);
+
 }
 
 void OutOfPhaseGUI::paint(juce::Graphics &g)
@@ -74,10 +83,28 @@ void OutOfPhaseGUI::resized()
 {
 	auto r = getLocalBounds();
     
-    // if you have to place several components, use scaleFactor
-    //int width = r.getWidth();
-	//float scaleFactor = float(width)/g_minGuiSize_x;
+    int height = getHeight();
+    int width = getWidth();
 
-    // use the given canvas in r
-    juce::ignoreUnused(r);
+    float scaleFactor = m_processor.getScaleFactor();
+
+    // general button size
+    int knobWidth = 80 * scaleFactor;
+    int knobHeight = 80 * scaleFactor;
+    int distance = 20 * scaleFactor;
+
+    int comboxWidth = 150 * scaleFactor;
+    int comboxHeight = 20 * scaleFactor;
+
+    // Display for phase in upper half of the GUI
+    int displayHeight = height / 2;
+    
+    // remove from top so buttons are in lower half
+    r.removeFromTop(displayHeight);
+    
+    // Combox in the middle
+    int comboxY = r.getY() + r.getHeight() / 2 - comboxHeight / 2;
+    int comboxX = r.getX() + r.getWidth() / 2 - comboxWidth / 2;
+    m_ComboBoxWithArrows.setBounds(comboxX, comboxY, comboxWidth, comboxHeight);
+
 }
