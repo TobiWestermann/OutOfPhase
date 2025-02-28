@@ -4,7 +4,7 @@
 #include "PluginProcessor.h"
 
 OutOfPhaseAudio::OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor)
-:SynchronBlockProcessor(), m_processor(processor)
+:WOLA(), m_processor(processor)
 {
 }
 
@@ -26,7 +26,8 @@ void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, 
 
 int OutOfPhaseAudio::processSynchronBlock(juce::AudioBuffer<float> & buffer, juce::MidiBuffer &midiMessages, int NrOfBlocksSinceLastProcessBlock)
 {
-    juce::ignoreUnused(buffer, midiMessages, NrOfBlocksSinceLastProcessBlock);
+    processWOLA(buffer, midiMessages);
+    juce::ignoreUnused( NrOfBlocksSinceLastProcessBlock);
     return 0;
 }
 
@@ -51,6 +52,22 @@ void OutOfPhaseAudio::prepareParameter(std::unique_ptr<juce::AudioProcessorValue
     juce::ignoreUnused(vts);
 }
 
+int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &inBlock, juce::MidiBuffer &midiMessages)
+{
+    juce::ignoreUnused(midiMessages);
+
+    for (int channel = 0; channel < inBlock.getNumChannels(); ++channel)
+    {
+        for (int sample = 0; sample < inBlock.getNumSamples(); ++sample)
+        {
+            float data = inBlock.getSample(channel, sample);
+            data = data * 0.5f;
+            inBlock.setSample(channel, sample, data);
+        }
+    }
+
+    return 0;
+}
 
 OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts)
 :m_processor(p) ,m_apvts(apvts)

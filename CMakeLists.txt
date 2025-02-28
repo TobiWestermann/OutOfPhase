@@ -6,7 +6,7 @@
 
 set(TARGET_NAME OutOfPhase)
 
-project(${TARGET_NAME} VERSION 0.0.1)
+project(${TARGET_NAME} VERSION 0.0.2)
 
 configure_file(Versioning.h.in Versioning.h)
 
@@ -40,10 +40,10 @@ juce_add_plugin(${TARGET_NAME}
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
     VST3_CATEGORIES "Fx" "EQ"                        
     AU_MAIN_TYPE "kAudioUnitType_Effect"
-    COPY_PLUGIN_AFTER_BUILD TRUE               # Should the plugin be installed to a default location after building?
+    COPY_PLUGIN_AFTER_BUILD FALSE               # Should the plugin be installed to a default location after building?
     PLUGIN_MANUFACTURER_CODE IHAJ               # A four-character manufacturer id with at least one upper-case character
     PLUGIN_CODE tep1                            # A unique four-character plugin id with at least one upper-case character
-    FORMATS AU VST3 Standalone                  # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
+    FORMATS VST3 Standalone                  # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "OutOfPhase")     # The name of the final executable, which can differ from the target name
 #
 # `juce_generate_juce_header` will create a JuceHeader.h for a given target, which will be generated

@@ -20,7 +20,7 @@ const struct
 }g_paramExample;
 
 
-class OutOfPhaseAudio : public SynchronBlockProcessor
+class OutOfPhaseAudio : public WOLA
 {
 public:
     OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor);
@@ -33,6 +33,8 @@ public:
     
     // some necessary info for the host
     int getLatency(){return m_Latency;};
+
+	int processWOLA(juce::AudioBuffer<float>& inBlock, juce::MidiBuffer& midiMessages);
 
 private:
 	OutOfPhaseAudioProcessor* m_processor;
