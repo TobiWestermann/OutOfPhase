@@ -5,6 +5,7 @@
 
 #include "tools/SynchronBlockProcessor.h"
 #include "PluginSettings.h"
+#include "FFT.h"
 
 class OutOfPhaseAudioProcessor;
 
@@ -25,7 +26,9 @@ class OutOfPhaseAudio : public WOLA
 public:
     OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor);
     void prepareToPlay(double sampleRate, int max_samplesPerBlock, int max_channels);
-    virtual int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages, int NrOfBlocksSinceLastProcessBlock);
+    //virtual int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages, int NrOfBlocksSinceLastProcessBlock);
+	
+	virtual int processWOLA(juce::AudioBuffer<float>& inBlock, juce::MidiBuffer& midiMessages);
 
     // parameter handling
   	void addParameter(std::vector < std::unique_ptr<juce::RangedAudioParameter>>& paramVector);
@@ -34,11 +37,15 @@ public:
     // some necessary info for the host
     int getLatency(){return m_Latency;};
 
-	int processWOLA(juce::AudioBuffer<float>& inBlock, juce::MidiBuffer& midiMessages);
 
 private:
 	OutOfPhaseAudioProcessor* m_processor;
     int m_Latency = 0;
+
+	int m_synchronblocksize = 0;
+	spectrum m_fftprocess;
+	juce::AudioBuffer<float> m_realdata;
+	juce::AudioBuffer<float> m_imagdata;
 };
 
 class OutOfPhaseGUI : public juce::Component

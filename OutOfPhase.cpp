@@ -18,18 +18,22 @@ void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, 
         int nextpowerof2 = int(log2(synchronblocksize))+1;
         synchronblocksize = int(pow(2,nextpowerof2));
     }
-    prepareSynchronProcessing(max_channels,synchronblocksize);
+    m_synchronblocksize = synchronblocksize;
+    //prepareSynchronProcessing(max_channels,synchronblocksize);
+    prepareWOLAprocessing(max_channels,synchronblocksize,WOLA::WOLAType::SqrtHann_over50);
     m_Latency += synchronblocksize;
     // here your code
-
+    m_fftprocess.setFFTSize(synchronblocksize);
+    m_realdata.setSize(max_channels,synchronblocksize/2+1);
+    m_imagdata.setSize(max_channels,synchronblocksize/2+1);
 }
 
-int OutOfPhaseAudio::processSynchronBlock(juce::AudioBuffer<float> & buffer, juce::MidiBuffer &midiMessages, int NrOfBlocksSinceLastProcessBlock)
+/* int OutOfPhaseAudio::processSynchronBlock(juce::AudioBuffer<float> & buffer, juce::MidiBuffer &midiMessages, int NrOfBlocksSinceLastProcessBlock)
 {
     processWOLA(buffer, midiMessages);
     juce::ignoreUnused( NrOfBlocksSinceLastProcessBlock);
     return 0;
-}
+} */
 
 void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudioParameter>> &paramVector)
 {
@@ -52,18 +56,36 @@ void OutOfPhaseAudio::prepareParameter(std::unique_ptr<juce::AudioProcessorValue
     juce::ignoreUnused(vts);
 }
 
-int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &inBlock, juce::MidiBuffer &midiMessages)
+int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffer &midiMessages)
 {
     juce::ignoreUnused(midiMessages);
 
-    for (int channel = 0; channel < inBlock.getNumChannels(); ++channel)
+    int numchns = data.getNumChannels();
+
+    for (int cc = 0 ; cc < numchns; cc++)
     {
-        for (int sample = 0; sample < inBlock.getNumSamples(); ++sample)
+    // FFT 
+        auto dataPtr = data.getWritePointer(cc);
+        auto realPtr = m_realdata.getWritePointer(cc);
+        auto imagPtr = m_imagdata.getWritePointer(cc);
+        m_fftprocess.fft(dataPtr,realPtr,imagPtr);
+
+        for (int nn = 0; nn< m_synchronblocksize/2+1; nn++)
         {
-            float data = inBlock.getSample(channel, sample);
-            data = data * 0.5f;
-            inBlock.setSample(channel, sample, data);
+            float absval = sqrtf(realPtr[nn]*realPtr[nn] + imagPtr[nn]*imagPtr[nn]);
+            float phase = atan2f(imagPtr[nn],realPtr[nn]);
+
+            if (nn>30)
+                absval = 0.f;
+
+            // rück
+            realPtr[nn] = absval*cosf(phase);
+            imagPtr[nn] = absval*sinf(phase);
         }
+
+    // IFFT
+        m_fftprocess.ifft(realPtr,imagPtr, dataPtr);
+
     }
 
     return 0;

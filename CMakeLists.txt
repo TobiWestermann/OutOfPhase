@@ -6,7 +6,7 @@
 
 set(TARGET_NAME OutOfPhase)
 
-project(${TARGET_NAME} VERSION 0.0.2)
+project(${TARGET_NAME} VERSION 0.0.5)
 
 configure_file(Versioning.h.in Versioning.h)
 
@@ -69,6 +69,7 @@ target_sources(${TARGET_NAME}
         tools/MidiModPitchState.cpp
         tools/PresetHandler.cpp
         tools/SynchronBlockProcessor.cpp
+        FFT.cpp
         )
 
 
