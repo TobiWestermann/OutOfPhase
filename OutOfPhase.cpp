@@ -60,21 +60,36 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     {
         bool shouldShowDistribution = (newId == 3);
         m_ComboBoxDistribution.setVisible(shouldShowDistribution);
+        if (newId == 3)
+    {
+        // Beispielhafte Phasendaten (Sinusförmige Phase für Visualisierung)
+        std::vector<float> phaseData;
+        for (int i = 0; i < 100; ++i)
+        {
+            float phase = std::sin(i * juce::MathConstants<float>::twoPi / 100);
+            phaseData.push_back(phase);
+        }
+        m_PhasePlot.setPhaseData(phaseData);
+    }
+
 
         resized();
     });
 
     m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    m_BlocksizeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 20);
+    m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
     addAndMakeVisible(m_BlocksizeSlider);
 
     m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    m_DryWetSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 20);
+    m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
     addAndMakeVisible(m_DryWetSlider);
 
+    // example options, standard should be uniform distribution
     m_ComboBoxDistribution.addItem("Uniform", 1);
     m_ComboBoxDistribution.addItem("Gaussian", 2);
     addAndMakeVisible(m_ComboBoxDistribution);
+
+    addAndMakeVisible(m_PhasePlot);
 
 }
 
@@ -100,8 +115,8 @@ void OutOfPhaseGUI::resized()
     float scaleFactor = m_processor.getScaleFactor();
 
     // general button size
-    int knobWidth = 80 * scaleFactor;
-    int knobHeight = 80 * scaleFactor;
+    int knobWidth = 100 * scaleFactor;
+    int knobHeight = 100 * scaleFactor;
     int distance = 40 * scaleFactor;
 
     int comboxWidth = 150 * scaleFactor;
@@ -109,9 +124,9 @@ void OutOfPhaseGUI::resized()
 
     // Display for phase in upper half of the GUI
     int displayHeight = height / 2;
+    // int plotHeight = displayHeight / 3;
+    m_PhasePlot.setBounds(r.removeFromTop(displayHeight));
     
-    // remove from top so buttons are in lower half
-    r.removeFromTop(displayHeight);
     
     // Combox in the middle
     int comboxY = r.getY() + r.getHeight() / 2 - comboxHeight / 2;
@@ -120,12 +135,12 @@ void OutOfPhaseGUI::resized()
 
     // button blocksize left from combobox
     int blocksizeX = comboxX - knobWidth - distance;
-    int blocksizeY = comboxY;
+    int blocksizeY = comboxY - comboxHeight;
     m_BlocksizeSlider.setBounds(blocksizeX, blocksizeY, knobWidth, knobHeight);
 
     // button drywet right from combobox
     int drywetX = comboxX + comboxWidth + distance;
-    int drywetY = comboxY;
+    int drywetY = comboxY - comboxHeight;
     m_DryWetSlider.setBounds(drywetX, drywetY, knobWidth, knobHeight);
 
     if (m_ComboBoxDistribution.isVisible())
@@ -134,4 +149,5 @@ void OutOfPhaseGUI::resized()
         int distributionY = comboxY + distance;
         m_ComboBoxDistribution.setBounds(distributionX, distributionY, comboxWidth, comboxHeight);
     }
+
 }

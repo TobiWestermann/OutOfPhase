@@ -7,6 +7,7 @@
 #include "PluginSettings.h"
 
 #include "ComboBoxWithArrows.h"
+#include "PhasePlot.h"
 
 class OutOfPhaseAudioProcessor;
 
@@ -57,5 +58,5 @@ private:
 	ComboBoxWithArrows m_ComboBoxWithArrows;
 
 	juce::ComboBox m_ComboBoxDistribution;
-
+	PhasePlot m_PhasePlot;
 };
