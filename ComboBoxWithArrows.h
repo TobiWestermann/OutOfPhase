@@ -35,6 +35,21 @@ public:
         comboBox.setBounds(area);
     }
 
+    int getSelectedItemId() const
+    {
+        return comboBox.getSelectedId();
+    }
+
+    void addItems(const juce::StringArray& items)
+    {
+        comboBox.addItemList(items, 1);
+    }
+
+    void setOnSelectionChanged(std::function<void(int)> callback)
+    {
+        comboBox.onChange = [callback, this] { callback(comboBox.getSelectedId()); };
+    }
+
 private:
     juce::ComboBox comboBox;
     juce::TextButton leftButton, rightButton;
@@ -56,15 +71,4 @@ private:
         if (currentId == comboBox.getNumItems())
             comboBox.setSelectedId(1);
     }
-
-    int getSelectedItemId() const
-    {
-        return comboBox.getSelectedId();
-    }
-
-    void addItems(const juce::StringArray& items)
-    {
-        comboBox.addItemList(items, 1);
-    }
-
 };
