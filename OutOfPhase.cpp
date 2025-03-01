@@ -10,16 +10,19 @@ OutOfPhaseAudio::OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor)
 
 void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, int max_channels)
 {
-    juce::ignoreUnused(max_samplesPerBlock,max_channels);
+    juce::ignoreUnused(sampleRate, max_samplesPerBlock,max_channels);
+
+    float desired_blocksize = *m_processor->m_parameterVTS->getRawParameterValue(g_paramBlocksize.ID);
+
     int synchronblocksize;
-    synchronblocksize = static_cast<int>(round(g_desired_blocksize_ms * sampleRate * 0.001)); // 0.001 to transform ms to seconds;
+    synchronblocksize = static_cast<int>(round(desired_blocksize));
     if (g_forcePowerOf2)
     {
         int nextpowerof2 = int(log2(synchronblocksize))+1;
         synchronblocksize = int(pow(2,nextpowerof2));
     }
     m_synchronblocksize = synchronblocksize;
-    //prepareSynchronProcessing(max_channels,synchronblocksize);
+
     prepareWOLAprocessing(max_channels,synchronblocksize,WOLA::WOLAType::SqrtHann_over50);
     m_Latency += synchronblocksize;
     // here your code
@@ -28,20 +31,16 @@ void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, 
     m_imagdata.setSize(max_channels,synchronblocksize/2+1);
 }
 
-/* int OutOfPhaseAudio::processSynchronBlock(juce::AudioBuffer<float> & buffer, juce::MidiBuffer &midiMessages, int NrOfBlocksSinceLastProcessBlock)
-{
-    processWOLA(buffer, midiMessages);
-    juce::ignoreUnused( NrOfBlocksSinceLastProcessBlock);
-    return 0;
-} */
-
 void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudioParameter>> &paramVector)
 {
-    // this is just a placeholder (necessary for compiling/testing the template)
-    paramVector.push_back(std::make_unique<AudioParameterChoice>(g_paramMode.ID,
+    paramVector.push_back(std::make_unique<juce::AudioParameterChoice>(g_paramMode.ID,
         g_paramMode.name,
-        StringArray {g_paramMode.mode1, g_paramMode.mode2, g_paramMode.mode3 , g_paramMode.mode4}, g_paramMode.defaultValue
-                        ));
+        juce::StringArray {g_paramMode.mode1, g_paramMode.mode2, g_paramMode.mode3 , g_paramMode.mode4}, g_paramMode.defaultValue
+    ));
+    
+    paramVector.push_back(std::make_unique<juce::AudioParameterInt>(g_paramBlocksize.ID,
+        g_paramBlocksize.name, g_paramBlocksize.minValue, g_paramBlocksize.maxValue, g_paramBlocksize.defaultValue
+    ));
 
 }
 
@@ -93,7 +92,7 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             imagPtr[nn] = absval*sinf(phase);
         }
 
-    // IFFT
+        // IFFT
         m_fftprocess.ifft(realPtr,imagPtr, dataPtr);
 
     }
@@ -130,6 +129,8 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
     addAndMakeVisible(m_BlocksizeSlider);
+    BlocksizeSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        *m_processor.m_parameterVTS, g_paramBlocksize.ID, m_BlocksizeSlider);
 
     m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);

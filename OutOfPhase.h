@@ -24,13 +24,20 @@ const struct
 	const int defaultValue = 1;
 }g_paramMode;
 
+const struct
+{
+	const std::string ID = "BlocksizeID";
+	const std::string name = "Blocksize";
+	const int defaultValue = 1024;
+	const int minValue = 256;
+	const int maxValue = 8192;
+}g_paramBlocksize;
 
 class OutOfPhaseAudio : public WOLA
 {
 public:
     OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor);
     void prepareToPlay(double sampleRate, int max_samplesPerBlock, int max_channels);
-    //virtual int processSynchronBlock(juce::AudioBuffer<float>&, juce::MidiBuffer& midiMessages, int NrOfBlocksSinceLastProcessBlock);
 	
 	virtual int processWOLA(juce::AudioBuffer<float>& inBlock, juce::MidiBuffer& midiMessages);
 
@@ -64,6 +71,7 @@ private:
     juce::AudioProcessorValueTreeState& m_apvts; 
 
 	juce::Slider m_BlocksizeSlider;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> BlocksizeSliderAttachment;
 	juce::Slider m_DryWetSlider;
 	ComboBoxWithArrows m_ComboBoxWithArrows;
 
