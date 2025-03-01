@@ -54,6 +54,8 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
 {
     juce::ignoreUnused(midiMessages);
 
+    float operatingMode = *m_processor->m_parameterVTS->getRawParameterValue(g_paramMode.ID);
+
     int numchns = data.getNumChannels();
 
     for (int cc = 0 ; cc < numchns; cc++)
@@ -69,8 +71,22 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             float absval = sqrtf(realPtr[nn]*realPtr[nn] + imagPtr[nn]*imagPtr[nn]);
             float phase = atan2f(imagPtr[nn],realPtr[nn]);
 
-            if (nn>30)
-                absval = 0.f;
+            if (operatingMode == 1) // zero
+            {
+                phase = 0;
+            }
+            else if (operatingMode == 2) // frost
+            {
+                phase = 0.5f * juce::MathConstants<float>::pi;
+            }
+            else if (operatingMode == 3) // random
+            {
+                phase = juce::Random::getSystemRandom().nextFloat() * juce::MathConstants<float>::twoPi;
+            }
+            else if (operatingMode == 4) // flip
+            {
+                phase = phase + juce::MathConstants<float>::pi;
+            }
 
             // rück
             realPtr[nn] = absval*cosf(phase);
