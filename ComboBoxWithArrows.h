@@ -8,10 +8,10 @@ public:
     ComboBoxWithArrows()
     {
         // Füge Einträge zur ComboBox hinzu
-        comboBox.addItem("Mode 1", 1);
-        comboBox.addItem("Mode 2", 2);
-        comboBox.addItem("Mode 3", 3);
-        comboBox.addItem("Mode 4", 4);
+        comboBox.addItem("Zero", 1);
+        comboBox.addItem("Frost", 2);
+        comboBox.addItem("Random", 3);
+        comboBox.addItem("Flip", 4);
         
         comboBox.setSelectedId(1);
         addAndMakeVisible(comboBox);
@@ -47,7 +47,7 @@ public:
 
     void setOnSelectionChanged(std::function<void(int)> callback)
     {
-        comboBox.onChange = [callback, this] { callback(comboBox.getSelectedId()); };
+        comboBox.onChange = [callback, this] { callback(comboBox.getSelectedId() - 1); };
     }
 
 private:
@@ -59,7 +59,7 @@ private:
         int currentId = comboBox.getSelectedId();
         if (currentId > 1)
             comboBox.setSelectedId(currentId - 1);
-        if (currentId == 1)
+        else
             comboBox.setSelectedId(comboBox.getNumItems());
     }
 
@@ -68,7 +68,7 @@ private:
         int currentId = comboBox.getSelectedId();
         if (currentId < comboBox.getNumItems())
             comboBox.setSelectedId(currentId + 1);
-        if (currentId == comboBox.getNumItems())
+        else
             comboBox.setSelectedId(1);
     }
 };

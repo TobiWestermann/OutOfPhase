@@ -38,15 +38,9 @@ void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, 
 void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudioParameter>> &paramVector)
 {
     // this is just a placeholder (necessary for compiling/testing the template)
-    paramVector.push_back(std::make_unique<AudioParameterFloat>(g_paramExample.ID,
-        g_paramExample.name,
-        NormalisableRange<float>(g_paramExample.minValue, g_paramExample.maxValue),
-        g_paramExample.defaultValue,
-        AudioParameterFloatAttributes().withLabel (g_paramExample.unitName)
-                                        .withCategory (juce::AudioProcessorParameter::genericParameter)
-                                        // or two additional lines with lambdas to convert data for display
-                                        // .withStringFromValueFunction (std::move ([](float value, int MaxLen) { value = int(exp(value) * 10) * 0.1f;  return (String(value, MaxLen) + " Hz"); }))
-                                        // .withValueFromStringFunction (std::move ([](const String& text) {return text.getFloatValue(); }))
+    paramVector.push_back(std::make_unique<AudioParameterChoice>(g_paramMode.ID,
+        g_paramMode.name,
+        StringArray {g_paramMode.mode1, g_paramMode.mode2, g_paramMode.mode3 , g_paramMode.mode4}, g_paramMode.defaultValue
                         ));
 
 }
@@ -97,9 +91,9 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     addAndMakeVisible(m_ComboBoxWithArrows);
     m_ComboBoxWithArrows.setOnSelectionChanged([this](int newId)
     {
-        bool shouldShowDistribution = (newId == 3);
+        bool shouldShowDistribution = (newId == 2);
         m_ComboBoxDistribution.setVisible(shouldShowDistribution);
-        if (newId == 3)
+        if (newId == 2)
     {
         // Beispielhafte Phasendaten (Sinusförmige Phase für Visualisierung)
         std::vector<float> phaseData;
@@ -113,6 +107,8 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 
 
         resized();
+
+        m_apvts.getParameterAsValue(g_paramMode.ID) = newId;
     });
 
     m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
@@ -154,12 +150,12 @@ void OutOfPhaseGUI::resized()
     float scaleFactor = m_processor.getScaleFactor();
 
     // general button size
-    int knobWidth = 100 * scaleFactor;
-    int knobHeight = 100 * scaleFactor;
-    int distance = 40 * scaleFactor;
+    float knobWidth = 100 * scaleFactor;
+    float knobHeight = 100 * scaleFactor;
+    float distance = 40 * scaleFactor;
 
-    int comboxWidth = 150 * scaleFactor;
-    int comboxHeight = 20 * scaleFactor;
+    float comboxWidth = 150 * scaleFactor;
+    float comboxHeight = 20 * scaleFactor;
 
     // Display for phase in upper half of the GUI
     int displayHeight = height / 2;
@@ -168,25 +164,24 @@ void OutOfPhaseGUI::resized()
     
     
     // Combox in the middle
-    int comboxY = r.getY() + r.getHeight() / 2 - comboxHeight / 2;
-    int comboxX = r.getX() + r.getWidth() / 2 - comboxWidth / 2;
-    m_ComboBoxWithArrows.setBounds(comboxX, comboxY, comboxWidth, comboxHeight);
+    float comboxY = r.getY() + r.getHeight() / 2 - comboxHeight / 2;
+    float comboxX = r.getX() + r.getWidth() / 2 - comboxWidth / 2;
+    m_ComboBoxWithArrows.setBounds(static_cast<int>(comboxX), static_cast<int>(comboxY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
 
     // button blocksize left from combobox
-    int blocksizeX = comboxX - knobWidth - distance;
-    int blocksizeY = comboxY - comboxHeight;
-    m_BlocksizeSlider.setBounds(blocksizeX, blocksizeY, knobWidth, knobHeight);
+    float blocksizeX = comboxX - knobWidth - distance;
+    float blocksizeY = comboxY - comboxHeight;
+    m_BlocksizeSlider.setBounds(static_cast<int>(blocksizeX), static_cast<int>(blocksizeY), static_cast<int>(knobWidth), static_cast<int>(knobHeight));
 
     // button drywet right from combobox
-    int drywetX = comboxX + comboxWidth + distance;
-    int drywetY = comboxY - comboxHeight;
-    m_DryWetSlider.setBounds(drywetX, drywetY, knobWidth, knobHeight);
+    float drywetX = comboxX + comboxWidth + distance;
+    float drywetY = comboxY - comboxHeight;
+    m_DryWetSlider.setBounds(static_cast<int>(drywetX), static_cast<int>(drywetY), static_cast<int>(knobWidth), static_cast<int>(knobHeight));
 
     if (m_ComboBoxDistribution.isVisible())
     {
-        int distributionX = comboxX;
-        int distributionY = comboxY + distance;
-        m_ComboBoxDistribution.setBounds(distributionX, distributionY, comboxWidth, comboxHeight);
+        float distributionX = comboxX;
+        float distributionY = comboxY + distance;
+        m_ComboBoxDistribution.setBounds(static_cast<int>(distributionX), static_cast<int>(distributionY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
     }
-
 }

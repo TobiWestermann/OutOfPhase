@@ -15,13 +15,14 @@ class OutOfPhaseAudioProcessor;
 // This is how we define our parameter as globals to use it in the audio processor as well as in the editor
 const struct
 {
-	const std::string ID = "ExampleID";
-	const std::string name = "Example";
-	const std::string unitName = "xyz";
-	const float minValue = 1.f;
-	const float maxValue = 2.f;
-	const float defaultValue = 1.2f;
-}g_paramExample;
+	const std::string ID = "ModeID";
+	const std::string name = "Mode";
+	const std::string mode1 = "Zero";
+	const std::string mode2 = "Frost";
+	const std::string mode3 = "Random";
+	const std::string mode4 = "Flip";
+	const int defaultValue = 1;
+}g_paramMode;
 
 
 class OutOfPhaseAudio : public WOLA
