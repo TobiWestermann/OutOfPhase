@@ -6,7 +6,7 @@
 
 set(TARGET_NAME OutOfPhase)
 
-project(${TARGET_NAME} VERSION 0.0.5)
+project(${TARGET_NAME} VERSION 0.0.6)
 
 configure_file(Versioning.h.in Versioning.h)
 
