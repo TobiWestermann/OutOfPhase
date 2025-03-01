@@ -7,6 +7,9 @@
 #include "PluginSettings.h"
 #include "FFT.h"
 
+#include "ComboBoxWithArrows.h"
+#include "PhasePlot.h"
+
 class OutOfPhaseAudioProcessor;
 
 // This is how we define our parameter as globals to use it in the audio processor as well as in the editor
@@ -59,4 +62,10 @@ private:
 	OutOfPhaseAudioProcessor& m_processor;
     juce::AudioProcessorValueTreeState& m_apvts; 
 
+	juce::Slider m_BlocksizeSlider;
+	juce::Slider m_DryWetSlider;
+	ComboBoxWithArrows m_ComboBoxWithArrows;
+
+	juce::ComboBox m_ComboBoxDistribution;
+	PhasePlot m_PhasePlot;
 };
