@@ -48,6 +48,11 @@ public:
     // some necessary info for the host
     int getLatency(){return m_Latency;};
 
+	std::vector<float> getPhaseData() {
+        juce::ScopedLock lock(dataMutex);
+        return m_phaseData;
+	}
+
 
 private:
 	OutOfPhaseAudioProcessor* m_processor;
@@ -57,15 +62,20 @@ private:
 	spectrum m_fftprocess;
 	juce::AudioBuffer<float> m_realdata;
 	juce::AudioBuffer<float> m_imagdata;
+	std::vector<float> m_phaseData;
+	juce::CriticalSection dataMutex;
 };
 
-class OutOfPhaseGUI : public juce::Component
+class OutOfPhaseGUI : public juce::Component, public juce::Timer
 {
 public:
 	OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts);
 
 	void paint(juce::Graphics& g) override;
 	void resized() override;
+
+	void timerCallback() override;
+
 private:
 	OutOfPhaseAudioProcessor& m_processor;
     juce::AudioProcessorValueTreeState& m_apvts; 
@@ -77,4 +87,5 @@ private:
 
 	juce::ComboBox m_ComboBoxDistribution;
 	PhasePlot m_PhasePlot;
+	std::vector<float> phaseDataPlot;
 };

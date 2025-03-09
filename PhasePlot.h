@@ -4,7 +4,9 @@
 
 class PhasePlot : public juce::Component
 {
-    public:
+
+public:
+
     PhasePlot() {}
 
     void setPhaseData(const std::vector<float>& newPhaseData)
@@ -18,7 +20,7 @@ class PhasePlot : public juce::Component
         g.fillAll(juce::Colours::black); // Hintergrund schwarz setzen
         g.setColour(juce::Colours::white); // Linienfarbe weiß
 
-        if (phaseData.empty()) return;
+        // if (phaseData.empty()) return;
 
         auto width = static_cast<float>(getWidth());
         auto height = static_cast<float>(getHeight());

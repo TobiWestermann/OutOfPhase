@@ -65,6 +65,9 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
         auto imagPtr = m_imagdata.getWritePointer(cc);
         m_fftprocess.fft(dataPtr,realPtr,imagPtr);
 
+        std::vector<float> newPhaseData;
+        newPhaseData.resize(m_synchronblocksize/2+1);
+
         for (int nn = 0; nn< m_synchronblocksize/2+1; nn++)
         {
             float absval = sqrtf(realPtr[nn]*realPtr[nn] + imagPtr[nn]*imagPtr[nn]);
@@ -90,11 +93,14 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             // rück
             realPtr[nn] = absval*cosf(phase);
             imagPtr[nn] = absval*sinf(phase);
+
+            newPhaseData[nn] = phase;
         }
 
         // IFFT
         m_fftprocess.ifft(realPtr,imagPtr, dataPtr);
 
+        m_phaseData = newPhaseData;
     }
 
     return 0;
@@ -103,26 +109,11 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
 OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts)
 :m_processor(p) ,m_apvts(apvts)
 {   
+    startTimerHz(30); // 30 Hz update rate
+
     addAndMakeVisible(m_ComboBoxWithArrows);
     m_ComboBoxWithArrows.setOnSelectionChanged([this](int newId)
     {
-        bool shouldShowDistribution = (newId == 2);
-        m_ComboBoxDistribution.setVisible(shouldShowDistribution);
-        if (newId == 2)
-    {
-        // Beispielhafte Phasendaten (Sinusförmige Phase für Visualisierung)
-        std::vector<float> phaseData;
-        for (int i = 0; i < 100; ++i)
-        {
-            float phase = std::sin(i * juce::MathConstants<float>::twoPi / 100);
-            phaseData.push_back(phase);
-        }
-        m_PhasePlot.setPhaseData(phaseData);
-    }
-
-
-        resized();
-
         m_apvts.getParameterAsValue(g_paramMode.ID) = newId;
     });
 
@@ -201,4 +192,10 @@ void OutOfPhaseGUI::resized()
         float distributionY = comboxY + distance;
         m_ComboBoxDistribution.setBounds(static_cast<int>(distributionX), static_cast<int>(distributionY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
     }
+}
+
+void OutOfPhaseGUI::timerCallback()
+{
+    phaseDataPlot = m_processor.m_algo.getPhaseData(); // Retrieve data from processor
+    m_PhasePlot.setPhaseData(phaseDataPlot); // Update plot
 }
