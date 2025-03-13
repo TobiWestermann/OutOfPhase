@@ -115,7 +115,19 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     m_ComboBoxWithArrows.setOnSelectionChanged([this](int newId)
     {
         m_apvts.getParameterAsValue(g_paramMode.ID) = newId;
+        if (newId == 2)
+        {
+            m_frostButton.setVisible(true);
+        }
+        else 
+        {
+            m_frostButton.setVisible(false);
+        }
     });
+
+    addAndMakeVisible(m_frostButton);
+    m_frostButton.setButtonText("Frost");
+    m_frostButton.setVisible(false);
 
     m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
@@ -191,6 +203,13 @@ void OutOfPhaseGUI::resized()
         float distributionX = comboxX;
         float distributionY = comboxY + distance;
         m_ComboBoxDistribution.setBounds(static_cast<int>(distributionX), static_cast<int>(distributionY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
+    }
+
+    if (m_frostButton.isVisible())
+    {
+        float frostX = comboxX;
+        float frostY = comboxY + 2 * distance;
+        m_frostButton.setBounds(static_cast<int>(frostX), static_cast<int>(frostY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
     }
 }
 

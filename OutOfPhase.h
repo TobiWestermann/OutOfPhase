@@ -88,4 +88,5 @@ private:
 	juce::ComboBox m_ComboBoxDistribution;
 	PhasePlot m_PhasePlot;
 	std::vector<float> phaseDataPlot;
+	juce::TextButton m_frostButton;
 };
