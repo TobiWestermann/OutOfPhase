@@ -115,9 +115,10 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     m_ComboBoxWithArrows.setOnSelectionChanged([this](int newId)
     {
         m_apvts.getParameterAsValue(g_paramMode.ID) = newId;
-        if (newId == 2)
+        if (newId == 1)
         {
             m_frostButton.setVisible(true);
+            resized();
         }
         else 
         {
