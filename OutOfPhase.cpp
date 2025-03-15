@@ -29,6 +29,8 @@ void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, 
     m_fftprocess.setFFTSize(synchronblocksize);
     m_realdata.setSize(max_channels,synchronblocksize/2+1);
     m_imagdata.setSize(max_channels,synchronblocksize/2+1);
+
+    initFrostPhaseData();
 }
 
 void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudioParameter>> &paramVector)
@@ -69,6 +71,8 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
         std::vector<float> newPostPhaseData;
         newPrePhaseData.resize(m_synchronblocksize/2+1);
         newPostPhaseData.resize(m_synchronblocksize/2+1);
+        //m_FrostPhaseData.resize(m_synchronblocksize/2+1);
+        //DBG("FrostPhaseData size: " << m_FrostPhaseData.size());
 
         for (int nn = 0; nn< m_synchronblocksize/2+1; nn++)
         {
@@ -82,7 +86,7 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             }
             else if (operatingMode == 1) // frost
             {
-                PostPhase = 0.25f * juce::MathConstants<float>::pi;
+                PostPhase = m_FrostPhaseData[nn];
             }
             else if (operatingMode == 2) // random
             {
@@ -135,6 +139,10 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     addAndMakeVisible(m_frostButton);
     m_frostButton.setButtonText("Frost");
     m_frostButton.setVisible(false);
+    m_frostButton.onClick = [this]
+    {
+        m_processor.m_algo.updateFrostPhaseData();
+    };
 
     m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);

@@ -58,6 +58,17 @@ public:
         return m_PostPhaseData;
 	}
 
+	void updateFrostPhaseData() {
+		juce::ScopedLock lock(dataMutex);
+		m_FrostPhaseData = m_PrePhaseData;
+	}
+
+	void initFrostPhaseData() {
+		juce::ScopedLock lock(dataMutex);
+		m_FrostPhaseData.resize(m_synchronblocksize/2+1);
+		std::fill(m_FrostPhaseData.begin(), m_FrostPhaseData.end(), 0.0f);
+		//DBG("FrostPhaseData size: " << m_FrostPhaseData.size());
+	}
 
 private:
 	OutOfPhaseAudioProcessor* m_processor;
@@ -69,6 +80,7 @@ private:
 	juce::AudioBuffer<float> m_imagdata;
 	std::vector<float> m_PrePhaseData;
 	std::vector<float> m_PostPhaseData;
+	std::vector<float> m_FrostPhaseData;
 	juce::CriticalSection dataMutex;
 };
 
