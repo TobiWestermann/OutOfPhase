@@ -72,7 +72,7 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
         newPrePhaseData.resize(m_synchronblocksize/2+1);
         newPostPhaseData.resize(m_synchronblocksize/2+1);
         //m_FrostPhaseData.resize(m_synchronblocksize/2+1);
-        //DBG("FrostPhaseData size: " << m_FrostPhaseData.size());
+        DBG("FrostPhaseData size: " << m_FrostPhaseData.size());
 
         for (int nn = 0; nn< m_synchronblocksize/2+1; nn++)
         {
@@ -149,6 +149,10 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     addAndMakeVisible(m_BlocksizeSlider);
     BlocksizeSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         *m_processor.m_parameterVTS, g_paramBlocksize.ID, m_BlocksizeSlider);
+    m_BlocksizeSlider.onValueChange = [this]
+    {
+        m_processor.m_algo.prepareToPlay(44100, 512, 2);
+    };
 
     m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
