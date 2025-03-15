@@ -73,21 +73,26 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             float absval = sqrtf(realPtr[nn]*realPtr[nn] + imagPtr[nn]*imagPtr[nn]);
             float phase = atan2f(imagPtr[nn],realPtr[nn]);
 
-            if (operatingMode == 1) // zero
+            if (operatingMode == 0) // zero
             {
                 phase = 0;
             }
-            else if (operatingMode == 2) // frost
+            else if (operatingMode == 1) // frost
             {
-                phase = 0.5f * juce::MathConstants<float>::pi;
+                phase = 0.25f * juce::MathConstants<float>::pi;
             }
-            else if (operatingMode == 3) // random
+            else if (operatingMode == 2) // random
             {
-                phase = juce::Random::getSystemRandom().nextFloat() * juce::MathConstants<float>::twoPi;
+                phase = (juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f) * juce::MathConstants<float>::pi;
             }
-            else if (operatingMode == 4) // flip
+            else if (operatingMode == 3) // flip
             {
-                phase = phase + juce::MathConstants<float>::pi;
+                //phase = fmod(phase + juce::MathConstants<float>::pi, juce::MathConstants<float>::pi);
+                phase = fmod(phase + juce::MathConstants<float>::pi, 2.0 * juce::MathConstants<float>::pi); // Shift by juce::MathConstants<float>::pi, then modulo 2π
+                if (phase < 0) {
+                    phase += 2.0 * juce::MathConstants<float>::pi; // Ensure positive result
+                }
+                phase = phase - juce::MathConstants<float>::pi; // Shift back into the range [-π, π]
             }
 
             // rück
