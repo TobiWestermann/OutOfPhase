@@ -65,47 +65,48 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
         auto imagPtr = m_imagdata.getWritePointer(cc);
         m_fftprocess.fft(dataPtr,realPtr,imagPtr);
 
-        std::vector<float> newPhaseData;
-        newPhaseData.resize(m_synchronblocksize/2+1);
+        std::vector<float> newPrePhaseData;
+        std::vector<float> newPostPhaseData;
+        newPrePhaseData.resize(m_synchronblocksize/2+1);
+        newPostPhaseData.resize(m_synchronblocksize/2+1);
 
         for (int nn = 0; nn< m_synchronblocksize/2+1; nn++)
         {
             float absval = sqrtf(realPtr[nn]*realPtr[nn] + imagPtr[nn]*imagPtr[nn]);
-            float phase = atan2f(imagPtr[nn],realPtr[nn]);
+            float PrePhase = atan2f(imagPtr[nn],realPtr[nn]);
+            float PostPhase = atan2f(imagPtr[nn],realPtr[nn]);
 
             if (operatingMode == 0) // zero
             {
-                phase = 0;
+                PostPhase = 0;
             }
             else if (operatingMode == 1) // frost
             {
-                phase = 0.25f * juce::MathConstants<float>::pi;
+                PostPhase = 0.25f * juce::MathConstants<float>::pi;
             }
             else if (operatingMode == 2) // random
             {
-                phase = (juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f) * juce::MathConstants<float>::pi;
+                PostPhase = (juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f) * juce::MathConstants<float>::pi;
             }
             else if (operatingMode == 3) // flip
             {
-                //phase = fmod(phase + juce::MathConstants<float>::pi, juce::MathConstants<float>::pi);
-                phase = fmod(phase + juce::MathConstants<float>::pi, 2.0 * juce::MathConstants<float>::pi); // Shift by juce::MathConstants<float>::pi, then modulo 2π
-                if (phase < 0) {
-                    phase += 2.0 * juce::MathConstants<float>::pi; // Ensure positive result
-                }
-                phase = phase - juce::MathConstants<float>::pi; // Shift back into the range [-π, π]
+                //PostPhase = fmod(PostPhase + juce::MathConstants<float>::pi, juce::MathConstants<float>::pi);
+                PostPhase = -PostPhase;
             }
 
             // rück
-            realPtr[nn] = absval*cosf(phase);
-            imagPtr[nn] = absval*sinf(phase);
+            realPtr[nn] = absval*cosf(PostPhase);
+            imagPtr[nn] = absval*sinf(PostPhase);
 
-            newPhaseData[nn] = phase;
+            newPrePhaseData[nn] = PrePhase;
+            newPostPhaseData[nn] = PostPhase;
         }
 
         // IFFT
         m_fftprocess.ifft(realPtr,imagPtr, dataPtr);
 
-        m_phaseData = newPhaseData;
+        m_PrePhaseData = newPrePhaseData;
+        m_PostPhaseData = newPostPhaseData;
     }
 
     return 0;
@@ -221,6 +222,8 @@ void OutOfPhaseGUI::resized()
 
 void OutOfPhaseGUI::timerCallback()
 {
-    phaseDataPlot = m_processor.m_algo.getPhaseData(); // Retrieve data from processor
-    m_PhasePlot.setPhaseData(phaseDataPlot); // Update plot
+    std::vector<float> PrePhaseDataPlot = m_processor.m_algo.getPrePhaseData(); // Retrieve data from processor
+    std::vector<float> PostPhaseDataPlot = m_processor.m_algo.getPostPhaseData(); // Retrieve data from processor
+    m_PhasePlot.setPrePhaseData(PrePhaseDataPlot); // Update plot
+    m_PhasePlot.setPostPhaseData(PostPhaseDataPlot); // Update plot
 }

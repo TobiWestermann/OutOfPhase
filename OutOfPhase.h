@@ -48,9 +48,14 @@ public:
     // some necessary info for the host
     int getLatency(){return m_Latency;};
 
-	std::vector<float> getPhaseData() {
+	std::vector<float> getPrePhaseData() {
         juce::ScopedLock lock(dataMutex);
-        return m_phaseData;
+        return m_PrePhaseData;
+	}
+
+	std::vector<float> getPostPhaseData() {
+        juce::ScopedLock lock(dataMutex);
+        return m_PostPhaseData;
 	}
 
 
@@ -62,7 +67,8 @@ private:
 	spectrum m_fftprocess;
 	juce::AudioBuffer<float> m_realdata;
 	juce::AudioBuffer<float> m_imagdata;
-	std::vector<float> m_phaseData;
+	std::vector<float> m_PrePhaseData;
+	std::vector<float> m_PostPhaseData;
 	juce::CriticalSection dataMutex;
 };
 
@@ -87,6 +93,6 @@ private:
 
 	juce::ComboBox m_ComboBoxDistribution;
 	PhasePlot m_PhasePlot;
-	std::vector<float> phaseDataPlot;
+	//std::vector<float> phaseDataPlot;
 	juce::TextButton m_frostButton;
 };

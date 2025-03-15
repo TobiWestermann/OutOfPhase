@@ -9,37 +9,64 @@ public:
 
     PhasePlot() {}
 
-    void setPhaseData(const std::vector<float>& newPhaseData)
+    void setPrePhaseData(const std::vector<float>& newPrePhaseData)
     {
-        phaseData = newPhaseData;
+        PrePhaseData = newPrePhaseData;
+        repaint(); // Neuzeichnen des Plots
+    }
+
+    void setPostPhaseData(const std::vector<float>& newPostPhaseData)
+    {
+        PostPhaseData = newPostPhaseData;
         repaint(); // Neuzeichnen des Plots
     }
 
     void paint(juce::Graphics& g) override
     {
-        g.fillAll(juce::Colours::black); // Hintergrund schwarz setzen
-        g.setColour(juce::Colours::white); // Linienfarbe weiß
+        g.fillAll(juce::Colours::white); // Hintergrund schwarz setzen
+
+        // PrePhase
+
+        g.setColour(juce::Colours::blue); // Linienfarbe weiß
+        g.setOpacity(0.5f);
 
         // if (phaseData.empty()) return;
 
         auto width = static_cast<float>(getWidth());
         auto height = static_cast<float>(getHeight());
 
-        juce::Path phasePath;
-        float xStep = width / static_cast<float>(phaseData.size());
+        juce::Path PrePhasePath;
+        float xStep = width / static_cast<float>(PrePhaseData.size());
 
-        phasePath.startNewSubPath(0, height / 2);
+        PrePhasePath.startNewSubPath(0, height / 2);
 
-        for (size_t i = 0; i < phaseData.size(); ++i)
+        for (size_t i = 0; i < PrePhaseData.size(); ++i)
         {
             float x = i * xStep;
-            float y = height / 2 - (phaseData[i] * (height / 2)); // Skalierung
-            phasePath.lineTo(x, y);
+            float y = height / 2 - (PrePhaseData[i] * (height / 2)); // Skalierung
+            PrePhasePath.lineTo(x, y);
         }
 
-        g.strokePath(phasePath, juce::PathStrokeType(2.0f)); // Linie zeichnen
+        g.strokePath(PrePhasePath, juce::PathStrokeType(2.0f)); // Linie zeichnen
+
+        // PostPhase
+
+        juce::Path PostPhasePath;
+        g.setColour(juce::Colours::pink); // Linienfarbe weiß
+        g.setOpacity(0.5f);
+        PostPhasePath.startNewSubPath(0, height / 2);
+
+        for (size_t i = 0; i < PostPhaseData.size(); ++i)
+        {
+            float x = i * xStep;
+            float y = height / 2 - (PostPhaseData[i] * (height / 2)); // Skalierung
+            PostPhasePath.lineTo(x, y);
+        }
+
+        g.strokePath(PostPhasePath, juce::PathStrokeType(2.0f)); // Linie zeichnen
     }
 
 private:
-    std::vector<float> phaseData;
+    std::vector<float> PrePhaseData;
+    std::vector<float> PostPhaseData;
 };
