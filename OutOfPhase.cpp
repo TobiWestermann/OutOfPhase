@@ -10,6 +10,7 @@ OutOfPhaseAudio::OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor)
 
 void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, int max_channels)
 {
+    juce::ScopedLock lock(dataMutex);
     juce::ignoreUnused(sampleRate, max_samplesPerBlock,max_channels);
 
     float desired_blocksize = *m_processor->m_parameterVTS->getRawParameterValue(g_paramBlocksize.ID);
@@ -53,6 +54,7 @@ void OutOfPhaseAudio::prepareParameter(std::unique_ptr<juce::AudioProcessorValue
 
 int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffer &midiMessages)
 {
+    juce::ScopedLock lock(dataMutex);
     juce::ignoreUnused(midiMessages);
 
     float operatingMode = *m_processor->m_parameterVTS->getRawParameterValue(g_paramMode.ID);

@@ -9,6 +9,7 @@
 
 #include "ComboBoxWithArrows.h"
 #include "PhasePlot.h"
+#include "DiscreteSlider.h"
 
 class OutOfPhaseAudioProcessor;
 
@@ -98,7 +99,7 @@ private:
 	OutOfPhaseAudioProcessor& m_processor;
     juce::AudioProcessorValueTreeState& m_apvts; 
 
-	juce::Slider m_BlocksizeSlider;
+	DiscreteSlider m_BlocksizeSlider;
 	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> BlocksizeSliderAttachment;
 	juce::Slider m_DryWetSlider;
 	ComboBoxWithArrows m_ComboBoxWithArrows;
