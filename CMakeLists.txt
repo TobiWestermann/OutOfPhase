@@ -6,7 +6,7 @@
 
 set(TARGET_NAME OutOfPhase)
 
-project(${TARGET_NAME} VERSION 0.0.6)
+project(${TARGET_NAME} VERSION 0.0.7)
 
 configure_file(Versioning.h.in Versioning.h)
 
@@ -25,7 +25,7 @@ configure_file(Versioning.h.in Versioning.h)
 
 # add_compile_definitions(FACTORY_PRESETS) # use this if you have finally some presets to add (see binary files below)
 # add_compile_definitions(WITH_MIDIKEYBOARD)
-add_compile_definitions(WITH_PRESETHANDLERGUI)
+#add_compile_definitions(WITH_PRESETHANDLERGUI)
 
 juce_add_plugin(${TARGET_NAME}
     # VERSION ...                               # Set this if the plugin version is different to the project version

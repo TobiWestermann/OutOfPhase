@@ -108,4 +108,6 @@ private:
 	PhasePlot m_PhasePlot;
 	//std::vector<float> phaseDataPlot;
 	juce::TextButton m_frostButton;
+
+	juce::Image m_image;
 };

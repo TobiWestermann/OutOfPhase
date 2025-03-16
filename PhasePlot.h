@@ -25,7 +25,10 @@ public:
     {
         bool mouseOver = isMouseOver();
 
-        g.fillAll(juce::Colours::black); // Hintergrund schwarz setzen
+        g.fillAll(juce::Colours::whitesmoke.darker(0.2)); // Hintergrund schwarz setzen
+
+        g.setColour(juce::Colours::grey);
+        g.drawRect(getLocalBounds(), 5); // Draw outline
 
         if (mouseOver)
         {

@@ -3,6 +3,8 @@
 
 #include "PluginProcessor.h"
 
+#include "resources/images/paint_bin.h"
+
 OutOfPhaseAudio::OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor)
 :WOLA(), m_processor(processor)
 {
@@ -74,7 +76,7 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
         newPrePhaseData.resize(m_synchronblocksize/2+1);
         newPostPhaseData.resize(m_synchronblocksize/2+1);
         //m_FrostPhaseData.resize(m_synchronblocksize/2+1);
-        DBG("FrostPhaseData size: " << m_FrostPhaseData.size());
+        //DBG("FrostPhaseData size: " << m_FrostPhaseData.size());
 
         for (int nn = 0; nn< m_synchronblocksize/2+1; nn++)
         {
@@ -167,13 +169,18 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 
     addAndMakeVisible(m_PhasePlot);
 
+    m_image = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
 }
 
 void OutOfPhaseGUI::paint(juce::Graphics &g)
 {
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId).brighter(0.3f));
+    g.fillAll (juce::Colours::bisque);
 
-    g.setColour (juce::Colours::white);
+    g.drawImageWithin(m_image, getX(), 0, getWidth(), getHeight(),
+                       juce::RectanglePlacement::fillDestination);
+    
+
+    g.setColour (juce::Colours::grey);
     g.setFont (12.0f);
     
     juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
@@ -201,7 +208,8 @@ void OutOfPhaseGUI::resized()
     // Display for phase in upper half of the GUI
     int displayHeight = height / 2;
     // int plotHeight = displayHeight / 3;
-    m_PhasePlot.setBounds(r.removeFromTop(displayHeight));
+    int margin = 10 * scaleFactor;
+    m_PhasePlot.setBounds(r.removeFromTop(displayHeight).reduced(margin));
     
     
     // Combox in the middle
