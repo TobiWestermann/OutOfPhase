@@ -74,7 +74,7 @@ void PhasePlot::paint(juce::Graphics& g)
             PrePhasePath.lineTo(x, y);
         }
 
-        g.strokePath(PrePhasePath, juce::PathStrokeType(2.0f));
+        g.strokePath(PrePhasePath, juce::PathStrokeType(1.0f));
     }
 
     g.setColour(juce::Colours::white);
@@ -105,7 +105,7 @@ void PhasePlot::paint(juce::Graphics& g)
             PostPhasePath.lineTo(x, y);
         }
 
-        g.strokePath(PostPhasePath, juce::PathStrokeType(2.0f));
+        g.strokePath(PostPhasePath, juce::PathStrokeType(1.0f));
     }
 
     if (mouseOver)
