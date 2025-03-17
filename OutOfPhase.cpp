@@ -110,14 +110,11 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
                 }
                 else if (DistributionModeID == 1) // Gaussian
                 {
-                    // More efficient Gaussian implementation
-                    // Use cached random values to avoid generating two values every time
                     static float nextGaussian = 0.0f;
                     static bool hasNextGaussian = false;
                     
                     if (hasNextGaussian)
                     {
-                        // Use the cached value
                         PostPhase = nextGaussian * juce::MathConstants<float>::pi; // Scale to full -π to π range
                         hasNextGaussian = false;
                     }
@@ -136,8 +133,7 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
                         PostPhase = u1 * s * juce::MathConstants<float>::pi; // Scale to full -π to π range
                         hasNextGaussian = true;
                     }
-                    
-                    // Limit to -π to π, though this should rarely be needed
+
                     PostPhase = juce::jlimit(-juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, PostPhase);
                 }
             }
