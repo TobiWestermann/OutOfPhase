@@ -6,7 +6,7 @@ const bool g_forcePowerOf2(true); // should be true for FFT Processing
 
 // -------------- GUI -----------------
 // global GUI setting for OutOfPhase
-const int g_minGuiSize_x(500);
+const int g_minGuiSize_x(400);
 const int g_maxGuiSize_x(600);
 const int g_minGuiSize_y(400);
 const float g_guiratio = float(g_minGuiSize_y)/g_minGuiSize_x;

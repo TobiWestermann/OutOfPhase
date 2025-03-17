@@ -47,6 +47,10 @@ void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudio
         g_paramBlocksize.name, g_paramBlocksize.minValue, g_paramBlocksize.maxValue, g_paramBlocksize.defaultValue
     ));
 
+    paramVector.push_back(std::make_unique<juce::AudioParameterFloat>(g_paramDryWet.ID,
+        g_paramDryWet.name, g_paramDryWet.minValue, g_paramDryWet.maxValue, g_paramDryWet.defaultValue
+    ));
+
     paramVector.push_back(std::make_unique<juce::AudioParameterChoice>(g_paramDistributionMode.ID,
         g_paramDistributionMode.name,
         juce::StringArray {g_paramDistributionMode.mode1, g_paramDistributionMode.mode2}, g_paramDistributionMode.defaultValue
@@ -209,6 +213,8 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 
     m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
+    DryWetSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        *m_processor.m_parameterVTS, g_paramDryWet.ID, m_DryWetSlider);
     addAndMakeVisible(m_DryWetSlider);
 
     // example options, standard should be uniform distribution
@@ -217,7 +223,8 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     addAndMakeVisible(m_ComboBoxDistribution);
     m_ComboBoxDistribution.setVisible(false);
 
-    addAndMakeVisible(m_PhasePlot);
+    addAndMakeVisible(m_PrePhasePlot);
+    addAndMakeVisible(m_PostPhasePlot);
 
     m_paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
 }
@@ -259,7 +266,8 @@ void OutOfPhaseGUI::resized()
     int displayHeight = height / 2;
     // int plotHeight = displayHeight / 3;
     int margin = 10 * scaleFactor;
-    m_PhasePlot.setBounds(r.removeFromTop(displayHeight).reduced(margin));
+    m_PrePhasePlot.setBounds(r.removeFromTop(displayHeight*0.75).reduced(margin*0.7).withTrimmedLeft(scaleFactor*10).withTrimmedRight(scaleFactor*10));
+    m_PostPhasePlot.setBounds(r.removeFromTop(displayHeight * 0.23).withTrimmedLeft(scaleFactor*80).withTrimmedRight(scaleFactor*80));
     
     
     // Combox in the middle
@@ -296,6 +304,6 @@ void OutOfPhaseGUI::timerCallback()
 {
     std::vector<float> PrePhaseDataPlot = m_processor.m_algo.getPrePhaseData(); // Retrieve data from processor
     std::vector<float> PostPhaseDataPlot = m_processor.m_algo.getPostPhaseData(); // Retrieve data from processor
-    m_PhasePlot.setPrePhaseData(PrePhaseDataPlot); // Update plot
-    m_PhasePlot.setPostPhaseData(PostPhaseDataPlot); // Update plot
+    m_PrePhasePlot.setPrePhaseData(PrePhaseDataPlot); // Update plot
+    m_PostPhasePlot.setPostPhaseData(PostPhaseDataPlot); // Update plot
 }
