@@ -30,7 +30,7 @@ void PhasePlot::paint(juce::Graphics& g)
     g.setOpacity(1.0f);
 
     g.setColour(juce::Colours::grey);
-    g.drawRect(getLocalBounds(), 5);
+    g.drawRect(getLocalBounds(), 3);
 
     if (mouseOver)
     {
@@ -43,7 +43,7 @@ void PhasePlot::paint(juce::Graphics& g)
     juce::Rectangle<int> clipBounds = getLocalBounds().reduced(5);
     g.reduceClipRegion(clipBounds);
 
-    g.setColour(juce::Colours::blue);
+    g.setColour(juce::Colours::white);
     g.setOpacity(0.5f);
 
     if (!PrePhaseData.empty())
@@ -77,7 +77,7 @@ void PhasePlot::paint(juce::Graphics& g)
         g.strokePath(PrePhasePath, juce::PathStrokeType(2.0f));
     }
 
-    g.setColour(juce::Colours::orange);
+    g.setColour(juce::Colours::white);
     g.setOpacity(0.5f);
 
     if (!PostPhaseData.empty())
@@ -113,6 +113,6 @@ void PhasePlot::paint(juce::Graphics& g)
         g.setColour(juce::Colours::white);
         g.setFont(15.0f);
         g.drawText(juce::CharPointer_UTF8("0"), 5, getHeight() / 2 - 10, 20, 20, juce::Justification::centred);
-        g.drawText(juce::CharPointer_UTF8("fs"), getWidth() - 25, getHeight() / 2 - 10, 20, 20, juce::Justification::centred);
+        g.drawText(juce::CharPointer_UTF8("fs/2"), getWidth() - 25, getHeight() / 2 - 10, 20, 20, juce::Justification::centred);
     }
 }

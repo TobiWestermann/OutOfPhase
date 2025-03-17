@@ -167,7 +167,8 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     m_ComboBoxDistribution.addItem("Gaussian", 2);
     addAndMakeVisible(m_ComboBoxDistribution);
 
-    addAndMakeVisible(m_PhasePlot);
+    addAndMakeVisible(m_PrePhasePlot);
+    addAndMakeVisible(m_PostPhasePlot);
 
     m_paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
 }
@@ -209,7 +210,8 @@ void OutOfPhaseGUI::resized()
     int displayHeight = height / 2;
     // int plotHeight = displayHeight / 3;
     int margin = 10 * scaleFactor;
-    m_PhasePlot.setBounds(r.removeFromTop(displayHeight).reduced(margin));
+    m_PrePhasePlot.setBounds(r.removeFromTop(displayHeight*0.75).reduced(margin*0.7).withTrimmedLeft(scaleFactor*10).withTrimmedRight(scaleFactor*10));
+    m_PostPhasePlot.setBounds(r.removeFromTop(displayHeight * 0.23).withTrimmedLeft(scaleFactor*80).withTrimmedRight(scaleFactor*80));
     
     
     // Combox in the middle
@@ -246,6 +248,6 @@ void OutOfPhaseGUI::timerCallback()
 {
     std::vector<float> PrePhaseDataPlot = m_processor.m_algo.getPrePhaseData(); // Retrieve data from processor
     std::vector<float> PostPhaseDataPlot = m_processor.m_algo.getPostPhaseData(); // Retrieve data from processor
-    m_PhasePlot.setPrePhaseData(PrePhaseDataPlot); // Update plot
-    m_PhasePlot.setPostPhaseData(PostPhaseDataPlot); // Update plot
+    m_PrePhasePlot.setPrePhaseData(PrePhaseDataPlot); // Update plot
+    m_PostPhasePlot.setPostPhaseData(PostPhaseDataPlot); // Update plot
 }

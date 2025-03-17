@@ -105,7 +105,8 @@ private:
 	ComboBoxWithArrows m_ComboBoxWithArrows;
 
 	juce::ComboBox m_ComboBoxDistribution;
-	PhasePlot m_PhasePlot;
+	PhasePlot m_PrePhasePlot;
+	PhasePlot m_PostPhasePlot;
 	//std::vector<float> phaseDataPlot;
 	juce::TextButton m_frostButton;
 
