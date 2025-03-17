@@ -27,6 +27,15 @@ const struct
 
 const struct
 {
+	const std::string ID = "DistributionModeID";
+	const std::string name = "Distribution Mode";
+	const std::string mode1 = "Uniform";
+	const std::string mode2 = "Gaussian";
+	const int defaultValue = 1;
+} g_paramDistributionMode;
+
+const struct
+{
 	const std::string ID = "BlocksizeID";
 	const std::string name = "Blocksize";
 	const int defaultValue = 1024;

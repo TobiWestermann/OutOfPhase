@@ -51,6 +51,11 @@ void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudio
         g_paramDryWet.name, g_paramDryWet.minValue, g_paramDryWet.maxValue, g_paramDryWet.defaultValue
     ));
 
+    paramVector.push_back(std::make_unique<juce::AudioParameterChoice>(g_paramDistributionMode.ID,
+        g_paramDistributionMode.name,
+        juce::StringArray {g_paramDistributionMode.mode1, g_paramDistributionMode.mode2}, g_paramDistributionMode.defaultValue
+    ));
+
 }
 
 void OutOfPhaseAudio::prepareParameter(std::unique_ptr<juce::AudioProcessorValueTreeState> &vts)
@@ -98,7 +103,39 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             }
             else if (operatingMode == 2) // random
             {
-                PostPhase = (juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f) * juce::MathConstants<float>::pi;
+                float DistributionModeID = *m_processor->m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID);
+                if (DistributionModeID == 0) // Uniform
+                {
+                    PostPhase = (juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f) * juce::MathConstants<float>::pi;
+                }
+                else if (DistributionModeID == 1) // Gaussian
+                {
+                    static float nextGaussian = 0.0f;
+                    static bool hasNextGaussian = false;
+                    
+                    if (hasNextGaussian)
+                    {
+                        PostPhase = nextGaussian * juce::MathConstants<float>::pi; // Scale to full -π to π range
+                        hasNextGaussian = false;
+                    }
+                    else
+                    {
+                        float u1, u2, s;
+                        do
+                        {
+                            u1 = juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f;
+                            u2 = juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f;
+                            s = u1 * u1 + u2 * u2;
+                        } while (s >= 1.0f || s == 0.0f);
+                        
+                        s = sqrtf(-2.0f * logf(s) / s);
+                        nextGaussian = u2 * s;
+                        PostPhase = u1 * s * juce::MathConstants<float>::pi; // Scale to full -π to π range
+                        hasNextGaussian = true;
+                    }
+
+                    PostPhase = juce::jlimit(-juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, PostPhase);
+                }
             }
             else if (operatingMode == 3) // flip
             {
@@ -135,12 +172,20 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
         m_apvts.getParameterAsValue(g_paramMode.ID) = newId;
         if (newId == 1)
         {
+            m_ComboBoxDistribution.setVisible(false);
             m_frostButton.setVisible(true);
+            resized();
+        }
+        else if (newId == 2)
+        {
+            m_frostButton.setVisible(false);
+            m_ComboBoxDistribution.setVisible(true);
             resized();
         }
         else 
         {
             m_frostButton.setVisible(false);
+            m_ComboBoxDistribution.setVisible(false);
         }
     });
 
@@ -172,6 +217,8 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     m_ComboBoxDistribution.addItem("Uniform", 1);
     m_ComboBoxDistribution.addItem("Gaussian", 2);
     addAndMakeVisible(m_ComboBoxDistribution);
+    m_ComboBoxDistribution.setVisible(false);
+    m_ComboBoxDistribution.setSelectedId(1);
 
     addAndMakeVisible(m_PrePhasePlot);
     addAndMakeVisible(m_PostPhasePlot);
@@ -245,7 +292,7 @@ void OutOfPhaseGUI::resized()
     if (m_frostButton.isVisible())
     {
         float frostX = comboxX;
-        float frostY = comboxY + 2 * distance;
+        float frostY = comboxY + distance;
         m_frostButton.setBounds(static_cast<int>(frostX), static_cast<int>(frostY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
     }
 }
