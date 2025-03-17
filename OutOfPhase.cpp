@@ -222,6 +222,7 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     m_ComboBoxDistribution.addItem("Gaussian", 2);
     addAndMakeVisible(m_ComboBoxDistribution);
     m_ComboBoxDistribution.setVisible(false);
+    m_ComboBoxDistribution.setSelectedId(1);
 
     addAndMakeVisible(m_PrePhasePlot);
     addAndMakeVisible(m_PostPhasePlot);
