@@ -169,14 +169,14 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 
     addAndMakeVisible(m_PhasePlot);
 
-    m_image = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
+    m_paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
 }
 
 void OutOfPhaseGUI::paint(juce::Graphics &g)
 {
     g.fillAll (juce::Colours::bisque);
 
-    g.drawImageWithin(m_image, getX(), 0, getWidth(), getHeight(),
+    g.drawImageWithin(m_paintImage, getX(), 0, getWidth(), getHeight(),
                        juce::RectanglePlacement::fillDestination);
     
 

@@ -70,6 +70,8 @@ target_sources(${TARGET_NAME}
         tools/PresetHandler.cpp
         tools/SynchronBlockProcessor.cpp
         FFT.cpp
+        PhasePlot.cpp
+        resources/images/glass_texture2_bin.cpp
         )
 
 
