@@ -34,6 +34,15 @@ const struct
 	const int maxValue = 8192;
 }g_paramBlocksize;
 
+const struct
+{
+	const std::string ID = "DryWetID";
+	const std::string name = "DryWet";
+	const float defaultValue = 1;
+	const float minValue = 0;
+	const float maxValue = 1;
+}g_paramDryWet;
+
 class OutOfPhaseAudio : public WOLA
 {
 public:
@@ -102,6 +111,7 @@ private:
 	DiscreteSlider m_BlocksizeSlider;
 	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> BlocksizeSliderAttachment;
 	juce::Slider m_DryWetSlider;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> DryWetSliderAttachment;
 	ComboBoxWithArrows m_ComboBoxWithArrows;
 
 	juce::ComboBox m_ComboBoxDistribution;

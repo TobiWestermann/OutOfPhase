@@ -47,6 +47,10 @@ void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudio
         g_paramBlocksize.name, g_paramBlocksize.minValue, g_paramBlocksize.maxValue, g_paramBlocksize.defaultValue
     ));
 
+    paramVector.push_back(std::make_unique<juce::AudioParameterFloat>(g_paramDryWet.ID,
+        g_paramDryWet.name, g_paramDryWet.minValue, g_paramDryWet.maxValue, g_paramDryWet.defaultValue
+    ));
+
 }
 
 void OutOfPhaseAudio::prepareParameter(std::unique_ptr<juce::AudioProcessorValueTreeState> &vts)
@@ -160,6 +164,8 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 
     m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
+    DryWetSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        *m_processor.m_parameterVTS, g_paramDryWet.ID, m_DryWetSlider);
     addAndMakeVisible(m_DryWetSlider);
 
     // example options, standard should be uniform distribution
