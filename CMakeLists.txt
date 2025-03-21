@@ -73,6 +73,7 @@ target_sources(${TARGET_NAME}
         PhasePlot.cpp
         resources/images/glass_texture2_bin.cpp
         resources/images/snowflake_bin.cpp
+        resources/images/dice_bin.cpp
         )
 
 

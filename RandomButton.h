@@ -1,12 +1,12 @@
 #pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
-#include "resources/images/snowflake_bin.h"
+#include "resources/images/dice_bin.h"
 
-class FrostButton : public juce::Button
+class RandomButton : public juce::Button
 {
 public:
-    FrostButton() : juce::Button("FrostButton")
+    RandomButton() : juce::Button("RandomButton")
     {
         setClickingTogglesState(true);
     }
@@ -16,24 +16,31 @@ public:
         juce::ignoreUnused(isButtonDown);
         
         bool isActive = getToggleState();
-        juce::Colour bgColour = isActive ? juce::Colours::lightgrey.brighter(2) : juce::Colours::white;
-        
         auto bounds = getLocalBounds().toFloat();
 
-        g.setColour(bgColour);
+        juce::ColourGradient gradient(
+            isActive ? juce::Colours::red : juce::Colours::blue,
+            bounds.getTopLeft(),
+            isActive ? juce::Colours::yellow : juce::Colours::green,
+            bounds.getBottomRight(),
+            false
+        );
+        gradient.addColour(0.5, isActive ? juce::Colours::purple : juce::Colours::orange);
+
+        g.setGradientFill(gradient);
         g.fillRoundedRectangle(bounds, 10.0f);
         
-        auto imageBounds = m_snowflakeImage.getBounds().toFloat();
+        auto imageBounds = m_diceImage.getBounds().toFloat();
         imageBounds = imageBounds.withSizeKeepingCentre(
             juce::jmin(bounds.getWidth() * 0.7f, bounds.getHeight() * 0.7f),
             juce::jmin(bounds.getWidth() * 0.7f, bounds.getHeight() * 0.7f)
         );
         imageBounds = imageBounds.withCentre(bounds.getCentre());
-        g.drawImage(m_snowflakeImage, imageBounds);
+        g.drawImage(m_diceImage, imageBounds);
 
         g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.f));
         g.fillRoundedRectangle(bounds, 10.0f);
     }
 private:
-    juce::Image m_snowflakeImage = juce::ImageFileFormat::loadFrom(snowflake_bin, snowflake_bin_len);
+    juce::Image m_diceImage = juce::ImageFileFormat::loadFrom(dice_bin, dice_bin_len);
 };

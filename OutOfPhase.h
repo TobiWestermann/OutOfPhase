@@ -12,6 +12,7 @@
 #include "DiscreteSlider.h"
 
 #include "FrostButton.h"
+#include "RandomButton.h"
 
 class OutOfPhaseAudioProcessor;
 
@@ -133,7 +134,7 @@ private:
 
 	juce::TextButton m_ZeroModeTextButton;
 	FrostButton m_FrostModeTextButton;
-	juce::TextButton m_RandomModeTextButton;
+	RandomButton m_RandomModeTextButton;
 	juce::TextButton m_FlipModeTextButton;
 
 	juce::Image m_paintImage;

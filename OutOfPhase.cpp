@@ -277,6 +277,15 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
     g.drawFittedText (text2display, getLocalBounds(), juce::Justification::bottomLeft, 1);
 
+    auto shadowBounds = m_FrostModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
+    juce::DropShadow shadow(juce::Colours::black.withAlpha(0.3f), 5, { 0, 2 });
+    juce::Path roundedRect;
+    roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Add rounded rectangle with corner radius 5.0f
+    
+    shadowBounds = m_RandomModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
+    roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Add rounded rectangle with corner radius 5.0f
+    shadow.drawForPath(g, roundedRect);
+
 }
 
 void OutOfPhaseGUI::resized()
@@ -334,12 +343,12 @@ void OutOfPhaseGUI::resized()
     }
 
     // radio buttons
-    int buttonWidth = static_cast<int>(knobWidth);
-    int buttonHeight = static_cast<int>(knobHeight / 2);
-    int buttonSpacing = static_cast<int>(distance / 4);
+    int buttonWidth = static_cast<int>(knobWidth * 0.9);
+    int buttonHeight = static_cast<int>(knobHeight * 0.4);
+    int buttonSpacing = static_cast<int>(distance * 0.6);
 
-    float buttonsStartX = getWidth()/2 - buttonWidth - buttonSpacing;
-    float buttonsStartY = getHeight()/2 + distance;
+    float buttonsStartX = getWidth()/2 - buttonWidth - buttonSpacing/2;
+    float buttonsStartY = getHeight()/2 + distance/2;
 
     m_ZeroModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
     m_FrostModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
