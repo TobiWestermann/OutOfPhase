@@ -40,6 +40,13 @@ public:
 
         g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.f));
         g.fillRoundedRectangle(bounds, 10.0f);
+
+        if (isActive)
+        {
+            auto outlineBounds = bounds.reduced(0.5f);
+            g.setColour(juce::Colours::black);
+            g.drawRoundedRectangle(outlineBounds, 10.0f, 1.5f);
+        }
     }
 private:
     juce::Image m_diceImage = juce::ImageFileFormat::loadFrom(dice_bin, dice_bin_len);

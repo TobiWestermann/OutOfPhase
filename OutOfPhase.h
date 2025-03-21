@@ -13,6 +13,7 @@
 
 #include "FrostButton.h"
 #include "RandomButton.h"
+#include "ZeroButton.h"
 
 class OutOfPhaseAudioProcessor;
 
@@ -132,7 +133,7 @@ private:
 	//std::vector<float> phaseDataPlot;
 	juce::TextButton m_frostButton;
 
-	juce::TextButton m_ZeroModeTextButton;
+	ZeroButton m_ZeroModeTextButton;
 	FrostButton m_FrostModeTextButton;
 	RandomButton m_RandomModeTextButton;
 	juce::TextButton m_FlipModeTextButton;
