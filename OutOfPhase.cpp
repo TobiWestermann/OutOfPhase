@@ -197,7 +197,7 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
         m_processor.m_algo.updateFrostPhaseData();
     };
 
-    m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
     addAndMakeVisible(m_BlocksizeSlider);
     BlocksizeSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
@@ -207,7 +207,7 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
         m_processor.m_algo.prepareToPlay(44100, 512, 2);
     };
 
-    m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
     DryWetSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         *m_processor.m_parameterVTS, g_paramDryWet.ID, m_DryWetSlider);
@@ -301,73 +301,63 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
 
 }
 
-void OutOfPhaseGUI::resized()
-{
-	auto r = getLocalBounds();
-    
-    int height = getHeight();
-    // int width = getWidth();
-
+void OutOfPhaseGUI::resized() {
+    auto r = getLocalBounds();
     float scaleFactor = m_processor.getScaleFactor();
 
-    // general button size
-    float knobWidth = 100 * scaleFactor;
-    float knobHeight = 100 * scaleFactor;
-    float distance = 40 * scaleFactor;
+    // Dimensions
+    float knobWidth = 100 * scaleFactor, knobHeight = 100 * scaleFactor;
+    float distance = 40 * scaleFactor, margin = 10 * scaleFactor;
+    float comboxWidth = 150 * scaleFactor, comboxHeight = 20 * scaleFactor;
+    int displayHeight = getHeight() / 2;
 
-    float comboxWidth = 150 * scaleFactor;
-    float comboxHeight = 20 * scaleFactor;
+    r.removeFromTop(displayHeight * 0.02); // Add more space between the two plots
+    // Plots
+    m_PrePhasePlot.setBounds(r.removeFromTop(displayHeight * 0.7)
+                                 .reduced(margin * 0.7)
+                                 .withTrimmedLeft(10 * scaleFactor)
+                                 .withTrimmedRight(10 * scaleFactor));
 
-    // Display for phase in upper half of the GUI
-    int displayHeight = height / 2;
-    // int plotHeight = displayHeight / 3;
-    int margin = 10 * scaleFactor;
-    m_PrePhasePlot.setBounds(r.removeFromTop(displayHeight*0.75).reduced(margin*0.7).withTrimmedLeft(scaleFactor*10).withTrimmedRight(scaleFactor*10));
-    m_PostPhasePlot.setBounds(r.removeFromTop(displayHeight * 0.23).withTrimmedLeft(scaleFactor*80).withTrimmedRight(scaleFactor*80));
-    
-    
-    // Combox in the middle
-    float comboxY = r.getY() + r.getHeight() / 2 - comboxHeight / 2;
-    float comboxX = r.getX() + r.getWidth() / 2 - comboxWidth / 2;
-    m_ComboBoxWithArrows.setBounds(static_cast<int>(comboxX), static_cast<int>(comboxY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
+    r.removeFromTop(displayHeight * 0.05); // Add more space between the two plots
 
-    // button blocksize left from combobox
-    float blocksizeX = comboxX - knobWidth - distance;
-    float blocksizeY = comboxY - comboxHeight;
-    m_BlocksizeSlider.setBounds(static_cast<int>(blocksizeX), static_cast<int>(blocksizeY), static_cast<int>(knobWidth), static_cast<int>(knobHeight));
+    m_PostPhasePlot.setBounds(r.removeFromTop(displayHeight * 0.23)
+                                  .withTrimmedLeft(80 * scaleFactor)
+                                  .withTrimmedRight(80 * scaleFactor));
 
-    // button drywet right from combobox
-    float drywetX = comboxX + comboxWidth + distance;
-    float drywetY = comboxY - comboxHeight;
-    m_DryWetSlider.setBounds(static_cast<int>(drywetX), static_cast<int>(drywetY), static_cast<int>(knobWidth), static_cast<int>(knobHeight));
+    // ComboBox Centered
+    m_ComboBoxWithArrows.setBounds(
+        (getWidth() - comboxWidth) / 2, 
+        (getHeight() - comboxHeight) / 2, 
+        comboxWidth, 
+        comboxHeight
+    );
 
-    if (m_ComboBoxDistribution.isVisible())
-    {
-        float distributionX = comboxX;
-        float distributionY = comboxY + distance;
-        m_ComboBoxDistribution.setBounds(static_cast<int>(distributionX), static_cast<int>(distributionY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
+    // Sliders
+    float sliderHeight = knobHeight * 2.5, sliderWidth = knobWidth * 0.4;
+    m_BlocksizeSlider.setBounds(distance * 0.6, distance * 4.2, sliderWidth, sliderHeight);
+    m_DryWetSlider.setBounds(getWidth() - sliderWidth - distance * 0.6, distance * 4.2, sliderWidth, sliderHeight);
+
+    // Optional ComboBoxes and Buttons
+    if (m_ComboBoxDistribution.isVisible()) {
+        m_ComboBoxDistribution.setBounds((getWidth() - comboxWidth) / 2, (getHeight() - comboxHeight) / 2 + distance, comboxWidth, comboxHeight);
+    }
+    if (m_frostButton.isVisible()) {
+        m_frostButton.setBounds((getWidth() - comboxWidth) / 2, (getHeight() - comboxHeight) / 2 + distance, comboxWidth, comboxHeight);
     }
 
-    if (m_frostButton.isVisible())
-    {
-        float frostX = comboxX;
-        float frostY = comboxY + distance;
-        m_frostButton.setBounds(static_cast<int>(frostX), static_cast<int>(frostY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
-    }
-
-    // radio buttons
+    // Radio Buttons
     int buttonWidth = static_cast<int>(knobWidth * 0.9);
     int buttonHeight = static_cast<int>(knobHeight * 0.4);
     int buttonSpacing = static_cast<int>(distance * 0.6);
 
-    float buttonsStartX = getWidth()/2 - buttonWidth - buttonSpacing/2;
-    float buttonsStartY = getHeight()/2 + distance/2;
+    float buttonsStartX = getWidth() / 2 - buttonWidth - buttonSpacing / 2;
+    float buttonsStartY = getHeight() / 2 + distance / 2;
 
-    m_ZeroModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
-    m_FrostModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
-    m_RandomModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
-    m_FlipModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
-}
+    m_ZeroModeTextButton.setBounds(buttonsStartX, buttonsStartY, buttonWidth, buttonHeight);
+    m_FrostModeTextButton.setBounds(buttonsStartX + buttonWidth + buttonSpacing, buttonsStartY, buttonWidth, buttonHeight);
+    m_RandomModeTextButton.setBounds(buttonsStartX, buttonsStartY + buttonHeight + buttonSpacing, buttonWidth, buttonHeight);
+    m_FlipModeTextButton.setBounds(buttonsStartX + buttonWidth + buttonSpacing, buttonsStartY + buttonHeight + buttonSpacing, buttonWidth, buttonHeight);
+} 
 
 void OutOfPhaseGUI::timerCallback()
 {
