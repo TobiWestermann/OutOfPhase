@@ -284,6 +284,19 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     
     shadowBounds = m_RandomModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
     roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Add rounded rectangle with corner radius 5.0f
+    
+    shadowBounds = m_ZeroModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
+    roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Add rounded rectangle with corner radius 5.0f
+    
+    shadowBounds = m_FlipModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
+    roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Add rounded rectangle with corner radius 5.0f
+    
+    shadowBounds = m_PrePhasePlot.getBounds().toFloat().expanded(2.0f); // Expand for shadow
+    roundedRect.addRectangle(shadowBounds); // Add rounded rectangle with corner radius 5.0f
+
+    shadowBounds = m_PostPhasePlot.getBounds().toFloat().expanded(2.0f); // Expand for shadow
+    roundedRect.addRectangle(shadowBounds); // Add rounded rectangle with corner radius 5.0f
+
     shadow.drawForPath(g, roundedRect);
 
 }

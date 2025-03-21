@@ -44,7 +44,7 @@ public:
         if (isActive)
         {
             auto outlineBounds = bounds.reduced(0.5f);
-            g.setColour(juce::Colours::black);
+            g.setColour(juce::Colours::grey);
             g.drawRoundedRectangle(outlineBounds, 10.0f, 1.5f);
         }
     }

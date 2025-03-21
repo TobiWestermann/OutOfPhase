@@ -14,6 +14,7 @@
 #include "FrostButton.h"
 #include "RandomButton.h"
 #include "ZeroButton.h"
+#include "FlipButton.h"
 
 class OutOfPhaseAudioProcessor;
 
@@ -136,7 +137,7 @@ private:
 	ZeroButton m_ZeroModeTextButton;
 	FrostButton m_FrostModeTextButton;
 	RandomButton m_RandomModeTextButton;
-	juce::TextButton m_FlipModeTextButton;
+	FlipButton m_FlipModeTextButton;
 
 	juce::Image m_paintImage;
 };

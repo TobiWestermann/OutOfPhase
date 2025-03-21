@@ -30,7 +30,7 @@ public:
         g.fillRoundedRectangle(bounds, 10.0f);
 
         g.setFont(juce::Font(20.0f));
-        g.setColour(juce::Colours::black);
+        g.setColour(juce::Colours::grey);
         g.drawText("0", bounds, juce::Justification::centred);
 
         g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.f));
@@ -39,7 +39,7 @@ public:
         if (isActive)
         {
             auto outlineBounds = bounds.reduced(0.5f);
-            g.setColour(juce::Colours::black);
+            g.setColour(juce::Colours::grey);
             g.drawRoundedRectangle(outlineBounds, 10.0f, 1.5f);
         }
     }
