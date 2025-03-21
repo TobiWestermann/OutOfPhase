@@ -166,7 +166,7 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 {   
     startTimerHz(30); // 30 Hz update rate
 
-    addAndMakeVisible(m_ComboBoxWithArrows);
+    //addAndMakeVisible(m_ComboBoxWithArrows);
     m_ComboBoxWithArrows.setOnSelectionChanged([this](int newId)
     {
         m_apvts.getParameterAsValue(g_paramMode.ID) = newId;
@@ -222,6 +222,43 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 
     addAndMakeVisible(m_PrePhasePlot);
     addAndMakeVisible(m_PostPhasePlot);
+
+    m_ZeroModeTextButton.setButtonText("Zero");
+    addAndMakeVisible(m_ZeroModeTextButton);
+    m_ZeroModeTextButton.onClick = [this]
+    {
+        m_processor.m_parameterVTS->getParameterAsValue(g_paramMode.ID) = 0;
+    };
+    m_ZeroModeTextButton.setRadioGroupId(1);
+    m_ZeroModeTextButton.setClickingTogglesState(true);
+
+    m_FrostModeTextButton.setButtonText("Frost");
+    addAndMakeVisible(m_FrostModeTextButton);
+    m_FrostModeTextButton.onClick = [this]
+    {
+        m_processor.m_parameterVTS->getParameterAsValue(g_paramMode.ID) = 1;
+    };
+    m_FrostModeTextButton.setRadioGroupId(1);
+
+    m_RandomModeTextButton.setButtonText("Random");
+    addAndMakeVisible(m_RandomModeTextButton);
+    m_RandomModeTextButton.onClick = [this]
+    {
+        m_processor.m_parameterVTS->getParameterAsValue(g_paramMode.ID) = 2;
+    };
+    m_RandomModeTextButton.setRadioGroupId(1);
+    m_RandomModeTextButton.setClickingTogglesState(true);
+
+    m_FlipModeTextButton.setButtonText("Flip");
+    addAndMakeVisible(m_FlipModeTextButton);
+    m_FlipModeTextButton.onClick = [this]
+    {
+        m_processor.m_parameterVTS->getParameterAsValue(g_paramMode.ID) = 3;
+    };
+    m_FlipModeTextButton.setRadioGroupId(1);
+    m_FlipModeTextButton.setClickingTogglesState(true);
+
+
 
     m_paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
 }
@@ -295,6 +332,19 @@ void OutOfPhaseGUI::resized()
         float frostY = comboxY + distance;
         m_frostButton.setBounds(static_cast<int>(frostX), static_cast<int>(frostY), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
     }
+
+    // radio buttons
+    int buttonWidth = static_cast<int>(knobWidth);
+    int buttonHeight = static_cast<int>(knobHeight / 2);
+    int buttonSpacing = static_cast<int>(distance / 4);
+
+    float buttonsStartX = getWidth()/2 - buttonWidth - buttonSpacing;
+    float buttonsStartY = getHeight()/2 + distance;
+
+    m_ZeroModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
+    m_FrostModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
+    m_RandomModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
+    m_FlipModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
 }
 
 void OutOfPhaseGUI::timerCallback()

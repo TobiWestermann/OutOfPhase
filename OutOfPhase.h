@@ -11,6 +11,8 @@
 #include "PhasePlot.h"
 #include "DiscreteSlider.h"
 
+#include "FrostButton.h"
+
 class OutOfPhaseAudioProcessor;
 
 // This is how we define our parameter as globals to use it in the audio processor as well as in the editor
@@ -128,6 +130,11 @@ private:
 	PhasePlot m_PostPhasePlot;
 	//std::vector<float> phaseDataPlot;
 	juce::TextButton m_frostButton;
+
+	juce::TextButton m_ZeroModeTextButton;
+	FrostButton m_FrostModeTextButton;
+	juce::TextButton m_RandomModeTextButton;
+	juce::TextButton m_FlipModeTextButton;
 
 	juce::Image m_paintImage;
 };
