@@ -24,9 +24,9 @@ void PhasePlot::paint(juce::Graphics& g)
 
     g.fillAll(juce::Colours::whitesmoke.darker(0.2f));
 
-    g.setOpacity(0.6f);
-    g.drawImageWithin(m_glassImage, getX(), 0, getWidth(), getHeight(),
-                      juce::RectanglePlacement::fillDestination);
+    // g.setOpacity(0.6f);
+    // g.drawImageWithin(m_glassImage, getX(), 0, getWidth(), getHeight(),
+    //                   juce::RectanglePlacement::fillDestination);
     g.setOpacity(1.0f);
 
     g.setColour(juce::Colours::grey);

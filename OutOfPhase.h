@@ -140,4 +140,5 @@ private:
 	FlipButton m_FlipModeTextButton;
 
 	juce::Image m_paintImage;
+	juce::Image m_paperImage;
 };

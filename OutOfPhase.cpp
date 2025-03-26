@@ -4,6 +4,7 @@
 #include "PluginProcessor.h"
 
 #include "resources/images/paint_bin.h"
+#include "resources/images/paper_bin.h"
 
 OutOfPhaseAudio::OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor)
 :WOLA(), m_processor(processor)
@@ -261,14 +262,23 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 
 
     m_paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
+    m_paperImage = juce::ImageFileFormat::loadFrom(paper_bin, paper_bin_len);
 }
 
 void OutOfPhaseGUI::paint(juce::Graphics &g)
 {
     g.fillAll (juce::Colours::bisque);
 
-    g.drawImageWithin(m_paintImage, getX(), 0, getWidth(), getHeight(),
+    g.drawImageWithin(m_paperImage, 0, 0, getWidth(), getHeight(),
                        juce::RectanglePlacement::fillDestination);
+
+    g.drawImageWithin(m_paintImage, -getWidth()/4, getHeight()*0.84, getWidth(), getHeight()/4,
+                       juce::RectanglePlacement::fillDestination);
+    
+
+    
+    g.drawImageWithin(m_paintImage, getWidth() - getWidth() * 0.7, -getHeight()/3, getWidth(), getHeight(),
+    juce::RectanglePlacement::fillDestination);
     
 
     g.setColour (juce::Colours::grey);
@@ -280,16 +290,16 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     auto shadowBounds = m_FrostModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
     juce::DropShadow shadow(juce::Colours::black.withAlpha(0.3f), 5, { 0, 2 });
     juce::Path roundedRect;
-    roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Add rounded rectangle with corner radius 5.0f
+    roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 10.0f
     
     shadowBounds = m_RandomModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
-    roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Add rounded rectangle with corner radius 5.0f
+    roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 10.0f
     
     shadowBounds = m_ZeroModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
-    roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Add rounded rectangle with corner radius 5.0f
+    roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 10.0f
     
     shadowBounds = m_FlipModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
-    roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Add rounded rectangle with corner radius 5.0f
+    roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 5.0f
     
     shadowBounds = m_PrePhasePlot.getBounds().toFloat().expanded(2.0f); // Expand for shadow
     roundedRect.addRectangle(shadowBounds); // Add rounded rectangle with corner radius 5.0f
@@ -353,11 +363,11 @@ void OutOfPhaseGUI::resized() {
     float buttonsStartX = getWidth() / 2 - buttonWidth - buttonSpacing / 2;
     float buttonsStartY = getHeight() / 2 + distance / 2;
 
-    m_ZeroModeTextButton.setBounds(buttonsStartX, buttonsStartY, buttonWidth, buttonHeight);
-    m_FrostModeTextButton.setBounds(buttonsStartX + buttonWidth + buttonSpacing, buttonsStartY, buttonWidth, buttonHeight);
-    m_RandomModeTextButton.setBounds(buttonsStartX, buttonsStartY + buttonHeight + buttonSpacing, buttonWidth, buttonHeight);
+    m_RandomModeTextButton.setBounds(buttonsStartX, buttonsStartY, buttonWidth, buttonHeight);
+    m_FrostModeTextButton.setBounds(buttonsStartX, buttonsStartY + buttonHeight + buttonSpacing, buttonWidth, buttonHeight);
+    m_ZeroModeTextButton.setBounds(buttonsStartX + buttonWidth + buttonSpacing, buttonsStartY, buttonWidth, buttonHeight);
     m_FlipModeTextButton.setBounds(buttonsStartX + buttonWidth + buttonSpacing, buttonsStartY + buttonHeight + buttonSpacing, buttonWidth, buttonHeight);
-} 
+}
 
 void OutOfPhaseGUI::timerCallback()
 {
