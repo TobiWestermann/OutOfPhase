@@ -166,7 +166,8 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
                         
                         s = sqrtf(-2.0f * logf(s) / s);
                         nextGaussian = u2 * s;
-                        PostPhase = u1 * s * juce::MathConstants<float>::pi; // Scale to full -π to π range
+                        float concentration = 0.5f; // adjust to control concentration of the Gaussian distribution
+                        PostPhase = u1 * s * juce::MathConstants<float>::pi * concentration; // Scale to full -π to π range
                         hasNextGaussian = true;
                     }
 
@@ -215,37 +216,6 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     
     startTimerHz(30); // 30 Hz update rate
 
-    //addAndMakeVisible(m_ComboBoxWithArrows);
-    m_ComboBoxWithArrows.setOnSelectionChanged([this](int newId)
-    {
-        m_apvts.getParameterAsValue(g_paramMode.ID) = newId;
-        if (newId == 1)
-        {
-            m_ComboBoxDistribution.setVisible(false);
-            m_frostButton.setVisible(true);
-            resized();
-        }
-        else if (newId == 2)
-        {
-            m_frostButton.setVisible(false);
-            m_ComboBoxDistribution.setVisible(true);
-            resized();
-        }
-        else 
-        {
-            m_frostButton.setVisible(false);
-            m_ComboBoxDistribution.setVisible(false);
-        }
-    });
-
-    addAndMakeVisible(m_frostButton);
-    m_frostButton.setButtonText("Frost");
-    m_frostButton.setVisible(false);
-    m_frostButton.onClick = [this]
-    {
-        m_processor.m_algo.updateFrostPhaseData();
-    };
-
     m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
     m_BlocksizeSlider.setDoubleClickReturnValue(true, 512);
@@ -280,13 +250,6 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
         *m_processor.m_parameterVTS, g_paramDryWet.ID, m_DryWetSlider);
     addAndMakeVisible(m_DryWetSlider);
 
-    // example options, standard should be uniform distribution
-    m_ComboBoxDistribution.addItem("Uniform", 1);
-    m_ComboBoxDistribution.addItem("Gaussian", 2);
-    addAndMakeVisible(m_ComboBoxDistribution);
-    m_ComboBoxDistribution.setVisible(false);
-    m_ComboBoxDistribution.setSelectedId(1);
-
     addAndMakeVisible(m_PrePhasePlot);
     addAndMakeVisible(m_PostPhasePlot);
 
@@ -298,7 +261,7 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     };
     m_ZeroModeTextButton.setRadioGroupId(1);
     m_ZeroModeTextButton.setClickingTogglesState(true);
-
+    
     m_FrostModeTextButton.setButtonText("Frost");
     addAndMakeVisible(m_FrostModeTextButton);
     m_FrostModeTextButton.onClick = [this]
@@ -306,17 +269,17 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
         m_processor.m_parameterVTS->getParameterAsValue(g_paramMode.ID) = 1;
     };
     m_FrostModeTextButton.setRadioGroupId(1);
-
+    m_FrostModeTextButton.setClickingTogglesState(true);
+    
     m_RandomModeTextButton.setButtonText("Random");
     addAndMakeVisible(m_RandomModeTextButton);
-    
     m_RandomModeTextButton.onClick = [this]
     {
         m_processor.m_parameterVTS->getParameterAsValue(g_paramMode.ID) = 2;
     };
     m_RandomModeTextButton.setRadioGroupId(1);
     m_RandomModeTextButton.setClickingTogglesState(true);
-
+    
     m_FlipModeTextButton.setButtonText("Flip");
     addAndMakeVisible(m_FlipModeTextButton);
     m_FlipModeTextButton.onClick = [this]
@@ -326,8 +289,26 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     m_FlipModeTextButton.setRadioGroupId(1);
     m_FlipModeTextButton.setClickingTogglesState(true);
 
+    addAndMakeVisible(m_DistributionSwitch);
+    m_DistributionSwitch.setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
+    m_DistributionSwitch.onStateChange = [this]() {
+        m_processor.m_parameterVTS->getParameterAsValue(g_paramDistributionMode.ID) = 
+            m_DistributionSwitch.getToggleState() ? 1 : 0;
+    };
+
+    float initialMode = m_processor.m_parameterVTS->getRawParameterValue(g_paramMode.ID)->load();
+    if (initialMode == 2.0f) {
+        m_DistributionSwitch.setVisible(true);
+        bool isGaussian = m_processor.m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID)->load() == 1;
+        m_DistributionSwitch.setToggleState(isGaussian, juce::dontSendNotification);
+    } else {
+        m_DistributionSwitch.setVisible(false);
+    }
+
     m_paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
     m_paperImage = juce::ImageFileFormat::loadFrom(paper_bin, paper_bin_len);
+
+    resized();
 }
 
 void OutOfPhaseGUI::paint(juce::Graphics &g)
@@ -394,27 +375,37 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
         m_ZeroModeTextButton.getWidth(), 
         static_cast<int>(12 * m_processor.getScaleFactor()),
         juce::Justification::centred);
-
-    g.drawText("Random-Phase", 
-        m_RandomModeTextButton.getX(),
-        static_cast<int>(m_RandomModeTextButton.getBottom() + 5 * m_processor.getScaleFactor()),
-        m_RandomModeTextButton.getWidth(), 
-        static_cast<int>(12 * m_processor.getScaleFactor()),
-        juce::Justification::centred);
-
+    
     g.drawText("Phase-Frost", 
         m_FrostModeTextButton.getX(),
         m_FrostModeTextButton.getBottom() + static_cast<int>(5 * m_processor.getScaleFactor()),
         m_FrostModeTextButton.getWidth(), 
         static_cast<int>(12 * m_processor.getScaleFactor()),
         juce::Justification::centred);
-
+    
+    g.drawText("Random-Phase", 
+        m_RandomModeTextButton.getX(),
+        static_cast<int>(m_RandomModeTextButton.getBottom() + 5 * m_processor.getScaleFactor()),
+        m_RandomModeTextButton.getWidth(), 
+        static_cast<int>(12 * m_processor.getScaleFactor()),
+        juce::Justification::centred);
+    
     g.drawText("Phase-Flip", 
         m_FlipModeTextButton.getX(),
         m_FlipModeTextButton.getBottom() + static_cast<int>(5 * m_processor.getScaleFactor()),
         m_FlipModeTextButton.getWidth(), 
         static_cast<int>(12 * m_processor.getScaleFactor()),
         juce::Justification::centred);
+    
+    if (m_DistributionSwitch.isVisible() && 
+        m_processor.m_parameterVTS->getRawParameterValue(g_paramMode.ID)->load() == 2.0f) {
+        g.drawText("Distribution", 
+            m_DistributionSwitch.getX(),
+            m_DistributionSwitch.getBottom() + static_cast<int>(5 * m_processor.getScaleFactor()),
+            m_DistributionSwitch.getWidth(), 
+            static_cast<int>(12 * m_processor.getScaleFactor()),
+            juce::Justification::centred);
+    }
 
     juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
     g.drawFittedText (text2display, getLocalBounds(), juce::Justification::bottomLeft, 1);
@@ -439,6 +430,11 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     shadowBounds = m_PostPhasePlot.getBounds().toFloat().expanded(2.0f); // Expand for shadow
     roundedRect.addRectangle(shadowBounds); // Add rounded rectangle with corner radius 5.0f
 
+    if (m_DistributionSwitch.isVisible()) {
+        shadowBounds = m_DistributionSwitch.getBounds().toFloat().expanded(2.0f);
+        roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Smaller corner radius for the switch
+    }
+
     shadow.drawForPath(g, roundedRect);
 
 }
@@ -450,29 +446,23 @@ void OutOfPhaseGUI::resized() {
     // Dimensions
     float knobWidth = 100 * scaleFactor, knobHeight = 100 * scaleFactor;
     float distance = 40 * scaleFactor, margin = 10 * scaleFactor;
-    float comboxWidth = 150 * scaleFactor, comboxHeight = 20 * scaleFactor;
+
+    int buttonWidth = static_cast<int>(knobWidth * 0.9);
+    int buttonHeight = static_cast<int>(knobHeight * 0.4);
+    int buttonSpacing = static_cast<int>(distance * 0.6);
+
     int displayHeight = getHeight() / 2;
 
-    r.removeFromTop(static_cast<int>(displayHeight * 0.02)); // Add more space between the two plots
-    // Plots
+    r.removeFromTop(static_cast<int>(displayHeight * 0.02)); 
     m_PrePhasePlot.setBounds(r.removeFromTop(static_cast<int>(displayHeight * 0.7))
                                  .reduced(static_cast<int>(margin * 0.7))
                                  .withTrimmedLeft(static_cast<int>(10 * scaleFactor))
                                  .withTrimmedRight(static_cast<int>(10 * scaleFactor)));
 
-    r.removeFromTop(static_cast<int>(displayHeight * 0.05)); // Add more space between the two plots
-
+    r.removeFromTop(static_cast<int>(displayHeight * 0.05));
     m_PostPhasePlot.setBounds(r.removeFromTop(static_cast<int>(displayHeight * 0.23))
                                   .withTrimmedLeft(static_cast<int>(80 * scaleFactor))
                                   .withTrimmedRight(static_cast<int>(80 * scaleFactor)));
-
-    // ComboBox Centered
-    m_ComboBoxWithArrows.setBounds(
-        static_cast<int>((getWidth() - comboxWidth) / 2), 
-        static_cast<int>((getHeight() - comboxHeight) / 2), 
-        static_cast<int>(comboxWidth), 
-        static_cast<int>(comboxHeight)
-    );
 
     // Sliders
     float sliderHeight = static_cast<float>(knobHeight * 2.5);
@@ -480,32 +470,63 @@ void OutOfPhaseGUI::resized() {
     m_BlocksizeSlider.setBounds(static_cast<int>(distance * 0.6), static_cast<int>(distance * 4.2), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
     m_DryWetSlider.setBounds(static_cast<int>(getWidth() - sliderWidth - distance * 0.6), static_cast<int>(distance * 4.2), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
 
-    // Optional ComboBoxes and Buttons
-    if (m_ComboBoxDistribution.isVisible()) {
-        m_ComboBoxDistribution.setBounds(static_cast<int>((getWidth() - comboxWidth) / 2), static_cast<int>((getHeight() - comboxHeight) / 2 + distance), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
-    }
-    if (m_frostButton.isVisible()) {
-        m_frostButton.setBounds(static_cast<int>((getWidth() - comboxWidth) / 2), static_cast<int>((getHeight() - comboxHeight) / 2 + distance), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
-    }
-
-    // Radio Buttons
-    int buttonWidth = static_cast<int>(knobWidth * 0.9);
-    int buttonHeight = static_cast<int>(knobHeight * 0.4);
-    int buttonSpacing = static_cast<int>(distance * 0.6);
-
     float buttonsStartX = static_cast<float>(getWidth() / 2 - buttonWidth - buttonSpacing / 2);
     float buttonsStartY = static_cast<float>(getHeight() / 2 + distance / 2);
 
-    m_RandomModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
-    m_FrostModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
+    m_FrostModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
+    m_RandomModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
     m_ZeroModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
     m_FlipModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
+
+    int switchWidth = static_cast<int>(buttonWidth * 0.7);
+    int switchHeight = static_cast<int>(buttonHeight * 0.4);
+    int switchX = m_RandomModeTextButton.getX() + (m_RandomModeTextButton.getWidth() - switchWidth) / 2;
+    int switchY = m_RandomModeTextButton.getBottom() + static_cast<int>(25 * scaleFactor);
+    m_DistributionSwitch.setBounds(switchX, switchY, switchWidth, switchHeight);
+
+    float currentMode = m_processor.m_parameterVTS->getRawParameterValue(g_paramMode.ID)->load();
+    bool shouldBeVisible = (currentMode == 2.0f);
+    if (m_DistributionSwitch.isVisible() != shouldBeVisible) {
+        m_DistributionSwitch.setVisible(shouldBeVisible);
+        if (shouldBeVisible) {
+            bool isGaussian = m_processor.m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID)->load() == 1;
+            m_DistributionSwitch.setToggleState(isGaussian, juce::dontSendNotification);
+        }
+    }
+};
+
+void OutOfPhaseGUI::updateModeButtonStates()
+{
+    float currentMode = m_processor.m_parameterVTS->getRawParameterValue(g_paramMode.ID)->load();
+    
+    m_ZeroModeTextButton.setToggleState(currentMode == 0.0f, juce::dontSendNotification);
+    m_FrostModeTextButton.setToggleState(currentMode == 1.0f, juce::dontSendNotification);
+    m_RandomModeTextButton.setToggleState(currentMode == 2.0f, juce::dontSendNotification);
+    m_FlipModeTextButton.setToggleState(currentMode == 3.0f, juce::dontSendNotification);
+    
+    if (currentMode == 2.0f) {
+        m_DistributionSwitch.setVisible(true);
+        bool isGaussian = m_processor.m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID)->load() == 1;
+        m_DistributionSwitch.setToggleState(isGaussian, juce::dontSendNotification);
+    } else {
+        m_DistributionSwitch.setVisible(false);
+    }
 }
 
 void OutOfPhaseGUI::timerCallback()
 {
-    std::vector<float> PrePhaseDataPlot = m_processor.m_algo.getPrePhaseData(); // Retrieve data from processor
-    std::vector<float> PostPhaseDataPlot = m_processor.m_algo.getPostPhaseData(); // Retrieve data from processor
-    m_PrePhasePlot.setPrePhaseData(PrePhaseDataPlot); // Update plot
-    m_PostPhasePlot.setPostPhaseData(PostPhaseDataPlot); // Update plot
+    std::vector<float> PrePhaseDataPlot = m_processor.m_algo.getPrePhaseData();
+    std::vector<float> PostPhaseDataPlot = m_processor.m_algo.getPostPhaseData();
+    m_PrePhasePlot.setPrePhaseData(PrePhaseDataPlot);
+    m_PostPhasePlot.setPostPhaseData(PostPhaseDataPlot);
+
+    updateModeButtonStates();
+    
+    repaint();
+}
+
+void OutOfPhaseGUI::parentHierarchyChanged()
+{
+    updateModeButtonStates();
+    resized();
 }

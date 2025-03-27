@@ -15,6 +15,7 @@
 #include "RandomButton.h"
 #include "ZeroButton.h"
 #include "FlipButton.h"
+#include "DistributionSwitch.h"
 
 class OutOfPhaseAudioProcessor;
 
@@ -115,6 +116,8 @@ public:
 
 	void paint(juce::Graphics& g) override;
 	void resized() override;
+	void parentHierarchyChanged() override;
+	void updateModeButtonStates();
 
 	void timerCallback() override;
 
@@ -126,13 +129,9 @@ private:
 	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> BlocksizeSliderAttachment;
 	juce::Slider m_DryWetSlider;
 	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> DryWetSliderAttachment;
-	ComboBoxWithArrows m_ComboBoxWithArrows;
-
-	juce::ComboBox m_ComboBoxDistribution;
 	PhasePlot m_PrePhasePlot;
 	PhasePlot m_PostPhasePlot;
 	//std::vector<float> phaseDataPlot;
-	juce::TextButton m_frostButton;
 
 	std::unique_ptr<juce::TooltipWindow> tooltipWindow;
 	
@@ -140,6 +139,7 @@ private:
 	FrostButton m_FrostModeTextButton;
 	RandomButton m_RandomModeTextButton;
 	FlipButton m_FlipModeTextButton;
+	DistributionSwitch m_DistributionSwitch;
 
 	juce::Image m_paintImage;
 	juce::Image m_paperImage;
