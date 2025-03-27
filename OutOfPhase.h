@@ -52,7 +52,7 @@ const struct
 {
 	const std::string ID = "DryWetID";
 	const std::string name = "DryWet";
-	const float defaultValue = 1;
+	const float defaultValue = 0.5;
 	const float minValue = 0;
 	const float maxValue = 1;
 }g_paramDryWet;

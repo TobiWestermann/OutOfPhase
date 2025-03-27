@@ -22,19 +22,30 @@ void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, 
     synchronblocksize = static_cast<int>(round(desired_blocksize));
     if (g_forcePowerOf2)
     {
-        int nextpowerof2 = int(log2(synchronblocksize))+1;
-        synchronblocksize = int(pow(2,nextpowerof2));
+        synchronblocksize = juce::nextPowerOfTwo(synchronblocksize);
     }
     m_synchronblocksize = synchronblocksize;
 
+    m_realdata.setSize(0, 0, false, false, false);
+    m_imagdata.setSize(0, 0, false, false, false);
+
     prepareWOLAprocessing(max_channels,synchronblocksize,WOLA::WOLAType::SqrtHann_over50);
     m_Latency += synchronblocksize;
-    // here your code
+
     m_fftprocess.setFFTSize(synchronblocksize);
     m_realdata.setSize(max_channels,synchronblocksize/2+1);
     m_imagdata.setSize(max_channels,synchronblocksize/2+1);
 
+    m_realdata.clear();
+    m_imagdata.clear();
+
     initFrostPhaseData();
+
+    m_PrePhaseData.resize(synchronblocksize/2+1);
+    m_PostPhaseData.resize(synchronblocksize/2+1);
+    
+    std::fill(m_PrePhaseData.begin(), m_PrePhaseData.end(), 0.0f);
+    std::fill(m_PostPhaseData.begin(), m_PostPhaseData.end(), 0.0f);
 }
 
 void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudioParameter>> &paramVector)
@@ -69,12 +80,29 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
     juce::ScopedLock lock(dataMutex);
     juce::ignoreUnused(midiMessages);
 
+    if (data.getNumSamples() == 0 || m_synchronblocksize == 0)
+        return 0;
+
     float operatingMode = *m_processor->m_parameterVTS->getRawParameterValue(g_paramMode.ID);
+    float dryWetMix = *m_processor->m_parameterVTS->getRawParameterValue(g_paramDryWet.ID);
+    dryWetMix = juce::jlimit(0.0f, 1.0f, dryWetMix);
 
     int numchns = data.getNumChannels();
+    int numSamples = data.getNumSamples();
+
+    if (m_realdata.getNumChannels() < numchns || m_imagdata.getNumChannels() < numchns) {
+        return 0;
+    }
+
+    juce::AudioBuffer<float> dryBuffer;
+    dryBuffer.setSize(numchns, numSamples, false, true, true);
+
+    for (int cc = 0; cc < numchns; cc++)
+        dryBuffer.copyFrom(cc, 0, data, cc, 0, numSamples);
 
     for (int cc = 0 ; cc < numchns; cc++)
     {
+
     // FFT 
         auto dataPtr = data.getWritePointer(cc);
         auto realPtr = m_realdata.getWritePointer(cc);
@@ -100,7 +128,14 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             }
             else if (operatingMode == 1) // frost
             {
-                PostPhase = m_FrostPhaseData[nn];
+                if (nn < m_FrostPhaseData.size())
+                {
+                    PostPhase = m_FrostPhaseData[nn];
+                }
+                else
+                {
+                    PostPhase = 0.0f; // Default value if out of bounds
+                }
             }
             else if (operatingMode == 2) // random
             {
@@ -155,6 +190,16 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
         // IFFT
         m_fftprocess.ifft(realPtr,imagPtr, dataPtr);
 
+        // Apply dry/wet mix
+        auto dryPtr = dryBuffer.getReadPointer(cc);
+        
+        float wetRatio = dryWetMix;
+        wetRatio = juce::jlimit(0.0f, 1.0f, wetRatio);
+        float dryRatio = 1.0f - wetRatio;
+        
+        for (int i = 0; i < numSamples; ++i)
+            dataPtr[i] = dryPtr[i] * dryRatio + dataPtr[i] * wetRatio;
+        
         m_PrePhaseData = newPrePhaseData;
         m_PostPhaseData = newPostPhaseData;
     }
@@ -200,16 +245,34 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 
     m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
+    m_BlocksizeSlider.setDoubleClickReturnValue(true, 512);
+    m_BlocksizeSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+    m_BlocksizeSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::lightgrey);
+    m_BlocksizeSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::lightgrey);
     addAndMakeVisible(m_BlocksizeSlider);
     BlocksizeSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         *m_processor.m_parameterVTS, g_paramBlocksize.ID, m_BlocksizeSlider);
     m_BlocksizeSlider.onValueChange = [this]
     {
-        m_processor.m_algo.prepareToPlay(44100, 512, 2);
+        juce::ScopedLock lock(m_processor.getCallbackLock());
+        m_processor.suspendProcessing(true);
+
+        auto sampleRate = m_processor.getSampleRate();
+        auto blockSize = m_BlocksizeSlider.getValue();
+        auto channels = m_processor.getTotalNumInputChannels();
+
+        m_processor.m_algo.prepareToPlay(sampleRate, static_cast<int>(blockSize), channels);
+
+        m_processor.suspendProcessing(false);
     };
 
     m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
+    m_DryWetSlider.setNumDecimalPlacesToDisplay(2);
+    m_DryWetSlider.setDoubleClickReturnValue(true, 0.5f);
+    m_DryWetSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+    m_DryWetSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::lightgrey);
+    m_DryWetSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::lightgrey);
     DryWetSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         *m_processor.m_parameterVTS, g_paramDryWet.ID, m_DryWetSlider);
     addAndMakeVisible(m_DryWetSlider);
@@ -281,9 +344,25 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     juce::RectanglePlacement::fillDestination);
     
 
-    g.setColour (juce::Colours::grey);
-    g.setFont (12.0f);
-    
+    g.setColour (juce::Colours::darkslategrey);
+    g.setFont (12.0f * m_processor.getScaleFactor());
+
+    int labelWidth = static_cast<int>(m_BlocksizeSlider.getWidth() * 1.5f);   
+
+    g.drawText("Block Size", 
+        m_BlocksizeSlider.getX() - (labelWidth - m_BlocksizeSlider.getWidth()) / 2,
+        m_BlocksizeSlider.getY() - 15 * m_processor.getScaleFactor(),
+        labelWidth, 
+        20 * m_processor.getScaleFactor(),
+        juce::Justification::centred);
+
+    g.drawText("Dry/Wet", 
+        m_DryWetSlider.getX() - (labelWidth - m_DryWetSlider.getWidth()) / 2,
+        m_DryWetSlider.getY() - 15 * m_processor.getScaleFactor(),
+        labelWidth, 
+        20 * m_processor.getScaleFactor(),
+        juce::Justification::centred);
+
     juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
     g.drawFittedText (text2display, getLocalBounds(), juce::Justification::bottomLeft, 1);
 
