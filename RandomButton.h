@@ -44,6 +44,14 @@ public:
 
         if (isActive)
         {
+            g.setColour(juce::Colours::grey);
+            g.setOpacity(0.2f);
+            g.fillRoundedRectangle(bounds, 10.0f);
+            g.resetToDefaultState();
+        }
+        
+        if (isActive)
+        {
             auto outlineBounds = bounds.reduced(0.5f);
             g.setColour(juce::Colours::grey);
             g.drawRoundedRectangle(outlineBounds, 10.0f, 1.5f);
