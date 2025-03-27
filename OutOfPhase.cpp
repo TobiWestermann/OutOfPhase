@@ -247,11 +247,11 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     };
 
     m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
+    m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 40, 15);
     m_BlocksizeSlider.setDoubleClickReturnValue(true, 512);
-    m_BlocksizeSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
-    m_BlocksizeSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::lightgrey);
-    m_BlocksizeSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::lightgrey);
+    // m_BlocksizeSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+    m_BlocksizeSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+    //m_BlocksizeSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::lightgrey);
     addAndMakeVisible(m_BlocksizeSlider);
     BlocksizeSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         *m_processor.m_parameterVTS, g_paramBlocksize.ID, m_BlocksizeSlider);
@@ -270,12 +270,12 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     };
 
     m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
+    m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 40, 15);
     m_DryWetSlider.setNumDecimalPlacesToDisplay(2);
     m_DryWetSlider.setDoubleClickReturnValue(true, 0.5f);
-    m_DryWetSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
-    m_DryWetSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::lightgrey);
-    m_DryWetSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::lightgrey);
+    // m_DryWetSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+    m_DryWetSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+    //m_DryWetSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::lightgrey);
     DryWetSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         *m_processor.m_parameterVTS, g_paramDryWet.ID, m_DryWetSlider);
     addAndMakeVisible(m_DryWetSlider);
@@ -441,6 +441,17 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
 
     shadow.drawForPath(g, roundedRect);
 
+
+    // Draw a grey rectangle with outline around both sliders
+    juce::Rectangle<int> sliderBounds = m_BlocksizeSlider.getBounds().reduced(5, 0).expanded(0, 6);
+    g.setColour(juce::Colours::whitesmoke.darker(0.2f));
+    g.fillRect(sliderBounds);
+    sliderBounds = m_DryWetSlider.getBounds().reduced(5, 0).expanded(0, 6);
+    g.fillRect(sliderBounds);
+    g.setColour(juce::Colours::grey);
+    g.drawRect(sliderBounds, 2);
+    sliderBounds = m_BlocksizeSlider.getBounds().reduced(5, 0).expanded(0, 6);
+    g.drawRect(sliderBounds, 2);
 }
 
 void OutOfPhaseGUI::resized() {
@@ -475,10 +486,10 @@ void OutOfPhaseGUI::resized() {
     );
 
     // Sliders
-    float sliderHeight = static_cast<float>(knobHeight * 2.5);
-    float sliderWidth = static_cast<float>(knobWidth * 0.4);
-    m_BlocksizeSlider.setBounds(static_cast<int>(distance * 0.6), static_cast<int>(distance * 4.2), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
-    m_DryWetSlider.setBounds(static_cast<int>(getWidth() - sliderWidth - distance * 0.6), static_cast<int>(distance * 4.2), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
+    float sliderHeight = static_cast<float>(knobHeight * 2);
+    float sliderWidth = static_cast<float>(knobWidth * 0.4f);
+    m_BlocksizeSlider.setBounds(static_cast<int>(distance * 0.6), static_cast<int>(distance * 4.7f), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
+    m_DryWetSlider.setBounds(static_cast<int>(getWidth() - sliderWidth - distance * 0.6), static_cast<int>(distance * 4.7f), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
 
     // Optional ComboBoxes and Buttons
     if (m_ComboBoxDistribution.isVisible()) {
