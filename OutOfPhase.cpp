@@ -337,12 +337,12 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     g.drawImageWithin(m_paperImage, 0, 0, getWidth(), getHeight(),
                        juce::RectanglePlacement::fillDestination);
 
-    g.drawImageWithin(m_paintImage, -getWidth()/4, getHeight()*0.84, getWidth(), getHeight()/4,
+    g.drawImageWithin(m_paintImage, static_cast<int>(-getWidth() / 4), static_cast<int>(getHeight() * 0.84), getWidth(), static_cast<int>(getHeight() / 4),
                        juce::RectanglePlacement::fillDestination);
     
 
     
-    g.drawImageWithin(m_paintImage, getWidth() - getWidth() * 0.7, -getHeight()/3, getWidth(), getHeight(),
+    g.drawImageWithin(m_paintImage, static_cast<int>(getWidth() - getWidth() * 0.7), static_cast<int>(-getHeight() / 3), getWidth(), getHeight(),
     juce::RectanglePlacement::fillDestination);
     
 
@@ -353,67 +353,67 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
 
     g.drawText("Block Size", 
         m_BlocksizeSlider.getX() - (labelWidth - m_BlocksizeSlider.getWidth()) / 2,
-        m_BlocksizeSlider.getY() - 15 * m_processor.getScaleFactor(),
+        static_cast<int>(m_BlocksizeSlider.getY() - 15 * m_processor.getScaleFactor()),
         labelWidth, 
-        20 * m_processor.getScaleFactor(),
+        static_cast<int>(20 * m_processor.getScaleFactor()),
         juce::Justification::centred);
 
     g.drawText("Dry/Wet", 
         m_DryWetSlider.getX() - (labelWidth - m_DryWetSlider.getWidth()) / 2,
-        m_DryWetSlider.getY() - 15 * m_processor.getScaleFactor(),
+        static_cast<int>(m_DryWetSlider.getY() - 15 * m_processor.getScaleFactor()),
         labelWidth, 
-        20 * m_processor.getScaleFactor(),
+        static_cast<int>(20 * m_processor.getScaleFactor()),
         juce::Justification::centred);
 
     g.setFont(14.0f * m_processor.getScaleFactor());
     g.setColour(juce::Colours::darkslategrey);
     
-    float leftEdge = std::min(m_RandomModeTextButton.getX(), m_FrostModeTextButton.getX());
-    float rightEdge = std::max(m_ZeroModeTextButton.getRight(), m_FlipModeTextButton.getRight());
+    float leftEdge = std::min(static_cast<float>(m_RandomModeTextButton.getX()), static_cast<float>(m_FrostModeTextButton.getX()));
+    float rightEdge = static_cast<float>(std::max(m_ZeroModeTextButton.getRight(), m_FlipModeTextButton.getRight()));
     
 
     juce::Rectangle<int> buttonGroupBounds(
-        leftEdge, 
+        static_cast<int>(leftEdge), 
         m_ZeroModeTextButton.getY(),
-        rightEdge - leftEdge,
+        static_cast<int>(rightEdge - leftEdge),
         m_FlipModeTextButton.getBottom() - m_ZeroModeTextButton.getY()
     );
     
     g.drawText("Phase Mode", 
         buttonGroupBounds.getX(),
-        buttonGroupBounds.getY() - 25 * m_processor.getScaleFactor(),
+        static_cast<int>(buttonGroupBounds.getY() - 25 * m_processor.getScaleFactor()),
         buttonGroupBounds.getWidth(), 
-        20 * m_processor.getScaleFactor(),
+        static_cast<int>(20 * m_processor.getScaleFactor()),
         juce::Justification::centred);
 
     g.setFont(10.0f * m_processor.getScaleFactor());
 
     g.drawText("Zero-Phase", 
         m_ZeroModeTextButton.getX(),
-        m_ZeroModeTextButton.getBottom() + 5 * m_processor.getScaleFactor(),
+        static_cast<int>(m_ZeroModeTextButton.getBottom() + 5 * m_processor.getScaleFactor()),
         m_ZeroModeTextButton.getWidth(), 
-        12 * m_processor.getScaleFactor(),
+        static_cast<int>(12 * m_processor.getScaleFactor()),
         juce::Justification::centred);
 
     g.drawText("Random-Phase", 
         m_RandomModeTextButton.getX(),
-        m_RandomModeTextButton.getBottom() + 5 * m_processor.getScaleFactor(),
+        static_cast<int>(m_RandomModeTextButton.getBottom() + 5 * m_processor.getScaleFactor()),
         m_RandomModeTextButton.getWidth(), 
-        12 * m_processor.getScaleFactor(),
+        static_cast<int>(12 * m_processor.getScaleFactor()),
         juce::Justification::centred);
 
     g.drawText("Phase-Frost", 
         m_FrostModeTextButton.getX(),
-        m_FrostModeTextButton.getBottom() + 5 * m_processor.getScaleFactor(),
+        m_FrostModeTextButton.getBottom() + static_cast<int>(5 * m_processor.getScaleFactor()),
         m_FrostModeTextButton.getWidth(), 
-        12 * m_processor.getScaleFactor(),
+        static_cast<int>(12 * m_processor.getScaleFactor()),
         juce::Justification::centred);
 
     g.drawText("Phase-Flip", 
         m_FlipModeTextButton.getX(),
-        m_FlipModeTextButton.getBottom() + 5 * m_processor.getScaleFactor(),
+        m_FlipModeTextButton.getBottom() + static_cast<int>(5 * m_processor.getScaleFactor()),
         m_FlipModeTextButton.getWidth(), 
-        12 * m_processor.getScaleFactor(),
+        static_cast<int>(12 * m_processor.getScaleFactor()),
         juce::Justification::centred);
 
     juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
@@ -453,38 +453,39 @@ void OutOfPhaseGUI::resized() {
     float comboxWidth = 150 * scaleFactor, comboxHeight = 20 * scaleFactor;
     int displayHeight = getHeight() / 2;
 
-    r.removeFromTop(displayHeight * 0.02); // Add more space between the two plots
+    r.removeFromTop(static_cast<int>(displayHeight * 0.02)); // Add more space between the two plots
     // Plots
-    m_PrePhasePlot.setBounds(r.removeFromTop(displayHeight * 0.7)
-                                 .reduced(margin * 0.7)
-                                 .withTrimmedLeft(10 * scaleFactor)
-                                 .withTrimmedRight(10 * scaleFactor));
+    m_PrePhasePlot.setBounds(r.removeFromTop(static_cast<int>(displayHeight * 0.7))
+                                 .reduced(static_cast<int>(margin * 0.7))
+                                 .withTrimmedLeft(static_cast<int>(10 * scaleFactor))
+                                 .withTrimmedRight(static_cast<int>(10 * scaleFactor)));
 
-    r.removeFromTop(displayHeight * 0.05); // Add more space between the two plots
+    r.removeFromTop(static_cast<int>(displayHeight * 0.05)); // Add more space between the two plots
 
-    m_PostPhasePlot.setBounds(r.removeFromTop(displayHeight * 0.23)
-                                  .withTrimmedLeft(80 * scaleFactor)
-                                  .withTrimmedRight(80 * scaleFactor));
+    m_PostPhasePlot.setBounds(r.removeFromTop(static_cast<int>(displayHeight * 0.23))
+                                  .withTrimmedLeft(static_cast<int>(80 * scaleFactor))
+                                  .withTrimmedRight(static_cast<int>(80 * scaleFactor)));
 
     // ComboBox Centered
     m_ComboBoxWithArrows.setBounds(
-        (getWidth() - comboxWidth) / 2, 
-        (getHeight() - comboxHeight) / 2, 
-        comboxWidth, 
-        comboxHeight
+        static_cast<int>((getWidth() - comboxWidth) / 2), 
+        static_cast<int>((getHeight() - comboxHeight) / 2), 
+        static_cast<int>(comboxWidth), 
+        static_cast<int>(comboxHeight)
     );
 
     // Sliders
-    float sliderHeight = knobHeight * 2.5, sliderWidth = knobWidth * 0.4;
-    m_BlocksizeSlider.setBounds(distance * 0.6, distance * 4.2, sliderWidth, sliderHeight);
-    m_DryWetSlider.setBounds(getWidth() - sliderWidth - distance * 0.6, distance * 4.2, sliderWidth, sliderHeight);
+    float sliderHeight = static_cast<float>(knobHeight * 2.5);
+    float sliderWidth = static_cast<float>(knobWidth * 0.4);
+    m_BlocksizeSlider.setBounds(static_cast<int>(distance * 0.6), static_cast<int>(distance * 4.2), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
+    m_DryWetSlider.setBounds(static_cast<int>(getWidth() - sliderWidth - distance * 0.6), static_cast<int>(distance * 4.2), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
 
     // Optional ComboBoxes and Buttons
     if (m_ComboBoxDistribution.isVisible()) {
-        m_ComboBoxDistribution.setBounds((getWidth() - comboxWidth) / 2, (getHeight() - comboxHeight) / 2 + distance, comboxWidth, comboxHeight);
+        m_ComboBoxDistribution.setBounds(static_cast<int>((getWidth() - comboxWidth) / 2), static_cast<int>((getHeight() - comboxHeight) / 2 + distance), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
     }
     if (m_frostButton.isVisible()) {
-        m_frostButton.setBounds((getWidth() - comboxWidth) / 2, (getHeight() - comboxHeight) / 2 + distance, comboxWidth, comboxHeight);
+        m_frostButton.setBounds(static_cast<int>((getWidth() - comboxWidth) / 2), static_cast<int>((getHeight() - comboxHeight) / 2 + distance), static_cast<int>(comboxWidth), static_cast<int>(comboxHeight));
     }
 
     // Radio Buttons
@@ -492,13 +493,13 @@ void OutOfPhaseGUI::resized() {
     int buttonHeight = static_cast<int>(knobHeight * 0.4);
     int buttonSpacing = static_cast<int>(distance * 0.6);
 
-    float buttonsStartX = getWidth() / 2 - buttonWidth - buttonSpacing / 2;
-    float buttonsStartY = getHeight() / 2 + distance / 2;
+    float buttonsStartX = static_cast<float>(getWidth() / 2 - buttonWidth - buttonSpacing / 2);
+    float buttonsStartY = static_cast<float>(getHeight() / 2 + distance / 2);
 
-    m_RandomModeTextButton.setBounds(buttonsStartX, buttonsStartY, buttonWidth, buttonHeight);
-    m_FrostModeTextButton.setBounds(buttonsStartX, buttonsStartY + buttonHeight + buttonSpacing, buttonWidth, buttonHeight);
-    m_ZeroModeTextButton.setBounds(buttonsStartX + buttonWidth + buttonSpacing, buttonsStartY, buttonWidth, buttonHeight);
-    m_FlipModeTextButton.setBounds(buttonsStartX + buttonWidth + buttonSpacing, buttonsStartY + buttonHeight + buttonSpacing, buttonWidth, buttonHeight);
+    m_RandomModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
+    m_FrostModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
+    m_ZeroModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
+    m_FlipModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
 }
 
 void OutOfPhaseGUI::timerCallback()

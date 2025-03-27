@@ -23,7 +23,7 @@ public:
         return closest;
     }
     
-    void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override
+    void mouseWheelMove(const juce::MouseEvent&, const juce::MouseWheelDetails& wheel) override
     {
         double currentValue = getValue();
         

@@ -78,10 +78,10 @@ public:
         }
 
         juce::Font textFont(15.0f);
-        juce::String text("F L I P");
+        juce::String buttonText("F L I P");
         
         juce::AttributedString topString;
-        topString.append(text, textFont, isActive ? Color2 : Color1);
+        topString.append(buttonText, textFont, isActive ? Color2 : Color1);
         topString.setJustification(juce::Justification::centred);
         topString.draw(g, bounds.withHeight(bounds.getHeight() / 2).toFloat());
         
