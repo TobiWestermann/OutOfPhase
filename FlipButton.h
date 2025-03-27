@@ -84,23 +84,25 @@ public:
         topString.append(buttonText, textFont, isActive ? Color2 : Color1);
         topString.setJustification(juce::Justification::centred);
         topString.draw(g, bounds.withHeight(bounds.getHeight() / 2).toFloat());
-        
-        g.setFont(textFont);
-        g.setColour(isActive ? Color1 : Color2);
-        
-        juce::Graphics::ScopedSaveState savedState(g);
-        
-        float centerX = bounds.getCentreX();
-        float centerY = bounds.getCentreY() + bounds.getHeight() * 0.25f;
-        
-        g.addTransform(juce::AffineTransform::rotation(juce::MathConstants<float>::pi, centerX, centerY));
-        
-        g.drawText("F L I P", bounds.withTrimmedTop(bounds.getHeight() / 2), 
-                   juce::Justification::centred, false);
+
+        {
+            juce::Graphics::ScopedSaveState savedState(g);
+            
+            g.setFont(textFont);
+            g.setColour(isActive ? Color1 : Color2);
+            
+            float centerX = bounds.getCentreX();
+            float centerY = bounds.getCentreY() + bounds.getHeight() * 0.25f;
+            
+            g.addTransform(juce::AffineTransform::rotation(juce::MathConstants<float>::pi, centerX, centerY));
+            
+            g.drawText("F L I P", bounds.withTrimmedTop(bounds.getHeight() / 2), 
+                       juce::Justification::centred, false);
+        }
 
         g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.f));
         g.fillRoundedRectangle(bounds, 10.0f);
-
+    
         if (isActive)
         {
             auto outlineBounds = bounds.reduced(0.5f);

@@ -54,13 +54,26 @@ void PhasePlot::paint(juce::Graphics& g)
 
         juce::Path PrePhasePath;
 
-        float logMin = static_cast<float>(std::log10(1));
-        float logMax = static_cast<float>(std::log10(N));
+        float logMin = static_cast<float>(std::log10(1.0f));
+        float logMax = static_cast<float>(std::log10(static_cast<float>(N)));
 
-        float margin = mouseOver ? 23.0f : 0.0f;
+        float margin;
+        if (mouseOver) {
+            juce::Font labelFont(15.0f);
+            juce::GlyphArrangement glyphArrangement;
+            glyphArrangement.addLineOfText(labelFont, "0", 0.0f, 0.0f);
+            float zeroWidth = glyphArrangement.getBoundingBox(0, 1, true).getWidth();
+            glyphArrangement.clear();
+            glyphArrangement.addLineOfText(labelFont, "fs/2", 0.0f, 0.0f);
+            float fsWidth = glyphArrangement.getBoundingBox(0, 3, true).getWidth();
+            margin = std::max(zeroWidth, fsWidth) + 5.0f;
+        }
+        else {
+            margin = 0.0f;
+        }
         float plotWidth = width - 2 * margin;
 
-        float xStart = clipBounds.getX() + margin + (static_cast<float>(std::log10(1)) - logMin) / (logMax - logMin) * plotWidth;
+        float xStart = clipBounds.getX() + margin + (static_cast<float>(std::log10(1.0f)) - logMin) / (logMax - logMin) * plotWidth;
         float yStart = clipBounds.getY() + height / 2 - (PrePhaseData[0] * (height / 2));
         PrePhasePath.startNewSubPath(xStart, yStart);
 
@@ -85,10 +98,23 @@ void PhasePlot::paint(juce::Graphics& g)
         size_t N = PostPhaseData.size();
         juce::Path PostPhasePath;
 
-        float logMin = static_cast<float>(std::log10(1));
-        float logMax = static_cast<float>(std::log10(N));
+        float logMin = static_cast<float>(std::log10(1.0f));
+        float logMax = static_cast<float>(std::log10(static_cast<float>(N)));
 
-        float margin = mouseOver ? 23.0f : 0.0f;
+        float margin;
+        if (mouseOver) {
+            juce::Font labelFont(15.0f);
+            juce::GlyphArrangement glyphArrangement;
+            glyphArrangement.addLineOfText(labelFont, "0", 0.0f, 0.0f);
+            float zeroWidth = glyphArrangement.getBoundingBox(0, 1, true).getWidth();
+            glyphArrangement.clear();
+            glyphArrangement.addLineOfText(labelFont, "fs", 0.0f, 0.0f);
+            float fsWidth = glyphArrangement.getBoundingBox(0, 2, true).getWidth();
+            margin = std::max(zeroWidth, fsWidth) + 5.0f;
+        }
+        else {
+            margin = 0.0f;
+        }
         float plotWidth = clipBounds.getWidth() - 2 * margin;
 
         float xStart = clipBounds.getX() + margin + (static_cast<float>(std::log10(1)) - logMin) / (logMax - logMin) * plotWidth;
@@ -112,7 +138,14 @@ void PhasePlot::paint(juce::Graphics& g)
     {
         g.setColour(juce::Colours::white);
         g.setFont(15.0f);
-        g.drawText(juce::CharPointer_UTF8("0"), 5, getHeight() / 2 - 10, 20, 20, juce::Justification::centred);
-        g.drawText(juce::CharPointer_UTF8("fs/2"), getWidth() - 25, getHeight() / 2 - 10, 20, 20, juce::Justification::centred);
+
+        g.drawText("0", 5, getHeight() / 2 - 10, 20, 20, juce::Justification::centred);
+
+        // disp fs/2 as fraction
+        g.setFont(12.0f);
+        g.drawText("fs", getWidth() - 25, getHeight() / 2 - 15, 20, 12, juce::Justification::centred);
+        g.drawLine(static_cast<float>(getWidth() - 23), static_cast<float>(getHeight() / 2 - 2), 
+                   static_cast<float>(getWidth() - 7), static_cast<float>(getHeight() / 2 - 2), 1.0f);
+        g.drawText("2", getWidth() - 25, getHeight() / 2 + 1, 20, 12, juce::Justification::centred);
     }
 }
