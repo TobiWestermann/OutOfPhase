@@ -134,6 +134,8 @@ private:
 	//std::vector<float> phaseDataPlot;
 	juce::TextButton m_frostButton;
 
+	std::unique_ptr<juce::TooltipWindow> tooltipWindow;
+	
 	ZeroButton m_ZeroModeTextButton;
 	FrostButton m_FrostModeTextButton;
 	RandomButton m_RandomModeTextButton;

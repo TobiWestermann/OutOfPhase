@@ -9,6 +9,7 @@ public:
     FrostButton() : juce::Button("FrostButton")
     {
         setClickingTogglesState(true);
+        setTooltip("Captures and maintains the current phase spectrum.");
     }
 
     void paintButton(juce::Graphics& g, bool isMouseOverButton, bool isButtonDown) override

@@ -209,7 +209,10 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
 
 OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts)
 :m_processor(p) ,m_apvts(apvts)
-{   
+{
+    tooltipWindow = std::make_unique<juce::TooltipWindow>(this);
+    tooltipWindow->setMillisecondsBeforeTipAppears(500);
+    
     startTimerHz(30); // 30 Hz update rate
 
     //addAndMakeVisible(m_ComboBoxWithArrows);
@@ -306,6 +309,7 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
 
     m_RandomModeTextButton.setButtonText("Random");
     addAndMakeVisible(m_RandomModeTextButton);
+    
     m_RandomModeTextButton.onClick = [this]
     {
         m_processor.m_parameterVTS->getParameterAsValue(g_paramMode.ID) = 2;
@@ -321,8 +325,6 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     };
     m_FlipModeTextButton.setRadioGroupId(1);
     m_FlipModeTextButton.setClickingTogglesState(true);
-
-
 
     m_paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
     m_paperImage = juce::ImageFileFormat::loadFrom(paper_bin, paper_bin_len);
@@ -363,6 +365,57 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
         20 * m_processor.getScaleFactor(),
         juce::Justification::centred);
 
+    g.setFont(14.0f * m_processor.getScaleFactor());
+    g.setColour(juce::Colours::darkslategrey);
+    
+    float leftEdge = std::min(m_RandomModeTextButton.getX(), m_FrostModeTextButton.getX());
+    float rightEdge = std::max(m_ZeroModeTextButton.getRight(), m_FlipModeTextButton.getRight());
+    
+
+    juce::Rectangle<int> buttonGroupBounds(
+        leftEdge, 
+        m_ZeroModeTextButton.getY(),
+        rightEdge - leftEdge,
+        m_FlipModeTextButton.getBottom() - m_ZeroModeTextButton.getY()
+    );
+    
+    g.drawText("Phase Mode", 
+        buttonGroupBounds.getX(),
+        buttonGroupBounds.getY() - 25 * m_processor.getScaleFactor(),
+        buttonGroupBounds.getWidth(), 
+        20 * m_processor.getScaleFactor(),
+        juce::Justification::centred);
+
+    g.setFont(10.0f * m_processor.getScaleFactor());
+
+    g.drawText("Zero-Phase", 
+        m_ZeroModeTextButton.getX(),
+        m_ZeroModeTextButton.getBottom() + 5 * m_processor.getScaleFactor(),
+        m_ZeroModeTextButton.getWidth(), 
+        12 * m_processor.getScaleFactor(),
+        juce::Justification::centred);
+
+    g.drawText("Random-Phase", 
+        m_RandomModeTextButton.getX(),
+        m_RandomModeTextButton.getBottom() + 5 * m_processor.getScaleFactor(),
+        m_RandomModeTextButton.getWidth(), 
+        12 * m_processor.getScaleFactor(),
+        juce::Justification::centred);
+
+    g.drawText("Phase-Frost", 
+        m_FrostModeTextButton.getX(),
+        m_FrostModeTextButton.getBottom() + 5 * m_processor.getScaleFactor(),
+        m_FrostModeTextButton.getWidth(), 
+        12 * m_processor.getScaleFactor(),
+        juce::Justification::centred);
+
+    g.drawText("Phase-Flip", 
+        m_FlipModeTextButton.getX(),
+        m_FlipModeTextButton.getBottom() + 5 * m_processor.getScaleFactor(),
+        m_FlipModeTextButton.getWidth(), 
+        12 * m_processor.getScaleFactor(),
+        juce::Justification::centred);
+
     juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
     g.drawFittedText (text2display, getLocalBounds(), juce::Justification::bottomLeft, 1);
 
@@ -376,7 +429,7 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     
     shadowBounds = m_ZeroModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
     roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 10.0f
-    
+
     shadowBounds = m_FlipModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
     roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 5.0f
     

@@ -9,6 +9,7 @@ public:
     RandomButton() : juce::Button("RandomButton")
     {
         setClickingTogglesState(true);
+        setTooltip("Randomizes all phase components using either uniform or Gaussian distribution.");
     }
 
     void paintButton(juce::Graphics& g, bool isMouseOverButton, bool isButtonDown) override

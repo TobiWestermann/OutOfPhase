@@ -8,6 +8,7 @@ public:
     ZeroButton() : juce::Button("ZeroButton")
     {
         setClickingTogglesState(true);
+        setTooltip("Sets all phase components to zero.");
     }
 
     void paintButton(juce::Graphics& g, bool isMouseOverButton, bool isButtonDown) override
