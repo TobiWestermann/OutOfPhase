@@ -23,6 +23,7 @@ public:
         juce::Colour Color1 = juce::Colours::yellow;
         juce::Colour Color2 = juce::Colours::red;
 
+        // Draw background colors
         if (isActive)
         {
             // Draw the yellow upper half with rounded top corners
@@ -49,7 +50,6 @@ public:
             g.setColour(Color2);
             g.fillPath(lowerPath);
         }
-
         else
         {
             // Draw the yellow upper half with rounded top corners
@@ -77,45 +77,39 @@ public:
             g.fillPath(lowerPath);
         }
 
-        juce::Font textFont(15.0f);
+        juce::Font textFont(18.0f);
         juce::String buttonText("F L I P");
-        
-        juce::AttributedString topString;
-        topString.append(buttonText, textFont, isActive ? Color2 : Color1);
-        topString.setJustification(juce::Justification::centred);
-        topString.draw(g, bounds.withHeight(bounds.getHeight() / 2).toFloat());
 
-        {
-            juce::Graphics::ScopedSaveState savedState(g);
-            
+        juce::Colour textColor = juce::Colours::black;;
+
+        if (!isActive) {
             g.setFont(textFont);
-            g.setColour(isActive ? Color1 : Color2);
+            g.setColour(textColor);
+            g.drawText(buttonText, bounds, juce::Justification::centred, false);
+        } else {
+            g.setFont(textFont);
+            g.setColour(textColor);
             
             float centerX = bounds.getCentreX();
-            float centerY = bounds.getCentreY() + bounds.getHeight() * 0.25f;
+            float centerY = bounds.getCentreY();
             
+            juce::Graphics::ScopedSaveState savedState(g);
             g.addTransform(juce::AffineTransform::rotation(juce::MathConstants<float>::pi, centerX, centerY));
-            
-            g.drawText("F L I P", bounds.withTrimmedTop(bounds.getHeight() / 2), 
-                       juce::Justification::centred, false);
+            g.drawText(buttonText, bounds, juce::Justification::centred, false);
         }
 
         g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.f));
         g.fillRoundedRectangle(bounds, 10.0f);
     
-        if (isActive)
-        {
+        if (isActive) {
             auto outlineBounds = bounds.reduced(0.5f);
             g.setColour(juce::Colours::grey);
             g.drawRoundedRectangle(outlineBounds, 10.0f, 1.5f);
-
-        if (isActive)
-        {
+            
             g.setColour(juce::Colours::grey);
             g.setOpacity(0.2f);
             g.fillRoundedRectangle(bounds, 10.0f);
             g.resetToDefaultState();
-        }
         }
     }
 };

@@ -31,10 +31,13 @@ public:
         g.setGradientFill(gradient);
         g.fillRoundedRectangle(bounds, 10.0f);
         
+        // Adjust the dice image size depending on button state
+        float scaleFactor = isActive ? 0.85f : 0.7f;  // Bigger when active
+        
         auto imageBounds = m_diceImage.getBounds().toFloat();
         imageBounds = imageBounds.withSizeKeepingCentre(
-            juce::jmin(bounds.getWidth() * 0.7f, bounds.getHeight() * 0.7f),
-            juce::jmin(bounds.getWidth() * 0.7f, bounds.getHeight() * 0.7f)
+            juce::jmin(bounds.getWidth() * scaleFactor, bounds.getHeight() * scaleFactor),
+            juce::jmin(bounds.getWidth() * scaleFactor, bounds.getHeight() * scaleFactor)
         );
         imageBounds = imageBounds.withCentre(bounds.getCentre());
         g.drawImage(m_diceImage, imageBounds);
