@@ -31,8 +31,7 @@ public:
         g.setGradientFill(gradient);
         g.fillRoundedRectangle(bounds, 10.0f);
         
-        // Adjust the dice image size depending on button state
-        float scaleFactor = isActive ? 0.85f : 0.7f;  // Bigger when active
+        float scaleFactor = isActive ? 0.85f : 0.7f;
         
         auto imageBounds = m_diceImage.getBounds().toFloat();
         imageBounds = imageBounds.withSizeKeepingCentre(
