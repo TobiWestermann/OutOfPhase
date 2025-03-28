@@ -133,7 +133,7 @@ void PhasePlot::paint(juce::Graphics& g)
 
         g.strokePath(PostPhasePath, juce::PathStrokeType(1.0f));
     }
-
+    
     if (mouseOver)
     {
         g.setColour(juce::Colours::white);

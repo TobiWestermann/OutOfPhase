@@ -83,6 +83,16 @@ public:
         return m_PostPhaseData;
 	}
 
+	void acquireLock()
+    {
+        dataMutex.enter();
+    }
+    
+    void releaseLock()
+    {
+        dataMutex.exit();
+    }
+	
 	void updateFrostPhaseData() {
 		juce::ScopedLock lock(dataMutex);
 		m_FrostPhaseData = m_PrePhaseData;
@@ -103,8 +113,13 @@ private:
 	spectrum m_fftprocess;
 	juce::AudioBuffer<float> m_realdata;
 	juce::AudioBuffer<float> m_imagdata;
+
 	std::vector<float> m_PrePhaseData;
 	std::vector<float> m_PostPhaseData;
+
+	std::vector<float> m_tempPrePhaseData;
+	std::vector<float> m_tempPostPhaseData;
+
 	std::vector<float> m_FrostPhaseData;
 	juce::CriticalSection dataMutex;
 };
@@ -113,7 +128,9 @@ class OutOfPhaseGUI : public juce::Component, public juce::Timer
 {
 public:
 	OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts);
+	~OutOfPhaseGUI();
 
+	void setBackgroundImages(const juce::Image& paintImg, const juce::Image& paperImg);
 	void paint(juce::Graphics& g) override;
 	void resized() override;
 	void parentHierarchyChanged() override;
@@ -124,6 +141,11 @@ public:
 private:
 	OutOfPhaseAudioProcessor& m_processor;
     juce::AudioProcessorValueTreeState& m_apvts; 
+
+	juce::Image m_paintImage;
+	juce::Image m_paperImage;
+	bool m_imagesLoaded = false;
+	std::unique_ptr<juce::Thread> m_imageLoadThread;
 
 	DiscreteSlider m_BlocksizeSlider;
 	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> BlocksizeSliderAttachment;
@@ -140,7 +162,4 @@ private:
 	RandomButton m_RandomModeTextButton;
 	FlipButton m_FlipModeTextButton;
 	DistributionSwitch m_DistributionSwitch;
-
-	juce::Image m_paintImage;
-	juce::Image m_paperImage;
 };

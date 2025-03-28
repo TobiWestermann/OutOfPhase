@@ -6,6 +6,34 @@
 #include "resources/images/paint_bin.h"
 #include "resources/images/paper_bin.h"
 
+class ImageLoadThread : public juce::Thread
+{
+public:
+    ImageLoadThread(OutOfPhaseGUI* gui) 
+        : juce::Thread("ImageLoadThread"), owner(gui) {}
+
+    void run() override;
+
+private:
+    OutOfPhaseGUI* owner;
+};
+
+void ImageLoadThread::run()
+{
+    auto paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
+    auto paperImage = juce::ImageFileFormat::loadFrom(paper_bin, paper_bin_len);
+
+    if (threadShouldExit())
+        return;
+
+    juce::MessageManager::callAsync([this, paintImg = std::move(paintImage), paperImg = std::move(paperImage)]()
+    {
+        if (owner != nullptr && !threadShouldExit()) {
+            owner->setBackgroundImages(paintImg, paperImg);
+        }
+    });
+}
+
 OutOfPhaseAudio::OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor)
 :WOLA(), m_processor(processor)
 {
@@ -14,38 +42,34 @@ OutOfPhaseAudio::OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor)
 void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, int max_channels)
 {
     juce::ScopedLock lock(dataMutex);
-    juce::ignoreUnused(sampleRate, max_samplesPerBlock,max_channels);
+    juce::ignoreUnused(max_samplesPerBlock);
+    juce::ignoreUnused(sampleRate);
 
     float desired_blocksize = *m_processor->m_parameterVTS->getRawParameterValue(g_paramBlocksize.ID);
-
-    int synchronblocksize;
-    synchronblocksize = static_cast<int>(round(desired_blocksize));
-    if (g_forcePowerOf2)
-    {
-        synchronblocksize = juce::nextPowerOfTwo(synchronblocksize);
-    }
-    m_synchronblocksize = synchronblocksize;
-
-    m_realdata.setSize(0, 0, false, false, false);
-    m_imagdata.setSize(0, 0, false, false, false);
-
-    prepareWOLAprocessing(max_channels,synchronblocksize,WOLA::WOLAType::SqrtHann_over50);
-    m_Latency += synchronblocksize;
-
-    m_fftprocess.setFFTSize(synchronblocksize);
-    m_realdata.setSize(max_channels,synchronblocksize/2+1);
-    m_imagdata.setSize(max_channels,synchronblocksize/2+1);
-
-    m_realdata.clear();
-    m_imagdata.clear();
-
-    initFrostPhaseData();
-
-    m_PrePhaseData.resize(synchronblocksize/2+1);
-    m_PostPhaseData.resize(synchronblocksize/2+1);
+    int synchronblocksize = static_cast<int>(round(desired_blocksize));
     
-    std::fill(m_PrePhaseData.begin(), m_PrePhaseData.end(), 0.0f);
-    std::fill(m_PostPhaseData.begin(), m_PostPhaseData.end(), 0.0f);
+    if (g_forcePowerOf2)
+        synchronblocksize = juce::nextPowerOfTwo(synchronblocksize);
+
+    // only resize if necessary 
+    if (synchronblocksize != m_synchronblocksize) {
+        m_synchronblocksize = synchronblocksize;
+        
+        prepareWOLAprocessing(max_channels, synchronblocksize, WOLA::WOLAType::SqrtHann_over50);
+        m_fftprocess.setFFTSize(synchronblocksize);
+        
+        
+        m_PrePhaseData = std::vector<float>(synchronblocksize/2+1, 0.0f);
+        m_PostPhaseData = std::vector<float>(synchronblocksize/2+1, 0.0f);
+        initFrostPhaseData();
+        
+        m_realdata.setSize(max_channels, synchronblocksize/2+1);
+        m_imagdata.setSize(max_channels, synchronblocksize/2+1);
+        m_realdata.clear();
+        m_imagdata.clear();
+    }
+    
+    m_Latency = synchronblocksize;
 }
 
 void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudioParameter>> &paramVector)
@@ -77,11 +101,15 @@ void OutOfPhaseAudio::prepareParameter(std::unique_ptr<juce::AudioProcessorValue
 
 int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffer &midiMessages)
 {
-    juce::ScopedLock lock(dataMutex);
     juce::ignoreUnused(midiMessages);
 
     if (data.getNumSamples() == 0 || m_synchronblocksize == 0)
         return 0;
+
+    if (m_tempPrePhaseData.size() != m_synchronblocksize/2+1) {
+        m_tempPrePhaseData.resize(m_synchronblocksize/2+1);
+        m_tempPostPhaseData.resize(m_synchronblocksize/2+1);
+    }
 
     float operatingMode = *m_processor->m_parameterVTS->getRawParameterValue(g_paramMode.ID);
     float dryWetMix = *m_processor->m_parameterVTS->getRawParameterValue(g_paramDryWet.ID);
@@ -109,10 +137,6 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
         auto imagPtr = m_imagdata.getWritePointer(cc);
         m_fftprocess.fft(dataPtr,realPtr,imagPtr);
 
-        std::vector<float> newPrePhaseData;
-        std::vector<float> newPostPhaseData;
-        newPrePhaseData.resize(m_synchronblocksize/2+1);
-        newPostPhaseData.resize(m_synchronblocksize/2+1);
         //m_FrostPhaseData.resize(m_synchronblocksize/2+1);
         //DBG("FrostPhaseData size: " << m_FrostPhaseData.size());
 
@@ -184,8 +208,8 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             realPtr[nn] = absval*cosf(PostPhase);
             imagPtr[nn] = absval*sinf(PostPhase);
 
-            newPrePhaseData[nn] = PrePhase;
-            newPostPhaseData[nn] = PostPhase;
+            m_tempPrePhaseData[nn] = PrePhase;
+            m_tempPostPhaseData[nn] = PostPhase;
         }
 
         // IFFT
@@ -200,12 +224,25 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
         
         for (int i = 0; i < numSamples; ++i)
             dataPtr[i] = dryPtr[i] * dryRatio + dataPtr[i] * wetRatio;
-        
-        m_PrePhaseData = newPrePhaseData;
-        m_PostPhaseData = newPostPhaseData;
     }
 
+    {
+        juce::ScopedLock lock(dataMutex);
+        std::swap(m_PrePhaseData, m_tempPrePhaseData);
+        std::swap(m_PostPhaseData, m_tempPostPhaseData);
+    }
+
+
     return 0;
+}
+
+OutOfPhaseGUI::~OutOfPhaseGUI()
+{
+    if (m_imageLoadThread != nullptr)
+    {
+        m_imageLoadThread->stopThread(1000);
+        m_imageLoadThread = nullptr;
+    }
 }
 
 OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts)
@@ -305,27 +342,37 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
         m_DistributionSwitch.setVisible(false);
     }
 
-    m_paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
-    m_paperImage = juce::ImageFileFormat::loadFrom(paper_bin, paper_bin_len);
+    m_imageLoadThread = std::make_unique<ImageLoadThread>(this);
+    m_imageLoadThread->startThread();
 
     resized();
+}
+
+void OutOfPhaseGUI::setBackgroundImages(const juce::Image& paintImg, const juce::Image& paperImg)
+{
+    m_paintImage = paintImg;
+    m_paperImage = paperImg;
+    m_imagesLoaded = true;
+    repaint();
 }
 
 void OutOfPhaseGUI::paint(juce::Graphics &g)
 {
     g.fillAll (juce::Colours::bisque);
 
-    g.drawImageWithin(m_paperImage, 0, 0, getWidth(), getHeight(),
-                       juce::RectanglePlacement::fillDestination);
+    if (m_imagesLoaded) {
+        g.drawImageWithin(m_paperImage, 0, 0, getWidth(), getHeight(),
+                          juce::RectanglePlacement::fillDestination);
 
-    g.drawImageWithin(m_paintImage, static_cast<int>(-getWidth() / 4), static_cast<int>(getHeight() * 0.84), getWidth(), static_cast<int>(getHeight() / 4),
-                       juce::RectanglePlacement::fillDestination);
-    
+        g.drawImageWithin(m_paintImage, static_cast<int>(-getWidth() / 4), 
+                          static_cast<int>(getHeight() * 0.84), getWidth(), 
+                          static_cast<int>(getHeight() / 4),
+                          juce::RectanglePlacement::fillDestination);
 
-    
-    g.drawImageWithin(m_paintImage, static_cast<int>(getWidth() - getWidth() * 0.7), static_cast<int>(-getHeight() / 3), getWidth(), getHeight(),
-    juce::RectanglePlacement::fillDestination);
-    
+        g.drawImageWithin(m_paintImage, static_cast<int>(getWidth() - getWidth() * 0.7), 
+                          static_cast<int>(-getHeight() / 3), getWidth(), getHeight(),
+                          juce::RectanglePlacement::fillDestination);
+    }
 
     g.setColour (juce::Colours::darkslategrey);
     g.setFont (12.0f * m_processor.getScaleFactor());
@@ -409,34 +456,25 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
 
     juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
     g.drawFittedText (text2display, getLocalBounds(), juce::Justification::bottomLeft, 1);
-
-    auto shadowBounds = m_FrostModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
+    
+    // create shadow path
+    juce::Path shadowPath;
     juce::DropShadow shadow(juce::Colours::black.withAlpha(0.3f), 5, { 0, 2 });
-    juce::Path roundedRect;
-    roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 10.0f
     
-    shadowBounds = m_RandomModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
-    roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 10.0f
+    // add rounded rectangles for buttons
+    shadowPath.addRoundedRectangle(m_FrostModeTextButton.getBounds().toFloat().expanded(2.0f), 10.0f);
+    shadowPath.addRoundedRectangle(m_RandomModeTextButton.getBounds().toFloat().expanded(2.0f), 10.0f);
+    shadowPath.addRoundedRectangle(m_ZeroModeTextButton.getBounds().toFloat().expanded(2.0f), 10.0f);
+    shadowPath.addRoundedRectangle(m_FlipModeTextButton.getBounds().toFloat().expanded(2.0f), 10.0f);
     
-    shadowBounds = m_ZeroModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
-    roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 10.0f
-
-    shadowBounds = m_FlipModeTextButton.getBounds().toFloat().expanded(2.0f); // Expand for shadow
-    roundedRect.addRoundedRectangle(shadowBounds, 10.0f); // Add rounded rectangle with corner radius 5.0f
+    // add rectangles for sliders and plots
+    shadowPath.addRectangle(m_PrePhasePlot.getBounds().toFloat().expanded(2.0f));
+    shadowPath.addRectangle(m_PostPhasePlot.getBounds().toFloat().expanded(2.0f));
     
-    shadowBounds = m_PrePhasePlot.getBounds().toFloat().expanded(2.0f); // Expand for shadow
-    roundedRect.addRectangle(shadowBounds); // Add rounded rectangle with corner radius 5.0f
-
-    shadowBounds = m_PostPhasePlot.getBounds().toFloat().expanded(2.0f); // Expand for shadow
-    roundedRect.addRectangle(shadowBounds); // Add rounded rectangle with corner radius 5.0f
-
     if (m_DistributionSwitch.isVisible()) {
-        shadowBounds = m_DistributionSwitch.getBounds().toFloat().expanded(2.0f);
-        roundedRect.addRoundedRectangle(shadowBounds, 5.0f); // Smaller corner radius for the switch
+        shadowPath.addRoundedRectangle(m_DistributionSwitch.getBounds().toFloat().expanded(2.0f), 5.0f);
     }
-
-    shadow.drawForPath(g, roundedRect);
-
+    shadow.drawForPath(g, shadowPath);
 }
 
 void OutOfPhaseGUI::resized() {
@@ -504,22 +542,28 @@ void OutOfPhaseGUI::updateModeButtonStates()
     m_RandomModeTextButton.setToggleState(currentMode == 2.0f, juce::dontSendNotification);
     m_FlipModeTextButton.setToggleState(currentMode == 3.0f, juce::dontSendNotification);
     
-    if (currentMode == 2.0f) {
-        m_DistributionSwitch.setVisible(true);
-        bool isGaussian = m_processor.m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID)->load() == 1;
-        m_DistributionSwitch.setToggleState(isGaussian, juce::dontSendNotification);
-    } else {
-        m_DistributionSwitch.setVisible(false);
+    bool isRandomMode = (currentMode == 2.0f);
+    if (m_DistributionSwitch.isVisible() != isRandomMode) {
+        m_DistributionSwitch.setVisible(isRandomMode);
+        
+        if (isRandomMode) {
+            bool isGaussian = m_processor.m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID)->load() == 1;
+            m_DistributionSwitch.setToggleState(isGaussian, juce::dontSendNotification);
+        }
     }
 }
 
 void OutOfPhaseGUI::timerCallback()
 {
-    std::vector<float> PrePhaseDataPlot = m_processor.m_algo.getPrePhaseData();
-    std::vector<float> PostPhaseDataPlot = m_processor.m_algo.getPostPhaseData();
-    m_PrePhasePlot.setPrePhaseData(PrePhaseDataPlot);
-    m_PostPhasePlot.setPostPhaseData(PostPhaseDataPlot);
-
+    std::vector<float> prePhaseDataCopy;
+    std::vector<float> postPhaseDataCopy;
+    
+    prePhaseDataCopy = m_processor.m_algo.getPrePhaseData();
+    postPhaseDataCopy = m_processor.m_algo.getPostPhaseData();
+    
+    m_PrePhasePlot.setPrePhaseData(std::move(prePhaseDataCopy));
+    m_PostPhasePlot.setPostPhaseData(std::move(postPhaseDataCopy));
+    
     updateModeButtonStates();
     
     repaint();
