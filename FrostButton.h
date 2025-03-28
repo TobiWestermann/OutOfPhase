@@ -63,7 +63,7 @@ void clicked() override
     Button::clicked();
     
     if (getToggleState()) {
-        startTimerHz(30);
+        startTimerHz(60);
     } else {
 
         stopTimer();

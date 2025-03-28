@@ -333,6 +333,14 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
             m_DistributionSwitch.getToggleState() ? 1 : 0;
     };
 
+    m_FreezeCaptureButton.onClick = [this]()
+    {
+        m_processor.m_algo.updateFrostPhaseData();
+        m_FreezeCaptureButton.triggerFlash();
+    };
+    addAndMakeVisible(m_FreezeCaptureButton);
+    m_FreezeCaptureButton.setVisible(false);
+
     float initialMode = m_processor.m_parameterVTS->getRawParameterValue(g_paramMode.ID)->load();
     if (initialMode == 2.0f) {
         m_DistributionSwitch.setVisible(true);
@@ -454,6 +462,7 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
             juce::Justification::centred);
     }
 
+
     juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
     g.drawFittedText (text2display, getLocalBounds(), juce::Justification::bottomLeft, 1);
     
@@ -474,6 +483,12 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     if (m_DistributionSwitch.isVisible()) {
         shadowPath.addRoundedRectangle(m_DistributionSwitch.getBounds().toFloat().expanded(2.0f), 5.0f);
     }
+
+    if (m_FreezeCaptureButton.isVisible())
+    {
+        shadowPath.addRoundedRectangle(m_FreezeCaptureButton.getBounds().toFloat().expanded(2.0f), 5.0f);
+    }
+
     shadow.drawForPath(g, shadowPath);
 }
 
@@ -511,10 +526,16 @@ void OutOfPhaseGUI::resized() {
     float buttonsStartX = static_cast<float>(getWidth() / 2 - buttonWidth - buttonSpacing / 2);
     float buttonsStartY = static_cast<float>(getHeight() / 2 + distance / 2);
 
-    m_FrostModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
+    m_FlipModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
     m_RandomModeTextButton.setBounds(static_cast<int>(buttonsStartX), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
     m_ZeroModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY), buttonWidth, buttonHeight);
-    m_FlipModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
+    m_FrostModeTextButton.setBounds(static_cast<int>(buttonsStartX + buttonWidth + buttonSpacing), static_cast<int>(buttonsStartY + buttonHeight + buttonSpacing), buttonWidth, buttonHeight);
+
+    int freezeWidth = static_cast<int>(buttonWidth * 0.7);
+    int freezeHeight = static_cast<int>(buttonHeight * 0.4);
+    int freezeX = m_FrostModeTextButton.getX() + (m_FrostModeTextButton.getWidth() - freezeWidth) / 2;
+    int freezeY = m_FrostModeTextButton.getBottom() + static_cast<int>(25 * scaleFactor);
+    m_FreezeCaptureButton.setBounds(freezeX, freezeY, freezeWidth, freezeHeight);
 
     int switchWidth = static_cast<int>(buttonWidth * 0.7);
     int switchHeight = static_cast<int>(buttonHeight * 0.4);
@@ -523,13 +544,19 @@ void OutOfPhaseGUI::resized() {
     m_DistributionSwitch.setBounds(switchX, switchY, switchWidth, switchHeight);
 
     float currentMode = m_processor.m_parameterVTS->getRawParameterValue(g_paramMode.ID)->load();
-    bool shouldBeVisible = (currentMode == 2.0f);
-    if (m_DistributionSwitch.isVisible() != shouldBeVisible) {
-        m_DistributionSwitch.setVisible(shouldBeVisible);
-        if (shouldBeVisible) {
+    bool randomMode = (currentMode == 2.0f);
+    bool frostMode = (currentMode == 1.0f);
+    
+    if (m_DistributionSwitch.isVisible() != randomMode) {
+        m_DistributionSwitch.setVisible(randomMode);
+        if (randomMode) {
             bool isGaussian = m_processor.m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID)->load() == 1;
             m_DistributionSwitch.setToggleState(isGaussian, juce::dontSendNotification);
         }
+    }
+    
+    if (m_FreezeCaptureButton.isVisible() != frostMode) {
+        m_FreezeCaptureButton.setVisible(frostMode);
     }
 };
 
@@ -550,6 +577,11 @@ void OutOfPhaseGUI::updateModeButtonStates()
             bool isGaussian = m_processor.m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID)->load() == 1;
             m_DistributionSwitch.setToggleState(isGaussian, juce::dontSendNotification);
         }
+    }
+
+    bool isFrostMode = (currentMode == 1.0f);
+    if (m_FreezeCaptureButton.isVisible() != isFrostMode) {
+        m_FreezeCaptureButton.setVisible(isFrostMode);
     }
 }
 

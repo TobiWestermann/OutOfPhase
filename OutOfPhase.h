@@ -16,6 +16,7 @@
 #include "ZeroButton.h"
 #include "FlipButton.h"
 #include "DistributionSwitch.h"
+#include "FreezeCaptureButton.h"
 
 class OutOfPhaseAudioProcessor;
 
@@ -162,4 +163,5 @@ private:
 	RandomButton m_RandomModeTextButton;
 	FlipButton m_FlipModeTextButton;
 	DistributionSwitch m_DistributionSwitch;
+	FreezeCaptureButton m_FreezeCaptureButton;
 };
