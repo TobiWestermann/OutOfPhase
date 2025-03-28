@@ -2,10 +2,13 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
-class FlipButton : public juce::Button
+class FlipButton : public juce::Button, private juce::Timer
 {
 public:
-    FlipButton() : juce::Button("FlipButton")
+    FlipButton() : juce::Button("FlipButton"), 
+                   rotationAngle(0.0f), 
+                   targetAngle(0.0f), 
+                   wavePosition(-1.0f)
     {
         setClickingTogglesState(true);
         setTooltip("Inverts the phase of all components (multiplies by -1).");
@@ -27,7 +30,7 @@ public:
         if (isActive)
         {
             // Draw the yellow upper half with rounded top corners
-            Path upperPath;
+            juce::Path upperPath;
             upperPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
             upperPath.lineTo(bounds.getX(), bounds.getY() + cornerSize);
             upperPath.quadraticTo(bounds.getX(), bounds.getY(), bounds.getX() + cornerSize, bounds.getY());
@@ -39,7 +42,7 @@ public:
             g.fillPath(upperPath);
 
             // Draw the red bottom half with rounded bottom corners
-            Path lowerPath;
+            juce::Path lowerPath;
             lowerPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
             lowerPath.lineTo(bounds.getX(), bounds.getBottom() - cornerSize);
             lowerPath.quadraticTo(bounds.getX(), bounds.getBottom(), bounds.getX() + cornerSize, bounds.getBottom());
@@ -52,8 +55,8 @@ public:
         }
         else
         {
-            // Draw the yellow upper half with rounded top corners
-            Path upperPath;
+            // Draw the red upper half with rounded top corners
+            juce::Path upperPath;
             upperPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
             upperPath.lineTo(bounds.getX(), bounds.getY() + cornerSize);
             upperPath.quadraticTo(bounds.getX(), bounds.getY(), bounds.getX() + cornerSize, bounds.getY());
@@ -64,8 +67,8 @@ public:
             g.setColour(Color2);
             g.fillPath(upperPath);
 
-            // Draw the red bottom half with rounded bottom corners
-            Path lowerPath;
+            // Draw the yellow bottom half with rounded bottom corners
+            juce::Path lowerPath;
             lowerPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
             lowerPath.lineTo(bounds.getX(), bounds.getBottom() - cornerSize);
             lowerPath.quadraticTo(bounds.getX(), bounds.getBottom(), bounds.getX() + cornerSize, bounds.getBottom());
@@ -77,24 +80,36 @@ public:
             g.fillPath(lowerPath);
         }
 
-        juce::Font textFont(18.0f);
+        if (wavePosition >= 0.0f && wavePosition <= 1.0f) {
+            float waveX = bounds.getX() + bounds.getWidth() * wavePosition;
+            float waveWidth = bounds.getWidth() * 0.2f;
+            
+            juce::ColourGradient waveGradient(
+                juce::Colours::white.withAlpha(0.6f), waveX, bounds.getY(),
+                juce::Colours::white.withAlpha(0.0f), waveX - waveWidth/2, bounds.getY(),
+                false
+            );
+            waveGradient.addColour(0.8, juce::Colours::white.withAlpha(0.0f));
+            
+            g.setGradientFill(waveGradient);
+            g.fillRect(waveX - waveWidth/2, bounds.getY(), waveWidth, bounds.getHeight());
+        }
+
+        juce::Font textFont(20.0f);
+        textFont.setBold(true);
         juce::String buttonText("F L I P");
+        juce::Colour textColor = juce::Colours::black;
 
-        juce::Colour textColor = juce::Colours::black;;
-
-        if (!isActive) {
-            g.setFont(textFont);
-            g.setColour(textColor);
-            g.drawText(buttonText, bounds, juce::Justification::centred, false);
-        } else {
-            g.setFont(textFont);
-            g.setColour(textColor);
-            
-            float centerX = bounds.getCentreX();
-            float centerY = bounds.getCentreY();
-            
+        float centerX = bounds.getCentreX();
+        float centerY = bounds.getCentreY();
+        
+        {
             juce::Graphics::ScopedSaveState savedState(g);
-            g.addTransform(juce::AffineTransform::rotation(juce::MathConstants<float>::pi, centerX, centerY));
+            
+            g.addTransform(juce::AffineTransform::rotation(rotationAngle, centerX, centerY));
+            
+            g.setFont(textFont);
+            g.setColour(textColor);
             g.drawText(buttonText, bounds, juce::Justification::centred, false);
         }
 
@@ -102,6 +117,7 @@ public:
         g.fillRoundedRectangle(bounds, 10.0f);
     
         if (isActive) {
+
             auto outlineBounds = bounds.reduced(0.5f);
             g.setColour(juce::Colours::grey);
             g.drawRoundedRectangle(outlineBounds, 10.0f, 1.5f);
@@ -111,5 +127,38 @@ public:
             g.fillRoundedRectangle(bounds, 10.0f);
             g.resetToDefaultState();
         }
+    }
+
+    void clicked() override
+    {
+        Button::clicked();
+        
+        targetAngle = getToggleState() ? juce::MathConstants<float>::pi : 0.0f;
+        wavePosition = 0.0f;
+        startTimerHz(60);
+    }
+    
+private:
+    float rotationAngle;
+    float targetAngle;
+    float wavePosition;
+    
+    void timerCallback() override
+    {
+        const float rotationSpeed = 0.15f;
+        const float waveSpeed = 0.05f;
+        
+        float angleDiff = targetAngle - rotationAngle;
+        rotationAngle += angleDiff * rotationSpeed;
+        
+        wavePosition += waveSpeed;
+        
+        if (std::abs(angleDiff) < 0.01f && wavePosition > 1.0f) {
+            rotationAngle = targetAngle;
+            wavePosition = -1.0f;
+            stopTimer();
+        }
+        
+        repaint();
     }
 };
