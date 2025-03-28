@@ -8,7 +8,8 @@ public:
     FlipButton() : juce::Button("FlipButton"), 
                    rotationAngle(0.0f), 
                    targetAngle(0.0f), 
-                   wavePosition(-1.0f)
+                   wavePosition(-1.0f),
+                   waveMovingLeftToRight(true)
     {
         setClickingTogglesState(true);
         setTooltip("Inverts the phase of all components (multiplies by -1).");
@@ -81,12 +82,16 @@ public:
         }
 
         if (wavePosition >= 0.0f && wavePosition <= 1.0f) {
-            float waveX = bounds.getX() + bounds.getWidth() * wavePosition;
+            float effectivePosition = waveMovingLeftToRight ? wavePosition : (1.0f - wavePosition);
+            float waveX = bounds.getX() + bounds.getWidth() * effectivePosition;
             float waveWidth = bounds.getWidth() * 0.2f;
             
+            float gradientStart = waveX;
+            float gradientEnd = waveMovingLeftToRight ? (waveX - waveWidth/2) : (waveX + waveWidth/2);
+            
             juce::ColourGradient waveGradient(
-                juce::Colours::white.withAlpha(0.6f), waveX, bounds.getY(),
-                juce::Colours::white.withAlpha(0.0f), waveX - waveWidth/2, bounds.getY(),
+                juce::Colours::white.withAlpha(0.6f), gradientStart, bounds.getY(),
+                juce::Colours::white.withAlpha(0.0f), gradientEnd, bounds.getY(),
                 false
             );
             waveGradient.addColour(0.8, juce::Colours::white.withAlpha(0.0f));
@@ -131,10 +136,12 @@ public:
 
     void clicked() override
     {
+        bool newState = !getToggleState();
         Button::clicked();
         
         targetAngle = getToggleState() ? juce::MathConstants<float>::pi : 0.0f;
         wavePosition = 0.0f;
+        waveMovingLeftToRight = !newState;
         startTimerHz(60);
     }
     
@@ -142,6 +149,7 @@ private:
     float rotationAngle;
     float targetAngle;
     float wavePosition;
+    bool waveMovingLeftToRight; // Controls wave direction
     
     void timerCallback() override
     {

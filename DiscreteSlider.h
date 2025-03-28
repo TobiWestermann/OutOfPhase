@@ -1,18 +1,19 @@
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include "CustomSlider.h"
 
-class DiscreteSlider : public juce::Slider
+class DiscreteSlider : public CustomSlider
 {
 public:
-    DiscreteSlider() : juce::Slider()
+    DiscreteSlider() : CustomSlider()
     {
-        setScrollWheelEnabled(true);
+        setNumDecimalPlacesToDisplay(0);
+        // setPopupDisplayEnabled(true, true, getParentComponent(), 300);
     }
 
     double snapValue(double attemptedValue, juce::Slider::DragMode) override
     {
-        constexpr std::array<double, 6> values = { 256, 512, 1024, 2048, 4096, 8192}; // Custom values
+        constexpr std::array<double, 6> values = { 256, 512, 1024, 2048, 4096, 8192};
 
         auto closest = *std::min_element(values.begin(), values.end(),
             [attemptedValue](double a, double b)

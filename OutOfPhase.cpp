@@ -253,12 +253,7 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     
     startTimerHz(30); // 30 Hz update rate
 
-    m_BlocksizeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    m_BlocksizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
     m_BlocksizeSlider.setDoubleClickReturnValue(true, 512);
-    m_BlocksizeSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
-    m_BlocksizeSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::lightgrey);
-    m_BlocksizeSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::lightgrey);
     addAndMakeVisible(m_BlocksizeSlider);
     BlocksizeSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         *m_processor.m_parameterVTS, g_paramBlocksize.ID, m_BlocksizeSlider);
@@ -276,13 +271,8 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
         m_processor.suspendProcessing(false);
     };
 
-    m_DryWetSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    m_DryWetSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
     m_DryWetSlider.setNumDecimalPlacesToDisplay(2);
     m_DryWetSlider.setDoubleClickReturnValue(true, 0.5f);
-    m_DryWetSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
-    m_DryWetSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::lightgrey);
-    m_DryWetSlider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::lightgrey);
     DryWetSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         *m_processor.m_parameterVTS, g_paramDryWet.ID, m_DryWetSlider);
     addAndMakeVisible(m_DryWetSlider);
