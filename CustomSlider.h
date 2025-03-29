@@ -24,7 +24,7 @@ public:
         
         setLookAndFeel(&customLookAndFeel);
     }
-    
+
     ~CustomSlider() override
     {
         setLookAndFeel(nullptr);

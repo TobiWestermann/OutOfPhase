@@ -143,16 +143,17 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
     
     int lowBin = 0;
     int highBin = m_synchronblocksize / 2;
+    double sampleRate = m_processor->getSampleRate();
+    
+    int transitionWidth = 3;
 
     if (bandModeActive) {
-        double sampleRate = m_processor->getSampleRate();
         lowBin = static_cast<int>(std::floor(lowFreq * m_synchronblocksize / sampleRate));
         highBin = static_cast<int>(std::ceil(highFreq * m_synchronblocksize / sampleRate));
         
         lowBin = juce::jlimit(0, m_synchronblocksize / 2, lowBin);
         highBin = juce::jlimit(0, m_synchronblocksize / 2, highBin);
     }
-
     int numchns = data.getNumChannels();
     int numSamples = data.getNumSamples();
 
@@ -168,93 +169,117 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
 
     for (int cc = 0 ; cc < numchns; cc++)
     {
-
-    // FFT 
+        // FFT 
         auto dataPtr = data.getWritePointer(cc);
         auto realPtr = m_realdata.getWritePointer(cc);
         auto imagPtr = m_imagdata.getWritePointer(cc);
-        m_fftprocess.fft(dataPtr,realPtr,imagPtr);
+        m_fftprocess.fft(dataPtr, realPtr, imagPtr);
 
-        //m_FrostPhaseData.resize(m_synchronblocksize/2+1);
-        //DBG("FrostPhaseData size: " << m_FrostPhaseData.size());
-
-        for (int nn = 0; nn< m_synchronblocksize/2+1; nn++)
+        for (int nn = 0; nn < m_synchronblocksize/2+1; nn++)
         {
             float absval = sqrtf(realPtr[nn]*realPtr[nn] + imagPtr[nn]*imagPtr[nn]);
-            float PrePhase = atan2f(imagPtr[nn],realPtr[nn]);
-            float PostPhase = atan2f(imagPtr[nn],realPtr[nn]);
+            float PrePhase = atan2f(imagPtr[nn], realPtr[nn]);
+            float PostPhase = atan2f(imagPtr[nn], realPtr[nn]);
 
-            if (!bandModeActive || (nn >= lowBin && nn <= highBin)) {
-                if (operatingMode == 0) // zero
-                {
-                    PostPhase = 0;
+            float effectWeight = 1.0f;
+            
+            if (bandModeActive) {
+                effectWeight = 0.0f;
+                
+                if (nn >= lowBin && nn <= highBin) {
+                    effectWeight = 1.0f;
                 }
-                else if (operatingMode == 1) // frost
+                
+                if (nn < lowBin + transitionWidth && nn >= lowBin - transitionWidth) {
+
+                    effectWeight = juce::jmap<float>(static_cast<float>(nn), 
+                                                    static_cast<float>(lowBin - transitionWidth), 
+                                                    static_cast<float>(lowBin + transitionWidth), 
+                                                    0.0f, 1.0f);
+                    effectWeight = juce::jlimit(0.0f, 1.0f, effectWeight);
+                }
+                else if (nn > highBin - transitionWidth && nn <= highBin + transitionWidth) {
+
+                    effectWeight = juce::jmap<float>(static_cast<float>(nn), 
+                                                    static_cast<float>(highBin - transitionWidth), 
+                                                    static_cast<float>(highBin + transitionWidth), 
+                                                    1.0f, 0.0f);
+                    effectWeight = juce::jlimit(0.0f, 1.0f, effectWeight);
+                }
+            }
+
+            float originalPhase = PostPhase;
+            float processedPhase = PostPhase;
+            
+            // phase processing based on operating mode
+            if (operatingMode == 0)
+            {
+                processedPhase = 0;
+            }
+            else if (operatingMode == 1) // frost
+            {
+                if (nn < m_FrostPhaseData.size())
                 {
-                    if (nn < m_FrostPhaseData.size())
+                    processedPhase = m_FrostPhaseData[nn];
+                }
+                else
+                {
+                    processedPhase = 0.0f;
+                }
+            }
+            else if (operatingMode == 2) // random
+            {
+                float DistributionModeID = *m_processor->m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID);
+                if (DistributionModeID == 0) // Uniform
+                {
+                    processedPhase = (juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f) * juce::MathConstants<float>::pi;
+                }
+                else if (DistributionModeID == 1) // Gaussian
+                {
+                    static float nextGaussian = 0.0f;
+                    static bool hasNextGaussian = false;
+                    
+                    if (hasNextGaussian)
                     {
-                        PostPhase = m_FrostPhaseData[nn];
+                        processedPhase = nextGaussian * juce::MathConstants<float>::pi;
+                        hasNextGaussian = false;
                     }
                     else
                     {
-                        PostPhase = 0.0f; // Default value if out of bounds
-                    }
-                }
-                else if (operatingMode == 2) // random
-                {
-                    float DistributionModeID = *m_processor->m_parameterVTS->getRawParameterValue(g_paramDistributionMode.ID);
-                    if (DistributionModeID == 0) // Uniform
-                    {
-                        PostPhase = (juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f) * juce::MathConstants<float>::pi;
-                    }
-                    else if (DistributionModeID == 1) // Gaussian
-                    {
-                        static float nextGaussian = 0.0f;
-                        static bool hasNextGaussian = false;
+                        float u1, u2, s;
+                        do
+                        {
+                            u1 = juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f;
+                            u2 = juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f;
+                            s = u1 * u1 + u2 * u2;
+                        } while (s >= 1.0f || s == 0.0f);
                         
-                        if (hasNextGaussian)
-                        {
-                            PostPhase = nextGaussian * juce::MathConstants<float>::pi; // scale to full -π to π range
-                            hasNextGaussian = false;
-                        }
-                        else
-                        {
-                            float u1, u2, s;
-                            do
-                            {
-                                u1 = juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f;
-                                u2 = juce::Random::getSystemRandom().nextFloat() * 2.0f - 1.0f;
-                                s = u1 * u1 + u2 * u2;
-                            } while (s >= 1.0f || s == 0.0f);
-                            
-                            s = sqrtf(-2.0f * logf(s) / s);
-                            nextGaussian = u2 * s;
-                            float concentration = 0.5f; // adjust to control concentration of the Gaussian distribution
-                            PostPhase = u1 * s * juce::MathConstants<float>::pi * concentration; // scale to full -π to π range
-                            hasNextGaussian = true;
-                        }
-
-                        PostPhase = juce::jlimit(-juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, PostPhase);
+                        s = sqrtf(-2.0f * logf(s) / s);
+                        nextGaussian = u2 * s;
+                        float concentration = 0.5f;
+                        processedPhase = u1 * s * juce::MathConstants<float>::pi * concentration;
+                        hasNextGaussian = true;
                     }
-                }
-                else if (operatingMode == 3) // flip
-                {
-                    //PostPhase = fmod(PostPhase + juce::MathConstants<float>::pi, juce::MathConstants<float>::pi);
-                    PostPhase = -PostPhase;
+
+                    processedPhase = juce::jlimit(-juce::MathConstants<float>::pi, juce::MathConstants<float>::pi, processedPhase);
                 }
             }
-            // rück
-            realPtr[nn] = absval*cosf(PostPhase);
-            imagPtr[nn] = absval*sinf(PostPhase);
+            else if (operatingMode == 3) // flip
+            {
+                processedPhase = -processedPhase;
+            }
+            
+            PostPhase = originalPhase * (1.0f - effectWeight) + processedPhase * effectWeight;
+            
+            realPtr[nn] = absval * cosf(PostPhase);
+            imagPtr[nn] = absval * sinf(PostPhase);
 
             m_tempPrePhaseData[nn] = PrePhase;
             m_tempPostPhaseData[nn] = PostPhase;
         }
 
-        // IFFT
-        m_fftprocess.ifft(realPtr,imagPtr, dataPtr);
+        m_fftprocess.ifft(realPtr, imagPtr, dataPtr);
 
-        // Apply dry/wet mix
         auto dryPtr = dryBuffer.getReadPointer(cc);
         
         float wetRatio = dryWetMix;

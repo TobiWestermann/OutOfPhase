@@ -11,99 +11,186 @@ public:
         setClickingTogglesState(true);
         setTooltip("Sets all phase components to zero.");
         
-        for (int i = 0; i < 5; ++i) {
-            wavePositions[i] = i * 0.2f;
+        for (int i = 0; i < numWaves; ++i) {
+            wavePositions[i] = i * (1.0f / numWaves);
         }
+        
+        startTimerHz(60);
+    }
+
+    ~ZeroButton() override
+    {
+        stopTimer();
     }
 
     void paintButton(juce::Graphics& g, bool isMouseOverButton, bool isButtonDown) override
     {
-        juce::ignoreUnused(isButtonDown);
-        
         bool isActive = getToggleState();
         auto bounds = getLocalBounds().toFloat();
         auto center = bounds.getCentre();
         
-        g.setColour(isActive ? juce::Colours::white.darker(0.05f) : juce::Colours::white);
+        juce::Colour baseColor = isActive ? juce::Colours::dodgerblue.darker(0.2f) 
+                                         : juce::Colours::lightgrey;
+        
+        if (isActive) {
+            g.setGradientFill(juce::ColourGradient(
+                baseColor.brighter(0.1f),
+                bounds.getX(), bounds.getY(),
+                baseColor.darker(0.2f),
+                bounds.getRight(), bounds.getBottom(),
+                false
+            ));
+        } else {
+            g.setGradientFill(juce::ColourGradient(
+                juce::Colours::white.brighter(0.1f),
+                bounds.getX(), bounds.getY(),
+                juce::Colours::lightgrey.darker(0.1f),
+                bounds.getRight(), bounds.getBottom(),
+                false
+            ));
+        }
+        
+        g.fillRoundedRectangle(bounds, 10.0f);
+        
+        g.setGradientFill(juce::ColourGradient(
+            juce::Colours::black.withAlpha(0.2f),
+            bounds.getX(), bounds.getY(),
+            juce::Colours::transparentBlack,
+            bounds.getX(), bounds.getY() + bounds.getHeight() * 0.15f,
+            false
+        ));
+        g.fillRoundedRectangle(bounds, 10.0f);
+        
+        g.setGradientFill(juce::ColourGradient(
+            juce::Colours::transparentWhite,
+            bounds.getX(), bounds.getBottom() - bounds.getHeight() * 0.15f,
+            juce::Colours::white.withAlpha(0.1f),
+            bounds.getX(), bounds.getBottom(),
+            false
+        ));
         g.fillRoundedRectangle(bounds, 10.0f);
         
         if (isActive) {
-            const float maxRadius = bounds.getWidth() * 0.7f;
+            float centerGlowSize = bounds.getWidth() * 0.25f;
+            g.setGradientFill(juce::ColourGradient(
+                juce::Colours::white.withAlpha(0.7f),
+                center.x, center.y,
+                juce::Colours::white.withAlpha(0.0f),
+                center.x + centerGlowSize, center.y,
+                true
+            ));
+            g.fillEllipse(center.x - centerGlowSize, center.y - centerGlowSize, 
+                          centerGlowSize * 2.0f, centerGlowSize * 2.0f);
             
-            for (int i = 0; i < 5; ++i) {
+            // expanding waves (active state)
+            const float maxRadius = bounds.getWidth() * 0.7f;
+            for (int i = 0; i < numWaves; ++i) {
                 float position = wavePositions[i];
                 float radius = position * maxRadius;
                 
-                float alpha = 0.6f * (1.0f - position);
+                float alpha = 0.7f * (1.0f - position);
+                juce::Colour waveColor = juce::Colours::dodgerblue.withAlpha(alpha);
                 
-                juce::Colour circleColor = juce::Colours::dodgerblue.withAlpha(alpha);
-                g.setColour(circleColor);
+                g.setColour(waveColor);
+                float thickness = 3.0f + 2.0f * (1.0f - position);
                 
-                float ringThickness = 6.0f;
                 g.drawEllipse(
                     center.x - radius, 
                     center.y - radius, 
                     radius * 2.0f, 
                     radius * 2.0f,
-                    ringThickness
+                    thickness
                 );
             }
         } else {
-            juce::ColourGradient gradient(
-                juce::Colours::white,
-                center.x, center.y,
-                juce::Colours::lightblue.withAlpha(0.7f),
-                bounds.getRight(), bounds.getBottom(),
-                true
-            );
+            float innerRadius = bounds.getWidth() * 0.15f;
+            float outerRadius = bounds.getWidth() * 0.25f;
             
-            g.setGradientFill(gradient);
-            g.fillRoundedRectangle(bounds, 10.0f);
+            float pulse = 0.5f + 0.5f * std::sin(inactivePhase * 0.5f);
+            float innerAlpha = 0.2f + 0.1f * pulse;
+            float outerAlpha = 0.1f + 0.05f * pulse;
+            
+            g.setColour(juce::Colours::darkslategrey.withAlpha(outerAlpha));
+            g.drawEllipse(center.x - outerRadius, center.y - outerRadius,
+                         outerRadius * 2.0f, outerRadius * 2.0f, 1.5f);
+            
+            g.setColour(juce::Colours::darkslategrey.withAlpha(innerAlpha));
+            g.drawEllipse(center.x - innerRadius, center.y - innerRadius,
+                         innerRadius * 2.0f, innerRadius * 2.0f, 1.2f);
+            
+            for (int i = 0; i < 6; i++) {
+                float angle = i * juce::MathConstants<float>::pi / 3.0f + rotationAngle;
+                float x1 = center.x + std::cos(angle) * innerRadius;
+                float y1 = center.y + std::sin(angle) * innerRadius;
+                float x2 = center.x + std::cos(angle) * outerRadius;
+                float y2 = center.y + std::sin(angle) * outerRadius;
+                
+                g.setColour(juce::Colours::darkslategrey.withAlpha(0.15f));
+                g.drawLine(x1, y1, x2, y2, 1.0f);
+            }
         }
-
-        float fontSize = isActive ? 26.0f : 20.0f;
+        
+        float fontSize = isActive ? 32.0f : 24.0f;
         g.setFont(juce::Font(fontSize).boldened());
-        g.setColour(juce::Colours::darkslategrey);
-        g.drawText("0", bounds, juce::Justification::centred);
-
-        // Highlight effect for mouse over
-        g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.0f));
-        g.fillRoundedRectangle(bounds, 10.0f);
         
         if (isActive) {
-            auto outlineBounds = bounds.reduced(0.5f);
-            g.setColour(juce::Colours::grey);
-            g.drawRoundedRectangle(outlineBounds, 10.0f, 1.5f);
+            g.setColour(juce::Colours::black.withAlpha(0.4f));
+            g.drawText("0", bounds.translated(1, 1), juce::Justification::centred);
         }
-    }
-    
-    void clicked() override
-    {
-        Button::clicked();
         
-        if (getToggleState()) {
-            startTimerHz(60);
-        } else {
-            stopTimer();
-            repaint();
+        g.setColour(isActive ? juce::Colours::white : juce::Colours::darkslategrey);
+        g.drawText("0", bounds, juce::Justification::centred);
+        
+        if (isMouseOverButton) {
+            g.setColour(juce::Colours::white.withAlpha(0.2f));
+            g.fillRoundedRectangle(bounds, 10.0f);
         }
+        
+        if (isButtonDown) {
+            g.setColour(juce::Colours::black.withAlpha(0.1f));
+            g.fillRoundedRectangle(bounds, 10.0f);
+        }
+        
+        g.setColour(isActive 
+            ? juce::Colours::white.withAlpha(0.5f) 
+            : juce::Colours::darkslategrey.withAlpha(0.3f));
+        g.drawRoundedRectangle(bounds.reduced(1.0f), 10.0f, 1.5f);
     }
     
 private:
-    std::array<float, 5> wavePositions;
+    static constexpr int numWaves = 5;
+    std::array<float, numWaves> wavePositions;
+    float inactivePhase = 0.0f;
+    float rotationAngle = 0.0f;
     
     void timerCallback() override
     {
+        bool needsRepaint = false;
+        
         if (getToggleState()) {
-            for (int i = 0; i < 5; ++i) {
-                wavePositions[i] += 0.005f;
+            for (int i = 0; i < numWaves; ++i) {
+                wavePositions[i] += 0.008f;
                 
                 if (wavePositions[i] >= 1.0f) {
                     wavePositions[i] = 0.0f;
                 }
             }
+            needsRepaint = true;
+        } else {
+            inactivePhase += 0.03f;
+            if (inactivePhase > juce::MathConstants<float>::twoPi) {
+                inactivePhase -= juce::MathConstants<float>::twoPi;
+            }
             
-            // Trigger repaint to show animation
+            rotationAngle += 0.005f;
+            
+            // repaint every 4 frames when inactive
+            static int frameCounter = 0;
+            frameCounter = (frameCounter + 1) % 4;
+            needsRepaint = (frameCounter == 0);
+        }
+        
+        if (needsRepaint) {
             repaint();
         }
     }

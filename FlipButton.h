@@ -9,7 +9,8 @@ public:
                    rotationAngle(0.0f), 
                    targetAngle(0.0f), 
                    wavePosition(-1.0f),
-                   waveMovingLeftToRight(true)
+                   waveMovingLeftToRight(true),
+                   colorTransition(1.0f) // Start with fully transitioned color
     {
         setClickingTogglesState(true);
         setTooltip("Inverts the phase of all components (multiplies by -1).");
@@ -24,62 +25,74 @@ public:
         auto halfHeight = bounds.getHeight() / 2.0f;
         float cornerSize = 13.0f;
 
-        juce::Colour Color1 = juce::Colours::yellow;
-        juce::Colour Color2 = juce::Colours::red;
+        // Base colors
+        juce::Colour yellowColor = juce::Colours::yellow.withMultipliedBrightness(1.05f);
+        juce::Colour redColor = juce::Colours::red.darker(0.1f);
 
-        // Draw background colors
-        if (isActive)
-        {
-            // Draw the yellow upper half with rounded top corners
-            juce::Path upperPath;
-            upperPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
-            upperPath.lineTo(bounds.getX(), bounds.getY() + cornerSize);
-            upperPath.quadraticTo(bounds.getX(), bounds.getY(), bounds.getX() + cornerSize, bounds.getY());
-            upperPath.lineTo(bounds.getRight() - cornerSize, bounds.getY());
-            upperPath.quadraticTo(bounds.getRight(), bounds.getY(), bounds.getRight(), bounds.getY() + cornerSize);
-            upperPath.lineTo(bounds.getRight(), bounds.getBottomLeft().getY() - halfHeight);
-            upperPath.closeSubPath();
-            g.setColour(Color1);
-            g.fillPath(upperPath);
-
-            // Draw the red bottom half with rounded bottom corners
-            juce::Path lowerPath;
-            lowerPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
-            lowerPath.lineTo(bounds.getX(), bounds.getBottom() - cornerSize);
-            lowerPath.quadraticTo(bounds.getX(), bounds.getBottom(), bounds.getX() + cornerSize, bounds.getBottom());
-            lowerPath.lineTo(bounds.getRight() - cornerSize, bounds.getBottom());
-            lowerPath.quadraticTo(bounds.getRight(), bounds.getBottom(), bounds.getRight(), bounds.getBottom() - cornerSize);
-            lowerPath.lineTo(bounds.getRight(), bounds.getBottomLeft().getY() - halfHeight);
-            lowerPath.closeSubPath();
-            g.setColour(Color2);
-            g.fillPath(lowerPath);
+        // When transitioning from inactive to active: 
+        // - colorTransition starts at 0 and moves to 1
+        // - We want top color to go from red to yellow, bottom from yellow to red
+        
+        // When transitioning from active to inactive:
+        // - colorTransition starts at 0 and moves to 1
+        // - We want top color to go from yellow to red, bottom from red to yellow
+        
+        juce::Colour topColor, bottomColor;
+        
+        if (isActive) {
+            // Active state - top: yellow, bottom: red 
+            // Blend from previous state to this state based on colorTransition
+            topColor = redColor.interpolatedWith(yellowColor, colorTransition);
+            bottomColor = yellowColor.interpolatedWith(redColor, colorTransition);
+        } else {
+            // Inactive state - top: red, bottom: yellow
+            // Blend from previous state to this state based on colorTransition
+            topColor = yellowColor.interpolatedWith(redColor, colorTransition);
+            bottomColor = redColor.interpolatedWith(yellowColor, colorTransition);
         }
-        else
-        {
-            // Draw the red upper half with rounded top corners
-            juce::Path upperPath;
-            upperPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
-            upperPath.lineTo(bounds.getX(), bounds.getY() + cornerSize);
-            upperPath.quadraticTo(bounds.getX(), bounds.getY(), bounds.getX() + cornerSize, bounds.getY());
-            upperPath.lineTo(bounds.getRight() - cornerSize, bounds.getY());
-            upperPath.quadraticTo(bounds.getRight(), bounds.getY(), bounds.getRight(), bounds.getY() + cornerSize);
-            upperPath.lineTo(bounds.getRight(), bounds.getBottomLeft().getY() - halfHeight);
-            upperPath.closeSubPath();
-            g.setColour(Color2);
-            g.fillPath(upperPath);
 
-            // Draw the yellow bottom half with rounded bottom corners
-            juce::Path lowerPath;
-            lowerPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
-            lowerPath.lineTo(bounds.getX(), bounds.getBottom() - cornerSize);
-            lowerPath.quadraticTo(bounds.getX(), bounds.getBottom(), bounds.getX() + cornerSize, bounds.getBottom());
-            lowerPath.lineTo(bounds.getRight() - cornerSize, bounds.getBottom());
-            lowerPath.quadraticTo(bounds.getRight(), bounds.getBottom(), bounds.getRight(), bounds.getBottom() - cornerSize);
-            lowerPath.lineTo(bounds.getRight(), bounds.getBottomLeft().getY() - halfHeight);
-            lowerPath.closeSubPath();
-            g.setColour(Color1);
-            g.fillPath(lowerPath);
-        }
+        // Draw the upper half with rounded top corners and gradient
+        juce::Path upperPath;
+        upperPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
+        upperPath.lineTo(bounds.getX(), bounds.getY() + cornerSize);
+        upperPath.quadraticTo(bounds.getX(), bounds.getY(), bounds.getX() + cornerSize, bounds.getY());
+        upperPath.lineTo(bounds.getRight() - cornerSize, bounds.getY());
+        upperPath.quadraticTo(bounds.getRight(), bounds.getY(), bounds.getRight(), bounds.getY() + cornerSize);
+        upperPath.lineTo(bounds.getRight(), bounds.getBottomLeft().getY() - halfHeight);
+        upperPath.closeSubPath();
+
+        // Add a subtle gradient effect for more dimension
+        g.setGradientFill(juce::ColourGradient(
+            topColor.brighter(0.05f),
+            bounds.getX(), bounds.getY(),
+            topColor.darker(0.1f),
+            bounds.getX(), bounds.getCentreY(), 
+            false
+        ));
+        g.fillPath(upperPath);
+
+        // Draw the bottom half with rounded bottom corners and gradient
+        juce::Path lowerPath;
+        lowerPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
+        lowerPath.lineTo(bounds.getX(), bounds.getBottom() - cornerSize);
+        lowerPath.quadraticTo(bounds.getX(), bounds.getBottom(), bounds.getX() + cornerSize, bounds.getBottom());
+        lowerPath.lineTo(bounds.getRight() - cornerSize, bounds.getBottom());
+        lowerPath.quadraticTo(bounds.getRight(), bounds.getBottom(), bounds.getRight(), bounds.getBottom() - cornerSize);
+        lowerPath.lineTo(bounds.getRight(), bounds.getBottomLeft().getY() - halfHeight);
+        lowerPath.closeSubPath();
+
+        g.setGradientFill(juce::ColourGradient(
+            bottomColor,
+            bounds.getX(), bounds.getCentreY(),
+            bottomColor.darker(0.15f),
+            bounds.getX(), bounds.getBottom(),
+            false
+        ));
+        g.fillPath(lowerPath);
+
+        float lineY = bounds.getBottomLeft().getY() - halfHeight;
+        g.setColour(juce::Colours::black.withAlpha(0.2f));
+        g.drawLine(bounds.getX(), lineY, bounds.getRight(), lineY, 1.0f);
 
         if (wavePosition >= 0.0f && wavePosition <= 1.0f) {
             float effectivePosition = waveMovingLeftToRight ? wavePosition : (1.0f - wavePosition);
@@ -118,19 +131,13 @@ public:
             g.drawText(buttonText, bounds, juce::Justification::centred, false);
         }
 
-        g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.f));
-        g.fillRoundedRectangle(bounds, 10.0f);
+        g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.0f));
+        g.fillRoundedRectangle(bounds, cornerSize);
     
         if (isActive) {
-
             auto outlineBounds = bounds.reduced(0.5f);
             g.setColour(juce::Colours::grey);
-            g.drawRoundedRectangle(outlineBounds, 10.0f, 1.5f);
-            
-            g.setColour(juce::Colours::grey);
-            g.setOpacity(0.2f);
-            g.fillRoundedRectangle(bounds, 10.0f);
-            g.resetToDefaultState();
+            g.drawRoundedRectangle(outlineBounds, cornerSize, 1.5f);
         }
     }
 
@@ -142,6 +149,7 @@ public:
         targetAngle = getToggleState() ? juce::MathConstants<float>::pi : 0.0f;
         wavePosition = 0.0f;
         waveMovingLeftToRight = !newState;
+        colorTransition = 0.0f;
         startTimerHz(60);
     }
     
@@ -149,19 +157,26 @@ private:
     float rotationAngle;
     float targetAngle;
     float wavePosition;
-    bool waveMovingLeftToRight; // Controls wave direction
+    bool waveMovingLeftToRight;
+    float colorTransition;
     
     void timerCallback() override
     {
         const float rotationSpeed = 0.15f;
         const float waveSpeed = 0.05f;
+        const float colorSpeed = 0.08f;
         
         float angleDiff = targetAngle - rotationAngle;
         rotationAngle += angleDiff * rotationSpeed;
         
         wavePosition += waveSpeed;
         
-        if (std::abs(angleDiff) < 0.01f && wavePosition > 1.0f) {
+        colorTransition += colorSpeed;
+        if (colorTransition > 1.0f) {
+            colorTransition = 1.0f;
+        }
+        
+        if (std::abs(angleDiff) < 0.01f && wavePosition > 1.0f && colorTransition >= 1.0f) {
             rotationAngle = targetAngle;
             wavePosition = -1.0f;
             stopTimer();
