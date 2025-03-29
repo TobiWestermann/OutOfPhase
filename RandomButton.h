@@ -15,6 +15,7 @@ public:
         setTooltip("Randomizes all phase components using either uniform or Gaussian distribution.");
     }
 
+    // Main button rendering method
     void paintButton(juce::Graphics& g, bool isMouseOverButton, bool isButtonDown) override
     {
         juce::ignoreUnused(isButtonDown);
@@ -58,6 +59,7 @@ public:
         
         g.fillRoundedRectangle(bounds, 10.0f);
         
+        // Draw the dice image
         float scaleFactor = isActive ? 0.85f : 0.7f;
         
         auto imageBounds = m_diceImage.getBounds().toFloat();
@@ -75,7 +77,7 @@ public:
         imageBounds = imageBounds.withCentre(center);
         g.drawImage(m_diceImage, imageBounds);
 
-        // Mouse over highlight effect
+        // Mouse over and active state effects
         g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.f));
         g.fillRoundedRectangle(bounds, 10.0f);
 
@@ -95,6 +97,7 @@ public:
         }
     }
     
+    // Start/stop animation when button is clicked
     void clicked() override
     {
         Button::clicked();
@@ -117,6 +120,7 @@ private:
     juce::Point<float> shakeOffset;
     float shakePhase;
     
+    // Periodic animation update
     void timerCallback() override
     {
         if (getToggleState()) {

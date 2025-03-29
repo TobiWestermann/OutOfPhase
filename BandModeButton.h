@@ -18,6 +18,7 @@ public:
         stopTimer();
     }
 
+    // Handle animations and updates
     void timerCallback() override
     {
         bool updated = false;
@@ -25,12 +26,14 @@ public:
         const float targetAlpha = getToggleState() ? 1.0f : 0.0f;
         const float animationSpeed = 0.12f;
         
+        // Animate transition between on/off states
         if (std::abs(transitionAlpha - targetAlpha) > 0.01f)
         {
             transitionAlpha = transitionAlpha + (targetAlpha - transitionAlpha) * animationSpeed;
             updated = true;
         }
         
+        // Create pulsing effect when activated
         if (getToggleState())
         {
             pulseAlpha = 0.3f + 0.2f * std::sin(pulsePhase);
@@ -47,17 +50,20 @@ public:
             repaint();
     }
 
+    // Custom rendering of the button
     void paint(juce::Graphics& g) override
     {
         auto bounds = getLocalBounds().toFloat().reduced(2.0f);
         float cornerSize = 10.0f;
         
+        // Outer glow effect
         if (pulseAlpha > 0.0f)
         {
             g.setColour(juce::Colours::cadetblue.withAlpha(pulseAlpha * 0.7f));
             g.fillRoundedRectangle(bounds.expanded(3.0f), cornerSize + 3.0f);
         }
         
+        // Main button background
         juce::Colour offColor = juce::Colours::darkgrey.brighter(0.3f);
         juce::Colour onColor = juce::Colours::cadetblue.brighter(0.1f);
         juce::Colour baseColor = offColor.interpolatedWith(onColor, transitionAlpha);
@@ -71,6 +77,7 @@ public:
         
         g.fillRoundedRectangle(bounds, cornerSize);
         
+        // Top shadow effect
         g.setGradientFill(juce::ColourGradient(
             juce::Colours::black.withAlpha(0.2f),
             bounds.getX(), bounds.getY(),
@@ -79,6 +86,7 @@ public:
             false));
         g.fillRoundedRectangle(bounds, cornerSize);
         
+        // Bottom highlight effect
         g.setGradientFill(juce::ColourGradient(
             juce::Colours::transparentWhite,
             bounds.getX(), bounds.getBottom() - bounds.getHeight() * 0.15f,
@@ -87,12 +95,13 @@ public:
             false));
         g.fillRoundedRectangle(bounds, cornerSize);
         
+        // Border
         juce::Colour offBorderColor = juce::Colours::darkgrey.darker(0.1f);
         juce::Colour onBorderColor = juce::Colours::cadetblue.darker(0.5f);
         g.setColour(offBorderColor.interpolatedWith(onBorderColor, transitionAlpha));
         g.drawRoundedRectangle(bounds, cornerSize, 1.5f);
         
-        // freq band animation
+        // Draw animated frequency band visualization
         if (transitionAlpha > 0.1f)
         {
             auto bandArea = bounds.reduced(bounds.getWidth() * 0.3f, bounds.getHeight() * 0.3f);
@@ -112,6 +121,7 @@ public:
             }
         }
         
+        // Draw button text
         auto textBounds = bounds.reduced(4.0f);
         g.setFont(juce::Font(bounds.getHeight() * 0.4f).boldened());
         
@@ -122,6 +132,7 @@ public:
         g.setColour(textColor);
         g.drawText("BAND MODE", textBounds, juce::Justification::centred);
         
+        // Draw status indicator light
         float lightSize = bounds.getHeight() * 0.25f;
         juce::Rectangle<float> light(
             bounds.getRight() - lightSize - 10.0f,
@@ -139,7 +150,7 @@ public:
         g.setColour(offLightColor.interpolatedWith(onLightColor, transitionAlpha));
         g.fillEllipse(light);
         
-        // subtle glass effect
+        // Add glass effect to light
         g.setGradientFill(juce::ColourGradient(
             juce::Colours::white.withAlpha(0.7f),
             light.getX(), light.getY(),
@@ -151,7 +162,7 @@ public:
         g.setColour(juce::Colours::white.withAlpha(0.5f));
         g.drawEllipse(light, 1.0f);
         
-        // subtle reflection dot
+        // Highlight reflection
         if (transitionAlpha > 0.1f)
         {
             g.setColour(juce::Colours::white.withAlpha(0.4f * transitionAlpha));
@@ -162,7 +173,7 @@ public:
     }
     
 private:
-    float pulsePhase = 0.0f;
-    float pulseAlpha = 0.0f;
-    float transitionAlpha = 0.0f;
+    float pulsePhase = 0.0f;    // Controls animation timing
+    float pulseAlpha = 0.0f;    // Controls glow intensity
+    float transitionAlpha = 0.0f;  // Controls on/off state transition
 };

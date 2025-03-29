@@ -2,6 +2,7 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
+// Button Captures current phase
 class FreezeCaptureButton : public juce::TextButton, public juce::Timer
 {
 public:
@@ -11,6 +12,7 @@ public:
         
         setClickingTogglesState(false);
         
+        // Set up button colors
         setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
         setColour(juce::TextButton::buttonOnColourId, juce::Colours::transparentBlack);
         setColour(juce::TextButton::textColourOffId, juce::Colours::white);
@@ -26,18 +28,21 @@ public:
         stopTimer();
     }
     
+    // Initiates the flash animation
     void triggerFlash()
     {
         flashAlpha = 1.0f;
         isFlashing = true;
     }
     
+    // Custom button rendering
     void paintButton(juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         auto bounds = getLocalBounds().toFloat().reduced(2.0f);
         
         juce::ColourGradient gradient;
         
+        // Different gradient for pressed state
         if (shouldDrawButtonAsDown)
         {
             gradient = juce::ColourGradient(
@@ -59,6 +64,7 @@ public:
             );
         }
         
+        // Draw the button
         g.setGradientFill(gradient);
         g.fillRoundedRectangle(bounds, 5.0f);
         
@@ -71,10 +77,12 @@ public:
             g.fillRoundedRectangle(bounds, 5.0f);
         }
         
+        // Draw button text
         g.setColour(juce::Colours::white);
         g.setFont(getHeight() * 0.6f);
         g.drawText(getButtonText(), getLocalBounds(), juce::Justification::centred);
         
+        // Draw flash overlay if active
         if (isFlashing)
         {
             g.setColour(juce::Colours::white.withAlpha(flashAlpha));
@@ -82,6 +90,7 @@ public:
         }
     }
     
+    // Handles flash animation
     void timerCallback() override
     {
         if (isFlashing)

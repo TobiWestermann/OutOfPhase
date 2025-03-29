@@ -5,6 +5,7 @@
 class FlipButton : public juce::Button, private juce::Timer
 {
 public:
+    // Initialize button state and animations
     FlipButton() : juce::Button("FlipButton"), 
                    rotationAngle(0.0f), 
                    targetAngle(0.0f), 
@@ -30,6 +31,7 @@ public:
         
         juce::Colour topColor, bottomColor;
         
+        // Set colors based on button state
         if (isActive) {
             topColor = redColor.interpolatedWith(yellowColor, colorTransition);
             bottomColor = yellowColor.interpolatedWith(redColor, colorTransition);
@@ -38,7 +40,7 @@ public:
             bottomColor = redColor.interpolatedWith(yellowColor, colorTransition);
         }
 
-        // Draw the upper half with rounded top corners and gradient
+        // Upper half with rounded corners
         juce::Path upperPath;
         upperPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
         upperPath.lineTo(bounds.getX(), bounds.getY() + cornerSize);
@@ -48,7 +50,6 @@ public:
         upperPath.lineTo(bounds.getRight(), bounds.getBottomLeft().getY() - halfHeight);
         upperPath.closeSubPath();
 
-        // Add a subtle gradient effect for more dimension
         g.setGradientFill(juce::ColourGradient(
             topColor.brighter(0.05f),
             bounds.getX(), bounds.getY(),
@@ -58,7 +59,7 @@ public:
         ));
         g.fillPath(upperPath);
 
-        // Draw the bottom half with rounded bottom corners and gradient
+        // Lower half with rounded corners
         juce::Path lowerPath;
         lowerPath.startNewSubPath(bounds.getX(), bounds.getBottomLeft().getY() - halfHeight);
         lowerPath.lineTo(bounds.getX(), bounds.getBottom() - cornerSize);
@@ -77,10 +78,12 @@ public:
         ));
         g.fillPath(lowerPath);
 
+        // Draw dividing line between halves
         float lineY = bounds.getBottomLeft().getY() - halfHeight;
         g.setColour(juce::Colours::black.withAlpha(0.2f));
         g.drawLine(bounds.getX(), lineY, bounds.getRight(), lineY, 1.0f);
 
+        // Draw animated wave effect when toggling
         if (wavePosition >= 0.0f && wavePosition <= 1.0f) {
             float effectivePosition = waveMovingLeftToRight ? wavePosition : (1.0f - wavePosition);
             float waveX = bounds.getX() + bounds.getWidth() * effectivePosition;
@@ -100,6 +103,7 @@ public:
             g.fillRect(waveX - waveWidth/2, bounds.getY(), waveWidth, bounds.getHeight());
         }
 
+        // Draw button text with animation
         juce::Font textFont(20.0f);
         textFont.setBold(true);
         juce::String buttonText("F L I P");
@@ -118,9 +122,11 @@ public:
             g.drawText(buttonText, bounds, juce::Justification::centred, false);
         }
 
+        // Highlight on hover
         g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.0f));
         g.fillRoundedRectangle(bounds, cornerSize);
     
+        // Outline when active
         if (isActive) {
             auto outlineBounds = bounds.reduced(0.5f);
             g.setColour(juce::Colours::grey);
@@ -128,6 +134,7 @@ public:
         }
     }
 
+    // Start animations when clicked
     void clicked() override
     {
         bool newState = !getToggleState();
@@ -147,6 +154,7 @@ private:
     bool waveMovingLeftToRight;
     float colorTransition;
     
+    // Update animations
     void timerCallback() override
     {
         const float rotationSpeed = 0.15f;
@@ -163,6 +171,7 @@ private:
             colorTransition = 1.0f;
         }
         
+        // Stop timer when all animations complete
         if (std::abs(angleDiff) < 0.01f && wavePosition > 1.0f && colorTransition >= 1.0f) {
             rotationAngle = targetAngle;
             wavePosition = -1.0f;

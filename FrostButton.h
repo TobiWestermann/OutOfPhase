@@ -12,6 +12,7 @@ public:
         setClickingTogglesState(true);
         setTooltip("Captures and maintains the current phase spectrum.");
         
+        // Initialize snowflakes with random properties
         const int numFlakes = 20;
         snowflakes.resize(numFlakes);
         
@@ -40,6 +41,7 @@ public:
         
         auto bounds = getLocalBounds().toFloat();
 
+        // Draw button background
         if (isActive) {
             juce::ColourGradient gradient(
                 juce::Colour(0xFF2C3E50), // Dark blue
@@ -54,7 +56,7 @@ public:
         
         g.fillRoundedRectangle(bounds, 10.0f);
         
-        // snowflakes when active
+        // Draw snowflakes when active
         if (isActive) {
             for (const auto& flake : snowflakes) {
                 float flakeSize = flake.size * juce::jmin(bounds.getWidth(), bounds.getHeight()) * 0.03f;
@@ -66,6 +68,7 @@ public:
             }
         }
         
+        // Draw main snowflake image
         float scaleFactor = isActive ? 0.85f : 0.7f;
         auto imageBounds = m_snowflakeImage.getBounds().toFloat();
         imageBounds = imageBounds.withSizeKeepingCentre(
@@ -91,9 +94,11 @@ public:
             g.drawImage(m_snowflakeImage, imageBounds);
         }
 
+        // Hover effect
         g.setColour(juce::Colours::white.withAlpha(isMouseOverButton ? 0.2f : 0.0f));
         g.fillRoundedRectangle(bounds, 10.0f);
 
+        // Active state border
         if (isActive) {
             auto outlineBounds = bounds.reduced(0.5f);
             g.setColour(juce::Colour(0xFF7F9BAF));
@@ -106,8 +111,10 @@ public:
         Button::clicked();
         
         if (getToggleState()) {
+            // Start animation when button is activated
             startTimerHz(60);
             
+            // Reset snowflake positions
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_real_distribution<float> xDist(0.0f, 1.0f);
@@ -125,6 +132,7 @@ public:
     }
     
 private:
+    // Snowflake data structure
     struct Snowflake {
         float x;     // Position x (0-1)
         float y;     // Position y (0-1)
@@ -139,20 +147,19 @@ private:
     
     void timerCallback() override
     {
-        // main flake rotation
+        // Rotate main snowflake image
         rotationAngle += 0.01f;
         
         if (rotationAngle > juce::MathConstants<float>::twoPi) {
             rotationAngle -= juce::MathConstants<float>::twoPi;
         }
 
+        // Animate snowflakes
         for (auto& flake : snowflakes) {
-            // snowflake falling speed
             flake.y += flake.speed * 0.01f;
-            
-            // horizontal flake movement
             flake.x += 0.002f * std::sin(flake.y * 5.0f);
             
+            // Reset snowflakes that fall off the bottom
             if (flake.y > 1.0f) {
                 flake.y = -0.05f;
                 
@@ -162,6 +169,7 @@ private:
                 flake.x = xDist(gen);
             }
             
+            // Wrap snowflakes horizontally
             if (flake.x > 1.0f) flake.x -= 1.0f;
             if (flake.x < 0.0f) flake.x += 1.0f;
         }

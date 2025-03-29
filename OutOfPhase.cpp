@@ -153,7 +153,9 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             float absval = sqrtf(realPtr[nn]*realPtr[nn] + imagPtr[nn]*imagPtr[nn]);
             float PrePhase = atan2f(imagPtr[nn], realPtr[nn]);
             float PostPhase = atan2f(imagPtr[nn], realPtr[nn]);
-
+            
+            // effect weighting that creates smooth transitions
+            // between the band and the rest of the spectrum
             float effectWeight = 1.0f;
             
             if (bandModeActive) {
@@ -218,7 +220,7 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
                         hasNextGaussian = false;
                     }
                     else
-                    {
+                    {   // Box-Muller transform
                         float u1, u2, s;
                         do
                         {

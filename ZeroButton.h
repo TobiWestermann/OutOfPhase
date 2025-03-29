@@ -3,6 +3,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <array>
 
+// Custom button that displays animated waves when active
 class ZeroButton : public juce::Button, private juce::Timer
 {
 public:
@@ -11,6 +12,7 @@ public:
         setClickingTogglesState(true);
         setTooltip("Sets all phase components to zero.");
         
+        // Initialize wave positions
         for (int i = 0; i < numWaves; ++i) {
             wavePositions[i] = i * (1.0f / numWaves);
         }
@@ -29,9 +31,11 @@ public:
         auto bounds = getLocalBounds().toFloat();
         auto center = bounds.getCentre();
         
+        // Set base colors based on button state
         juce::Colour baseColor = isActive ? juce::Colours::dodgerblue.darker(0.2f) 
                                          : juce::Colours::lightgrey;
         
+        // Draw button background with gradient
         if (isActive) {
             g.setGradientFill(juce::ColourGradient(
                 baseColor.brighter(0.1f),
@@ -52,6 +56,7 @@ public:
         
         g.fillRoundedRectangle(bounds, 10.0f);
         
+        // Add top shadow
         g.setGradientFill(juce::ColourGradient(
             juce::Colours::black.withAlpha(0.2f),
             bounds.getX(), bounds.getY(),
@@ -61,6 +66,7 @@ public:
         ));
         g.fillRoundedRectangle(bounds, 10.0f);
         
+        // Add bottom highlight
         g.setGradientFill(juce::ColourGradient(
             juce::Colours::transparentWhite,
             bounds.getX(), bounds.getBottom() - bounds.getHeight() * 0.15f,
@@ -71,6 +77,7 @@ public:
         g.fillRoundedRectangle(bounds, 10.0f);
         
         if (isActive) {
+            // Draw center glow
             float centerGlowSize = bounds.getWidth() * 0.25f;
             g.setGradientFill(juce::ColourGradient(
                 juce::Colours::white.withAlpha(0.7f),
@@ -82,7 +89,7 @@ public:
             g.fillEllipse(center.x - centerGlowSize, center.y - centerGlowSize, 
                           centerGlowSize * 2.0f, centerGlowSize * 2.0f);
             
-            // expanding waves (active state)
+            // Draw animated expanding waves
             const float maxRadius = bounds.getWidth() * 0.7f;
             for (int i = 0; i < numWaves; ++i) {
                 float position = wavePositions[i];
@@ -103,6 +110,7 @@ public:
                 );
             }
         } else {
+            // Draw inactive state with pulsing circles
             float innerRadius = bounds.getWidth() * 0.15f;
             float outerRadius = bounds.getWidth() * 0.25f;
             
@@ -118,6 +126,7 @@ public:
             g.drawEllipse(center.x - innerRadius, center.y - innerRadius,
                          innerRadius * 2.0f, innerRadius * 2.0f, 1.2f);
             
+            // Draw spokes
             for (int i = 0; i < 6; i++) {
                 float angle = i * juce::MathConstants<float>::pi / 3.0f + rotationAngle;
                 float x1 = center.x + std::cos(angle) * innerRadius;
@@ -130,6 +139,7 @@ public:
             }
         }
         
+        // Draw the "0" text
         float fontSize = isActive ? 32.0f : 24.0f;
         g.setFont(juce::Font(fontSize).boldened());
         
@@ -141,6 +151,7 @@ public:
         g.setColour(isActive ? juce::Colours::white : juce::Colours::darkslategrey);
         g.drawText("0", bounds, juce::Justification::centred);
         
+        // Handle hover and press states
         if (isMouseOverButton) {
             g.setColour(juce::Colours::white.withAlpha(0.2f));
             g.fillRoundedRectangle(bounds, 10.0f);
@@ -151,6 +162,7 @@ public:
             g.fillRoundedRectangle(bounds, 10.0f);
         }
         
+        // Draw button border
         g.setColour(isActive 
             ? juce::Colours::white.withAlpha(0.5f) 
             : juce::Colours::darkslategrey.withAlpha(0.3f));
@@ -163,11 +175,13 @@ private:
     float inactivePhase = 0.0f;
     float rotationAngle = 0.0f;
     
+    // Handle animations
     void timerCallback() override
     {
         bool needsRepaint = false;
         
         if (getToggleState()) {
+            // Update wave positions when active
             for (int i = 0; i < numWaves; ++i) {
                 wavePositions[i] += 0.008f;
                 
@@ -177,6 +191,7 @@ private:
             }
             needsRepaint = true;
         } else {
+            // Update inactive state animations
             inactivePhase += 0.03f;
             if (inactivePhase > juce::MathConstants<float>::twoPi) {
                 inactivePhase -= juce::MathConstants<float>::twoPi;
@@ -184,7 +199,7 @@ private:
             
             rotationAngle += 0.005f;
             
-            // repaint every 4 frames when inactive
+            // Repaint less frequently when inactive
             static int frameCounter = 0;
             frameCounter = (frameCounter + 1) % 4;
             needsRepaint = (frameCounter == 0);

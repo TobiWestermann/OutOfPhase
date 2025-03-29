@@ -3,6 +3,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
+// Custom knob for frequency selection, extends JUCE Slider
 class FrequencyKnob : public juce::Slider
 {
 public:
@@ -17,6 +18,7 @@ public:
         setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
         setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
         
+        // Configure logarithmic frequency range (20Hz-20kHz)
         juce::NormalisableRange<double> freqRange(20.0, 20000.0, 1.0);
         freqRange.setSkewForCentre(m_type == LowFreq ? 500.0 : 2000.0);
         freqRange.skew = 0.2;
@@ -33,6 +35,7 @@ public:
         setDoubleClickReturnValue(true, type == LowFreq ? 100.0 : 5000.0);
     }
 
+    // Custom drawing of the knob
     void paint(juce::Graphics& g) override
     {
         auto bounds = getLocalBounds().toFloat();
@@ -41,6 +44,7 @@ public:
         
         auto knobBounds = juce::Rectangle<float>(center.x - radius, center.y - radius, radius * 2.0f, radius * 2.0f);
         
+        // Draw base knob shape
         g.setGradientFill(juce::ColourGradient(
             juce::Colours::grey.brighter(0.2f),
             center.x, knobBounds.getY(),
@@ -53,12 +57,14 @@ public:
         g.setColour(juce::Colours::lightgrey.withAlpha(0.4f));
         g.drawEllipse(knobBounds, 1.0f);
         
+        // Calculate arc angles based on value
         float angleStart = juce::MathConstants<float>::pi * 1.2f;
         float angleRange = juce::MathConstants<float>::pi * 1.6f;
         
         float valueNormalized = static_cast<float>(getNormalisableRange().convertTo0to1(getValue()));
         float angleValue = angleStart + valueNormalized * angleRange;
         
+        // Draw background and value arcs
         float arcThickness = radius * 0.18f;
         auto arcBounds = knobBounds.reduced(radius * 0.25f);
         
@@ -76,6 +82,7 @@ public:
                        angleStart, angleValue, arcThickness);
         g.strokePath(arcPath, juce::PathStrokeType(arcThickness, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
         
+        // Draw pointer indicator
         juce::Path pointerPath;
         auto pointerLength = radius * 0.4f;
         auto pointerThickness = radius * 0.12f;
@@ -88,6 +95,7 @@ public:
         g.setColour(juce::Colours::white);
         g.fillPath(pointerPath, juce::AffineTransform::rotation(angleValue).translated(center.x, center.y));
         
+        // Draw frequency value text and labels
         juce::String valueText = formatFrequency(getValue());
         g.setFont(juce::Font(radius * 0.45f).boldened());
         g.setColour(juce::Colours::white);
@@ -103,6 +111,7 @@ public:
         g.drawText(typeLabel, bounds.translated(0.0f, -radius * 0.4f), juce::Justification::centred);
     }
     
+    // Custom vertical drag behavior
     void mouseDrag(const juce::MouseEvent& e) override
     {
         const auto dragVertical = e.getDistanceFromDragStartY() * -1.0f;
@@ -119,6 +128,7 @@ public:
         auto currentValue = getValue();
         const double sensitivity = 0.5;
         
+        // Scale sensitivity based on current value for finer control
         double scaleFactor = currentValue / 500.0;
         scaleFactor = juce::jmax(0.05, scaleFactor);
         
@@ -134,6 +144,7 @@ public:
         juce::Slider::mouseUp(e);
     }
     
+    // Scale mousewheel sensitivity based on current value
     void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override
     {   
         auto currentValue = getValue();
@@ -153,6 +164,7 @@ private:
     double m_dragStartValue = 0.0;
     float m_previousDragDistance = 0.0f;
     
+    // Format frequency display
     juce::String formatFrequency(double freq) const
     {
         if (freq >= 1000.0)
