@@ -6,33 +6,6 @@
 #include "resources/images/paint_bin.h"
 #include "resources/images/paper_bin.h"
 
-class ImageLoadThread : public juce::Thread
-{
-public:
-    ImageLoadThread(OutOfPhaseGUI* gui) 
-        : juce::Thread("ImageLoadThread"), owner(gui) {}
-
-    void run() override;
-
-private:
-    OutOfPhaseGUI* owner;
-};
-
-void ImageLoadThread::run()
-{
-    auto paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
-    auto paperImage = juce::ImageFileFormat::loadFrom(paper_bin, paper_bin_len);
-
-    if (threadShouldExit())
-        return;
-
-    juce::MessageManager::callAsync([this, paintImg = std::move(paintImage), paperImg = std::move(paperImage)]()
-    {
-        if (owner != nullptr && !threadShouldExit()) {
-            owner->setBackgroundImages(paintImg, paperImg);
-        }
-    });
-}
 
 OutOfPhaseAudio::OutOfPhaseAudio(OutOfPhaseAudioProcessor* processor)
 :WOLA(), m_processor(processor)
@@ -302,11 +275,7 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
 
 OutOfPhaseGUI::~OutOfPhaseGUI()
 {
-    if (m_imageLoadThread != nullptr)
-    {
-        m_imageLoadThread->stopThread(1000);
-        m_imageLoadThread = nullptr;
-    }
+
 }
 
 OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts)
@@ -433,8 +402,9 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
         m_DistributionSwitch.setVisible(false);
     }
 
-    m_imageLoadThread = std::make_unique<ImageLoadThread>(this);
-    m_imageLoadThread->startThread();
+    auto paintImage = juce::ImageFileFormat::loadFrom(paint_bin, paint_bin_len);
+    auto paperImage = juce::ImageFileFormat::loadFrom(paper_bin, paper_bin_len);
+    setBackgroundImages(paintImage, paperImage);
 
     updateModeButtonStates();
     resized();

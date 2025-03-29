@@ -172,8 +172,7 @@ private:
 	juce::Image m_paintImage;
 	juce::Image m_paperImage;
 	bool m_imagesLoaded = false;
-	std::unique_ptr<juce::Thread> m_imageLoadThread;
-
+	
 	DiscreteSlider m_BlocksizeSlider;
 	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> BlocksizeSliderAttachment;
 	CustomSlider m_DryWetSlider;
