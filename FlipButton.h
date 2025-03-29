@@ -10,7 +10,7 @@ public:
                    targetAngle(0.0f), 
                    wavePosition(-1.0f),
                    waveMovingLeftToRight(true),
-                   colorTransition(1.0f) // Start with fully transitioned color
+                   colorTransition(1.0f)
     {
         setClickingTogglesState(true);
         setTooltip("Inverts the phase of all components (multiplies by -1).");
@@ -25,28 +25,15 @@ public:
         auto halfHeight = bounds.getHeight() / 2.0f;
         float cornerSize = 13.0f;
 
-        // Base colors
         juce::Colour yellowColor = juce::Colours::yellow.withMultipliedBrightness(1.05f);
         juce::Colour redColor = juce::Colours::red.darker(0.1f);
-
-        // When transitioning from inactive to active: 
-        // - colorTransition starts at 0 and moves to 1
-        // - We want top color to go from red to yellow, bottom from yellow to red
-        
-        // When transitioning from active to inactive:
-        // - colorTransition starts at 0 and moves to 1
-        // - We want top color to go from yellow to red, bottom from red to yellow
         
         juce::Colour topColor, bottomColor;
         
         if (isActive) {
-            // Active state - top: yellow, bottom: red 
-            // Blend from previous state to this state based on colorTransition
             topColor = redColor.interpolatedWith(yellowColor, colorTransition);
             bottomColor = yellowColor.interpolatedWith(redColor, colorTransition);
         } else {
-            // Inactive state - top: red, bottom: yellow
-            // Blend from previous state to this state based on colorTransition
             topColor = yellowColor.interpolatedWith(redColor, colorTransition);
             bottomColor = redColor.interpolatedWith(yellowColor, colorTransition);
         }
