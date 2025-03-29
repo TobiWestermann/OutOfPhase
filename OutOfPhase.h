@@ -73,7 +73,7 @@ const struct
     const std::string ID = "lowfreq";
     const std::string name = "Low Frequency";
     const float minValue = 20.0f;
-    const float maxValue = 20000.0f;
+    const float maxValue = 24000.0f;
     const float defaultValue = 100.0f;
 } g_paramLowFreq;
 
@@ -82,7 +82,7 @@ const struct
     const std::string ID = "highfreq";
     const std::string name = "High Frequency";
     const float minValue = 20.0f;
-    const float maxValue = 20000.0f;
+    const float maxValue = 24000.0f;
     const float defaultValue = 5000.0f;
 } g_paramHighFreq;
 

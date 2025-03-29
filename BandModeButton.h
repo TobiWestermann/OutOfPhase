@@ -16,7 +16,6 @@ public:
         auto bounds = getLocalBounds().toFloat().reduced(2.0f);
         float cornerSize = 10.0f;
         
-        // Draw background
         juce::Colour baseColor = getToggleState() ? juce::Colours::cadetblue.brighter(0.1f) : juce::Colours::darkgrey.brighter(0.3f);
         g.setGradientFill(juce::ColourGradient(
             baseColor.brighter(0.1f), 
@@ -27,18 +26,15 @@ public:
         
         g.fillRoundedRectangle(bounds, cornerSize);
         
-        // Draw border
         g.setColour(getToggleState() ? juce::Colours::cadetblue.darker(0.5f) : juce::Colours::darkgrey.darker(0.1f));
         g.drawRoundedRectangle(bounds, cornerSize, 1.5f);
         
-        // Draw text
         g.setFont(juce::Font(bounds.getHeight() * 0.5f).boldened());
         g.setColour(juce::Colours::white);
         
         juce::String text = "BAND MODE";
         g.drawText(text, bounds, juce::Justification::centred);
 
-        // Draw indicator light
         float lightSize = bounds.getHeight() * 0.2f;
         juce::Rectangle<float> light(
             bounds.getRight() - lightSize - 10.0f,
