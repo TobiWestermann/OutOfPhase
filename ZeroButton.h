@@ -111,20 +111,27 @@ public:
             }
         } else {
             // Draw inactive state with pulsing circles
-            float innerRadius = bounds.getWidth() * 0.15f;
-            float outerRadius = bounds.getWidth() * 0.25f;
+            float baseInnerRadius = bounds.getWidth() * 0.15f;
+            float baseOuterRadius = bounds.getWidth() * 0.25f;
             
             float pulse = 0.5f + 0.5f * std::sin(inactivePhase * 0.5f);
-            float innerAlpha = 0.2f + 0.1f * pulse;
-            float outerAlpha = 0.1f + 0.05f * pulse;
             
-            g.setColour(juce::Colours::darkslategrey.withAlpha(outerAlpha));
+            float innerRadius = baseInnerRadius * (1.0f + 0.1f * pulse);
+            float outerRadius = baseOuterRadius * (1.0f + 0.1f * pulse);
+            
+            float innerAlpha = 0.2f + 0.5f * pulse;
+            float outerAlpha = 0.1f + 0.4f * pulse;
+            
+            juce::Colour innerColor = juce::Colours::darkslategrey.withAlpha(innerAlpha);
+            juce::Colour outerColor = juce::Colours::darkslategrey.withAlpha(outerAlpha);
+            
+            g.setColour(outerColor);
             g.drawEllipse(center.x - outerRadius, center.y - outerRadius,
-                         outerRadius * 2.0f, outerRadius * 2.0f, 1.5f);
+                        outerRadius * 2.0f, outerRadius * 2.0f, 2.0f); // Thicker line
             
-            g.setColour(juce::Colours::darkslategrey.withAlpha(innerAlpha));
+            g.setColour(innerColor);
             g.drawEllipse(center.x - innerRadius, center.y - innerRadius,
-                         innerRadius * 2.0f, innerRadius * 2.0f, 1.2f);
+                        innerRadius * 2.0f, innerRadius * 2.0f, 2.0f);
             
             // Draw spokes
             for (int i = 0; i < 6; i++) {
@@ -134,8 +141,9 @@ public:
                 float x2 = center.x + std::cos(angle) * outerRadius;
                 float y2 = center.y + std::sin(angle) * outerRadius;
                 
-                g.setColour(juce::Colours::darkslategrey.withAlpha(0.15f));
-                g.drawLine(x1, y1, x2, y2, 1.0f);
+                float spokeAlpha = 0.15f + 0.15f * pulse;
+                g.setColour(juce::Colours::darkslategrey.withAlpha(spokeAlpha));
+                g.drawLine(x1, y1, x2, y2, 1.5f);
             }
         }
         
