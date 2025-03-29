@@ -59,6 +59,31 @@ const struct
 	const float maxValue = 1;
 }g_paramDryWet;
 
+const struct
+{
+    const std::string ID = "bandmode";
+    const std::string name = "Band Mode";
+    const int defaultValue = 0;
+} g_paramBandMode;
+
+const struct
+{
+    const std::string ID = "lowfreq";
+    const std::string name = "Low Frequency";
+    const float minValue = 20.0f;
+    const float maxValue = 20000.0f;
+    const float defaultValue = 100.0f;
+} g_paramLowFreq;
+
+const struct
+{
+    const std::string ID = "highfreq";
+    const std::string name = "High Frequency";
+    const float minValue = 20.0f;
+    const float maxValue = 20000.0f;
+    const float defaultValue = 5000.0f;
+} g_paramHighFreq;
+
 class OutOfPhaseAudio : public WOLA
 {
 public:
@@ -164,4 +189,11 @@ private:
 	FlipButton m_FlipModeTextButton;
 	DistributionSwitch m_DistributionSwitch;
 	FreezeCaptureButton m_FreezeCaptureButton;
+
+	juce::TextButton m_BandModeButton;
+	juce::Slider m_LowFreqSlider;
+	juce::Slider m_HighFreqSlider;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> BandModeButtonAttachment;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> LowFreqSliderAttachment;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> HighFreqSliderAttachment;
 };
