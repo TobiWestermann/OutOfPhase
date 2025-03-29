@@ -7,7 +7,6 @@
 #include "PluginSettings.h"
 #include "FFT.h"
 
-#include "ComboBoxWithArrows.h"
 #include "PhasePlot.h"
 #include "DiscreteSlider.h"
 

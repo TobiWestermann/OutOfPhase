@@ -110,16 +110,19 @@ public:
         if (!m_dragging) {
             m_dragging = true;
             m_dragStartValue = getValue();
+            m_previousDragDistance = 0.0f;
         }
         
-        auto currentValue = m_dragStartValue;
-        double sensitivity = 0.5;
+        const float dragDelta = dragVertical - m_previousDragDistance;
+        m_previousDragDistance = dragVertical;
+        
+        auto currentValue = getValue();
+        const double sensitivity = 0.5;
         
         double scaleFactor = currentValue / 500.0;
         scaleFactor = juce::jmax(0.05, scaleFactor);
         
-        double newValue = currentValue + dragVertical * sensitivity * scaleFactor * 10.0;
-        
+        double newValue = currentValue + dragDelta * sensitivity * scaleFactor * 10.0;
         newValue = juce::jlimit(getMinimum(), getMaximum(), newValue);
         
         setValue(newValue);
@@ -132,7 +135,7 @@ public:
     }
     
     void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override
-    {
+    {   
         auto currentValue = getValue();
         double scaleFactor = currentValue / 1000.0;
         scaleFactor = juce::jmax(0.05, scaleFactor);
@@ -148,6 +151,7 @@ private:
     juce::Colour m_knobColor;
     bool m_dragging = false;
     double m_dragStartValue = 0.0;
+    float m_previousDragDistance = 0.0f;
     
     juce::String formatFrequency(double freq) const
     {

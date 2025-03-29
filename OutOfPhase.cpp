@@ -441,23 +441,35 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
                           juce::RectanglePlacement::fillDestination);
     }
 
-    g.setColour (juce::Colours::darkslategrey);
-    g.setFont (12.0f * m_processor.getScaleFactor());
+    g.setColour(juce::Colours::darkslategrey);
+    g.setFont(14.0f * m_processor.getScaleFactor());
 
-    int labelWidth = static_cast<int>(m_BlocksizeSlider.getWidth() * 1.5f);   
-
+    juce::Rectangle<int> blockSizeLabelBg(
+        m_BlocksizeSlider.getX() - static_cast<int>(10 * m_processor.getScaleFactor()),
+        static_cast<int>(m_BlocksizeSlider.getY() - 20 * m_processor.getScaleFactor()),
+        m_BlocksizeSlider.getWidth() + static_cast<int>(20 * m_processor.getScaleFactor()),
+        static_cast<int>(25 * m_processor.getScaleFactor())
+    );
+    
+    g.setColour(juce::Colours::white.withAlpha(0.6f));
+    g.fillRoundedRectangle(blockSizeLabelBg.toFloat(), 5.0f);
+    
+    juce::Rectangle<int> dryWetLabelBg(
+        m_DryWetSlider.getX() - static_cast<int>(10 * m_processor.getScaleFactor()),
+        static_cast<int>(m_DryWetSlider.getY() - 20 * m_processor.getScaleFactor()),
+        m_DryWetSlider.getWidth() + static_cast<int>(20 * m_processor.getScaleFactor()),
+        static_cast<int>(25 * m_processor.getScaleFactor())
+    );
+    
+    g.fillRoundedRectangle(dryWetLabelBg.toFloat(), 5.0f);
+    
+    g.setColour(juce::Colours::darkslategrey);
     g.drawText("Block Size", 
-        m_BlocksizeSlider.getX() - (labelWidth - m_BlocksizeSlider.getWidth()) / 2,
-        static_cast<int>(m_BlocksizeSlider.getY() - 15 * m_processor.getScaleFactor()),
-        labelWidth, 
-        static_cast<int>(20 * m_processor.getScaleFactor()),
+        blockSizeLabelBg,
         juce::Justification::centred);
-
+    
     g.drawText("Dry/Wet", 
-        m_DryWetSlider.getX() - (labelWidth - m_DryWetSlider.getWidth()) / 2,
-        static_cast<int>(m_DryWetSlider.getY() - 15 * m_processor.getScaleFactor()),
-        labelWidth, 
-        static_cast<int>(20 * m_processor.getScaleFactor()),
+        dryWetLabelBg,
         juce::Justification::centred);
 
     g.setFont(14.0f * m_processor.getScaleFactor());
@@ -560,7 +572,6 @@ void OutOfPhaseGUI::resized() {
     auto r = getLocalBounds();
     float scaleFactor = m_processor.getScaleFactor();
 
-    // Dimensions
     float knobWidth = 100 * scaleFactor, knobHeight = 100 * scaleFactor;
     float distance = 40 * scaleFactor, margin = 10 * scaleFactor;
 
@@ -581,11 +592,21 @@ void OutOfPhaseGUI::resized() {
                                   .withTrimmedLeft(static_cast<int>(80 * scaleFactor))
                                   .withTrimmedRight(static_cast<int>(80 * scaleFactor)));
 
-    // Sliders
     float sliderHeight = static_cast<float>(knobHeight * 2.5);
     float sliderWidth = static_cast<float>(knobWidth * 0.4);
-    m_BlocksizeSlider.setBounds(static_cast<int>(distance * 0.6), static_cast<int>(distance * 4.2), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
-    m_DryWetSlider.setBounds(static_cast<int>(getWidth() - sliderWidth - distance * 0.6), static_cast<int>(distance * 4.2), static_cast<int>(sliderWidth), static_cast<int>(sliderHeight));
+    
+    int sliderVerticalOffset = static_cast<int>(distance * 0.9);
+    m_BlocksizeSlider.setBounds(
+        static_cast<int>(distance * 0.6), 
+        static_cast<int>(distance * 4.2) + sliderVerticalOffset, 
+        static_cast<int>(sliderWidth), 
+        static_cast<int>(sliderHeight));
+    
+    m_DryWetSlider.setBounds(
+        static_cast<int>(getWidth() - sliderWidth - distance * 0.6), 
+        static_cast<int>(distance * 4.2) + sliderVerticalOffset, 
+        static_cast<int>(sliderWidth), 
+        static_cast<int>(sliderHeight));
 
     float buttonsStartX = static_cast<float>(getWidth() / 2 - buttonWidth - buttonSpacing / 2);
     float buttonsStartY = static_cast<float>(getHeight() / 2 + distance / 2);
@@ -632,7 +653,7 @@ void OutOfPhaseGUI::resized() {
     
     if (m_LowFreqKnob.isVisible()) {
         int knobSize = static_cast<int>(knobWidth * 0.6f);
-        int knobSpacing = static_cast<int>(buttonWidth * 0.3f);
+        int knobSpacing = static_cast<int>(buttonWidth * 0.15f);
         
         int knobY = bandY + (bandButtonHeight - knobSize) / 2;
         
