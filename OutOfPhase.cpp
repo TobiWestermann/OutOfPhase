@@ -214,7 +214,7 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
                         
                         if (hasNextGaussian)
                         {
-                            PostPhase = nextGaussian * juce::MathConstants<float>::pi; // Scale to full -π to π range
+                            PostPhase = nextGaussian * juce::MathConstants<float>::pi; // scale to full -π to π range
                             hasNextGaussian = false;
                         }
                         else
@@ -230,7 +230,7 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
                             s = sqrtf(-2.0f * logf(s) / s);
                             nextGaussian = u2 * s;
                             float concentration = 0.5f; // adjust to control concentration of the Gaussian distribution
-                            PostPhase = u1 * s * juce::MathConstants<float>::pi * concentration; // Scale to full -π to π range
+                            PostPhase = u1 * s * juce::MathConstants<float>::pi * concentration; // scale to full -π to π range
                             hasNextGaussian = true;
                         }
 
@@ -355,43 +355,34 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     m_FlipModeTextButton.setRadioGroupId(1);
     m_FlipModeTextButton.setClickingTogglesState(true);
 
-    m_BandModeButton.setButtonText("Band Mode");
     addAndMakeVisible(m_BandModeButton);
-    m_BandModeButton.setClickingTogglesState(true);
-    m_BandModeButton.setTooltip("Apply effect only to a specific frequency band when enabled");
     BandModeButtonAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
         *m_processor.m_parameterVTS, g_paramBandMode.ID, m_BandModeButton);
     m_BandModeButton.onClick = [this] {
         updateModeButtonStates();
     };
 
-    // low freq slider
-    m_LowFreqSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    m_LowFreqSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 70, 20);
-    m_LowFreqSlider.setSkewFactorFromMidPoint(500.0f);
-    m_LowFreqSlider.setTooltip("Lower frequency bound of the band");
-    addAndMakeVisible(m_LowFreqSlider);
-    LowFreqSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-        *m_processor.m_parameterVTS, g_paramLowFreq.ID, m_LowFreqSlider);
-    m_LowFreqSlider.onValueChange = [this] {
-        if (m_HighFreqSlider.getValue() < m_LowFreqSlider.getValue())
-            m_HighFreqSlider.setValue(m_LowFreqSlider.getValue() * 1.2f);
+    // low freq knob
+    m_LowFreqKnob.setTooltip("Lower frequency bound of the band");
+    addAndMakeVisible(m_LowFreqKnob);
+    LowFreqKnobAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        *m_processor.m_parameterVTS, g_paramLowFreq.ID, m_LowFreqKnob);
+    m_LowFreqKnob.onValueChange = [this] {
+        if (m_HighFreqKnob.getValue() < m_LowFreqKnob.getValue())
+            m_HighFreqKnob.setValue(m_LowFreqKnob.getValue() * 1.2f);
     };
-    m_LowFreqSlider.setVisible(false);
+    m_LowFreqKnob.setVisible(false);
 
-    // high freq slider
-    m_HighFreqSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    m_HighFreqSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 70, 20);
-    m_HighFreqSlider.setSkewFactorFromMidPoint(2000.0f);
-    m_HighFreqSlider.setTooltip("Upper frequency bound of the band");
-    addAndMakeVisible(m_HighFreqSlider);
-    HighFreqSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-        *m_processor.m_parameterVTS, g_paramHighFreq.ID, m_HighFreqSlider);
-    m_HighFreqSlider.onValueChange = [this] {
-        if (m_HighFreqSlider.getValue() < m_LowFreqSlider.getValue())
-            m_LowFreqSlider.setValue(m_HighFreqSlider.getValue() * 0.8f);
+    // high freq knob
+    m_HighFreqKnob.setTooltip("Upper frequency bound of the band");
+    addAndMakeVisible(m_HighFreqKnob);
+    HighFreqKnobAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        *m_processor.m_parameterVTS, g_paramHighFreq.ID, m_HighFreqKnob);
+    m_HighFreqKnob.onValueChange = [this] {
+        if (m_HighFreqKnob.getValue() < m_LowFreqKnob.getValue())
+            m_LowFreqKnob.setValue(m_HighFreqKnob.getValue() * 0.8f);
     };
-    m_HighFreqSlider.setVisible(false);
+    m_HighFreqKnob.setVisible(false);
 
     addAndMakeVisible(m_DistributionSwitch);
     m_DistributionSwitch.setColour(juce::TextButton::buttonColourId, juce::Colours::transparentBlack);
@@ -530,24 +521,6 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
             juce::Justification::centred);
     }
 
-    if (m_LowFreqSlider.isVisible()) {
-        g.setFont(10.0f * m_processor.getScaleFactor());
-        g.drawText("Low Freq",
-            m_LowFreqSlider.getX(),
-            static_cast<int>(m_LowFreqSlider.getY() - 15 * m_processor.getScaleFactor()),
-            m_LowFreqSlider.getWidth(),
-            static_cast<int>(15 * m_processor.getScaleFactor()),
-            juce::Justification::centred);
-        
-        g.drawText("High Freq",
-            m_HighFreqSlider.getX(),
-            static_cast<int>(m_HighFreqSlider.getY() - 15 * m_processor.getScaleFactor()),
-            m_HighFreqSlider.getWidth(),
-            static_cast<int>(15 * m_processor.getScaleFactor()),
-            juce::Justification::centred);
-    }
-
-
     juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
     g.drawFittedText (text2display, getLocalBounds(), juce::Justification::bottomLeft, 1);
     
@@ -560,7 +533,8 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     shadowPath.addRoundedRectangle(m_RandomModeTextButton.getBounds().toFloat().expanded(2.0f), 10.0f);
     shadowPath.addRoundedRectangle(m_ZeroModeTextButton.getBounds().toFloat().expanded(2.0f), 10.0f);
     shadowPath.addRoundedRectangle(m_FlipModeTextButton.getBounds().toFloat().expanded(2.0f), 10.0f);
-    
+    shadowPath.addRoundedRectangle(m_BandModeButton.getBounds().toFloat().expanded(2.0f), 10.0f);
+
     // add rectangles for sliders and plots
     shadowPath.addRectangle(m_PrePhasePlot.getBounds().toFloat().expanded(2.0f));
     shadowPath.addRectangle(m_PostPhasePlot.getBounds().toFloat().expanded(2.0f));
@@ -572,6 +546,11 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
     if (m_FreezeCaptureButton.isVisible())
     {
         shadowPath.addRoundedRectangle(m_FreezeCaptureButton.getBounds().toFloat().expanded(2.0f), 5.0f);
+    }
+
+    if (m_LowFreqKnob.isVisible()) {
+        shadowPath.addEllipse(m_LowFreqKnob.getBounds().toFloat().expanded(2.0f));
+        shadowPath.addEllipse(m_HighFreqKnob.getBounds().toFloat().expanded(2.0f));
     }
 
     shadow.drawForPath(g, shadowPath);
@@ -644,30 +623,31 @@ void OutOfPhaseGUI::resized() {
         m_FreezeCaptureButton.setVisible(frostMode);
     }
 
-    int bandButtonWidth = static_cast<int>(buttonWidth * 1.2f);
+    int bandButtonWidth = static_cast<int>(buttonWidth * 1.3f);
     int bandButtonHeight = static_cast<int>(buttonHeight * 0.7f);
+
     int bandY = getHeight() - bandButtonHeight - static_cast<int>(distance * 0.5f);
     int bandX = (getWidth() - bandButtonWidth) / 2;
     m_BandModeButton.setBounds(bandX, bandY, bandButtonWidth, bandButtonHeight);
-
-    if (m_LowFreqSlider.isVisible()) {
-        int freqControlWidth = static_cast<int>(knobWidth * 0.8f);
-        int freqControlHeight = static_cast<int>(knobHeight * 0.8f);
-        int freqY = bandY - freqControlHeight - static_cast<int>(buttonSpacing * 0.8f);
-        int margin = static_cast<int>(buttonWidth * 0.2f);
+    
+    if (m_LowFreqKnob.isVisible()) {
+        int knobSize = static_cast<int>(knobWidth * 0.6f);
+        int knobSpacing = static_cast<int>(buttonWidth * 0.3f);
         
-        m_LowFreqSlider.setBounds(
-            bandX - freqControlWidth/2 + margin,
-            freqY,
-            freqControlWidth,
-            freqControlHeight
+        int knobY = bandY + (bandButtonHeight - knobSize) / 2;
+        
+        m_LowFreqKnob.setBounds(
+            bandX - knobSize - knobSpacing,
+            knobY,
+            knobSize,
+            knobSize
         );
         
-        m_HighFreqSlider.setBounds(
-            bandX + bandButtonWidth - freqControlWidth/2 - margin,
-            freqY,
-            freqControlWidth,
-            freqControlHeight
+        m_HighFreqKnob.setBounds(
+            bandX + bandButtonWidth + knobSpacing,
+            knobY,
+            knobSize,
+            knobSize
         );
     }
 };
@@ -697,9 +677,9 @@ void OutOfPhaseGUI::updateModeButtonStates()
     }
 
     bool bandModeActive = m_BandModeButton.getToggleState();
-    if (m_LowFreqSlider.isVisible() != bandModeActive) {
-        m_LowFreqSlider.setVisible(bandModeActive);
-        m_HighFreqSlider.setVisible(bandModeActive);
+    if (m_LowFreqKnob.isVisible() != bandModeActive) {
+        m_LowFreqKnob.setVisible(bandModeActive);
+        m_HighFreqKnob.setVisible(bandModeActive);
         resized();
     }
 }

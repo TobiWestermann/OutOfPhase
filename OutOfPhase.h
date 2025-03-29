@@ -17,6 +17,8 @@
 #include "FlipButton.h"
 #include "DistributionSwitch.h"
 #include "FreezeCaptureButton.h"
+#include "BandModeButton.h"
+#include "FrequencyKnob.h"
 
 class OutOfPhaseAudioProcessor;
 
@@ -190,10 +192,10 @@ private:
 	DistributionSwitch m_DistributionSwitch;
 	FreezeCaptureButton m_FreezeCaptureButton;
 
-	juce::TextButton m_BandModeButton;
-	juce::Slider m_LowFreqSlider;
-	juce::Slider m_HighFreqSlider;
+	BandModeButton m_BandModeButton;
+	FrequencyKnob m_LowFreqKnob{FrequencyKnob::LowFreq};
+	FrequencyKnob m_HighFreqKnob{FrequencyKnob::HighFreq};
 	std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> BandModeButtonAttachment;
-	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> LowFreqSliderAttachment;
-	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> HighFreqSliderAttachment;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> LowFreqKnobAttachment;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> HighFreqKnobAttachment;
 };
