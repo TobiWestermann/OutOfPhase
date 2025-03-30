@@ -530,7 +530,8 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
             juce::Justification::centred);
     }
 
-    juce::String text2display = "OutOfPhase V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
+    juce::String text2display = "V " + juce::String(PLUGIN_VERSION_MAJOR) + "." + juce::String(PLUGIN_VERSION_MINOR) + "." + juce::String(PLUGIN_VERSION_PATCH);
+    g.setColour(juce::Colours::whitesmoke);
     g.drawFittedText (text2display, getLocalBounds(), juce::Justification::bottomLeft, 1);
     
     // create shadow path
