@@ -1,7 +1,7 @@
 #pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
-#include "resources/images/snowflake_bin.h"
+#include "../resources/images/snowflake_bin.h"
 #include <random>
 
 class FrostButton : public juce::Button, private juce::Timer

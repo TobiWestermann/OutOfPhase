@@ -5,19 +5,18 @@
 
 #include "tools/SynchronBlockProcessor.h"
 #include "PluginSettings.h"
-#include "FFT.h"
+#include "libs/FFT.h"
 
-#include "PhasePlot.h"
-#include "DiscreteSlider.h"
-
-#include "FrostButton.h"
-#include "RandomButton.h"
-#include "ZeroButton.h"
-#include "FlipButton.h"
-#include "DistributionSwitch.h"
-#include "FreezeCaptureButton.h"
-#include "BandModeButton.h"
-#include "FrequencyKnob.h"
+#include "customComponents/PhasePlot.h"
+#include "customComponents/DiscreteSlider.h"
+#include "customComponents/FrostButton.h"
+#include "customComponents/RandomButton.h"
+#include "customComponents/ZeroButton.h"
+#include "customComponents/FlipButton.h"
+#include "customComponents/DistributionSwitch.h"
+#include "customComponents/FreezeCaptureButton.h"
+#include "customComponents/BandModeButton.h"
+#include "customComponents/FrequencyKnob.h"
 
 class OutOfPhaseAudioProcessor;
 

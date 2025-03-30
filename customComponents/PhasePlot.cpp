@@ -1,5 +1,5 @@
 #include "PhasePlot.h"
-#include "resources/images/glass_texture2_bin.h"
+#include "../resources/images/glass_texture2_bin.h"
 
 PhasePlot::PhasePlot() 
 {

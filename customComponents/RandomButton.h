@@ -1,7 +1,7 @@
 #pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
-#include "resources/images/dice_bin.h"
+#include "../resources/images/dice_bin.h"
 
 class RandomButton : public juce::Button, private juce::Timer
 {

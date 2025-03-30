@@ -69,8 +69,8 @@ target_sources(${TARGET_NAME}
         tools/MidiModPitchState.cpp
         tools/PresetHandler.cpp
         tools/SynchronBlockProcessor.cpp
-        FFT.cpp
-        PhasePlot.cpp
+        libs/FFT.cpp
+        customComponents/PhasePlot.cpp
         resources/images/glass_texture2_bin.cpp
         resources/images/snowflake_bin.cpp
         resources/images/dice_bin.cpp
