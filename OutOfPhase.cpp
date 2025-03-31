@@ -292,6 +292,9 @@ OutOfPhaseGUI::OutOfPhaseGUI(OutOfPhaseAudioProcessor& p, juce::AudioProcessorVa
     
     startTimerHz(60);
 
+    m_PrePhasePlot.setSampleRate(m_processor.getSampleRate());
+    m_PostPhasePlot.setSampleRate(m_processor.getSampleRate());
+
     m_BlocksizeSlider.setDoubleClickReturnValue(true, 512);
     addAndMakeVisible(m_BlocksizeSlider);
     BlocksizeSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(

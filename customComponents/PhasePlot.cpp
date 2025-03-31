@@ -24,9 +24,6 @@ void PhasePlot::paint(juce::Graphics& g)
 
     g.fillAll(juce::Colours::whitesmoke.darker(0.2f));
 
-    // g.setOpacity(0.6f);
-    // g.drawImageWithin(m_glassImage, getX(), 0, getWidth(), getHeight(),
-    //                   juce::RectanglePlacement::fillDestination);
     g.setOpacity(1.0f);
 
     g.setColour(juce::Colours::grey);
@@ -34,8 +31,25 @@ void PhasePlot::paint(juce::Graphics& g)
 
     if (mouseOver)
     {
+        juce::Rectangle<int> plotBounds = getLocalBounds().reduced(55, 0);
+        float centerY = plotBounds.getY() + plotBounds.getHeight() / 2.0f;
+        g.setColour(juce::Colours::grey);
+        g.drawLine(static_cast<float>(plotBounds.getX()), centerY, 
+                static_cast<float>(plotBounds.getRight()), centerY, 
+                1.0f);
+    } else {
+        juce::Rectangle<int> plotBounds = getLocalBounds();
+        float centerY = plotBounds.getY() + plotBounds.getHeight() / 2.0f;
+        g.setColour(juce::Colours::grey);
+        g.drawLine(static_cast<float>(plotBounds.getX()), centerY, 
+                static_cast<float>(plotBounds.getRight()), centerY, 
+                1.0f);
+    }
+
+    if (mouseOver)
+    {
         g.setColour(juce::Colours::white);
-        g.setFont(juce::Font("Arial", 15.0f, juce::Font::plain));
+        g.setFont(juce::Font(juce::FontOptions("Arial", 15.0f, juce::Font::plain)));
         g.drawText(juce::CharPointer_UTF8("\xCF\x80"), 5, 5, 20, 20, juce::Justification::centred);
         g.drawText(juce::CharPointer_UTF8("-\xCF\x80"), 5, getHeight() - 25, 20, 20, juce::Justification::centred);
     }
@@ -59,13 +73,21 @@ void PhasePlot::paint(juce::Graphics& g)
 
         float margin;
         if (mouseOver) {
-            juce::Font labelFont(15.0f);
+            juce::Font labelFont(juce::FontOptions(15.0f));
             juce::GlyphArrangement glyphArrangement;
             glyphArrangement.addLineOfText(labelFont, "0", 0.0f, 0.0f);
             float zeroWidth = glyphArrangement.getBoundingBox(0, 1, true).getWidth();
             glyphArrangement.clear();
-            glyphArrangement.addLineOfText(labelFont, "fs/2", 0.0f, 0.0f);
-            float fsWidth = glyphArrangement.getBoundingBox(0, 3, true).getWidth();
+            
+            juce::String nyquistLabel;
+            if (m_sampleRate >= 2000) {
+                nyquistLabel = juce::String(m_sampleRate / 2000.0f, 1) + " kHz";
+            } else {
+                nyquistLabel = juce::String(m_sampleRate / 2) + " Hz";
+            }
+            
+            glyphArrangement.addLineOfText(labelFont, nyquistLabel, 0.0f, 0.0f);
+            float fsWidth = glyphArrangement.getBoundingBox(0, nyquistLabel.length(), true).getWidth() - 10.0f;
             margin = std::max(zeroWidth, fsWidth) + 5.0f;
         }
         else {
@@ -103,13 +125,21 @@ void PhasePlot::paint(juce::Graphics& g)
 
         float margin;
         if (mouseOver) {
-            juce::Font labelFont(15.0f);
+            juce::Font labelFont(juce::FontOptions(15.0f));
             juce::GlyphArrangement glyphArrangement;
             glyphArrangement.addLineOfText(labelFont, "0", 0.0f, 0.0f);
             float zeroWidth = glyphArrangement.getBoundingBox(0, 1, true).getWidth();
             glyphArrangement.clear();
-            glyphArrangement.addLineOfText(labelFont, "fs", 0.0f, 0.0f);
-            float fsWidth = glyphArrangement.getBoundingBox(0, 2, true).getWidth();
+            
+            juce::String nyquistLabel;
+            if (m_sampleRate >= 2000) {
+                nyquistLabel = juce::String(m_sampleRate / 2000.0f, 1) + " kHz";
+            } else {
+                nyquistLabel = juce::String(m_sampleRate / 2) + " Hz";
+            }
+            
+            glyphArrangement.addLineOfText(labelFont, nyquistLabel, 0.0f, 0.0f);
+            float fsWidth = glyphArrangement.getBoundingBox(0, nyquistLabel.length(), true).getWidth() - 10.0f;
             margin = std::max(zeroWidth, fsWidth) + 5.0f;
         }
         else {
@@ -141,11 +171,31 @@ void PhasePlot::paint(juce::Graphics& g)
 
         g.drawText("0", 5, getHeight() / 2 - 10, 20, 20, juce::Justification::centred);
 
-        // disp fs/2 as fraction
         g.setFont(12.0f);
-        g.drawText("fs", getWidth() - 25, getHeight() / 2 - 15, 20, 12, juce::Justification::centred);
-        g.drawLine(static_cast<float>(getWidth() - 23), static_cast<float>(getHeight() / 2 - 2), 
-                   static_cast<float>(getWidth() - 7), static_cast<float>(getHeight() / 2 - 2), 1.0f);
-        g.drawText("2", getWidth() - 25, getHeight() / 2 + 1, 20, 12, juce::Justification::centred);
+        
+        int nyquistFreq = static_cast<int>(m_sampleRate / 2);
+        
+        juce::String freqText;
+        if (nyquistFreq >= 1000)
+        {
+            float nyquistKHz = nyquistFreq / 1000.0f;
+            freqText = juce::String(nyquistKHz, 1) + " kHz";
+        }
+        else
+        {
+            freqText = juce::String(nyquistFreq) + " Hz";
+        }
+        
+        juce::Font labelFont(juce::FontOptions(12.0f));
+        juce::GlyphArrangement glyphArrangement;
+        glyphArrangement.addLineOfText(labelFont, freqText, 0.0f, 0.0f);
+        float textWidth = glyphArrangement.getBoundingBox(0, freqText.length(), true).getWidth();
+        
+        g.drawText(freqText, 
+                  getWidth() - static_cast<int>(textWidth) - 10, 
+                  getHeight() / 2 - 10, 
+                  static_cast<int>(textWidth) + 5, 
+                  20, 
+                  juce::Justification::centred);
     }
 }
