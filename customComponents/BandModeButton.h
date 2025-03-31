@@ -113,7 +113,7 @@ public:
             
             for (int i = 0; i < 5; ++i)
             {
-                float height = bandArea.getHeight() * (0.3f + 0.5f * std::sin(pulsePhase + i * 0.7f));
+                float height = bandArea.getHeight() * (0.1f + 0.4f * (1.0f + std::sin(pulsePhase + i * 0.7f)));
                 float x = bandArea.getX() + i * (barWidth + spacing);
                 float y = bandArea.getCentreY() + (bandArea.getHeight() - height) * 0.5f;
                 

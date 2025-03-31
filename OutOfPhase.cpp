@@ -16,7 +16,8 @@ void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, 
 {
     juce::ScopedLock lock(dataMutex);
     juce::ignoreUnused(max_samplesPerBlock);
-    juce::ignoreUnused(sampleRate);
+
+    updateFrequencyRange(sampleRate);
 
     float desired_blocksize = *m_processor->m_parameterVTS->getRawParameterValue(g_paramBlocksize.ID);
     int synchronblocksize = static_cast<int>(round(desired_blocksize));
@@ -47,6 +48,7 @@ void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, 
 
 void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudioParameter>> &paramVector)
 {
+
     paramVector.push_back(std::make_unique<juce::AudioParameterChoice>(g_paramMode.ID,
         g_paramMode.name,
         juce::StringArray {g_paramMode.mode1, g_paramMode.mode2, g_paramMode.mode3 , g_paramMode.mode4}, g_paramMode.defaultValue
@@ -71,11 +73,13 @@ void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudio
         g_paramBandMode.defaultValue
     ));
 
+    float initialMaxFreq = 24000.0f;
+
     paramVector.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::String(g_paramLowFreq.ID),
         juce::String(g_paramLowFreq.name), 
         g_paramLowFreq.minValue, 
-        g_paramLowFreq.maxValue, 
+        initialMaxFreq, 
         g_paramLowFreq.defaultValue
     ));
 
@@ -83,7 +87,7 @@ void OutOfPhaseAudio::addParameter(std::vector<std::unique_ptr<juce::RangedAudio
         juce::String(g_paramHighFreq.ID),
         juce::String(g_paramHighFreq.name), 
         g_paramHighFreq.minValue, 
-        g_paramHighFreq.maxValue, 
+        initialMaxFreq, 
         g_paramHighFreq.defaultValue
     ));
 
@@ -700,6 +704,34 @@ void OutOfPhaseGUI::updateModeButtonStates()
         m_LowFreqKnob.setVisible(bandModeActive);
         m_HighFreqKnob.setVisible(bandModeActive);
         resized();
+    }
+}
+
+void OutOfPhaseAudio::updateFrequencyRange(double sampleRate)
+{
+    if (sampleRate > 0)
+    {
+        float nyquistFreq = static_cast<float>(sampleRate / 2.0);
+        
+        if (auto* lowFreqParam = dynamic_cast<juce::AudioParameterFloat*>(
+                m_processor->m_parameterVTS->getParameter(g_paramLowFreq.ID)))
+        {
+            lowFreqParam->range.end = nyquistFreq;
+            
+            float currentValue = *m_processor->m_parameterVTS->getRawParameterValue(g_paramLowFreq.ID);
+            if (currentValue > nyquistFreq)
+                *m_processor->m_parameterVTS->getRawParameterValue(g_paramLowFreq.ID) = nyquistFreq;
+        }
+        
+        if (auto* highFreqParam = dynamic_cast<juce::AudioParameterFloat*>(
+                m_processor->m_parameterVTS->getParameter(g_paramHighFreq.ID)))
+        {
+            highFreqParam->range.end = nyquistFreq;
+            
+            float currentValue = *m_processor->m_parameterVTS->getRawParameterValue(g_paramHighFreq.ID);
+            if (currentValue > nyquistFreq)
+                *m_processor->m_parameterVTS->getRawParameterValue(g_paramHighFreq.ID) = nyquistFreq;
+        }
     }
 }
 

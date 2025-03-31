@@ -157,6 +157,33 @@ public:
         setValue(newValue);
     }
 
+    void updateRange(double sampleRate)
+    {
+        if (sampleRate > 0)
+        {
+            double nyquistFreq = sampleRate / 2.0;
+            
+            double normalizedValue = getNormalisableRange().convertTo0to1(getValue());
+            
+            juce::NormalisableRange<double> freqRange(20.0, nyquistFreq, 1.0);
+            double centreFreq = m_type == LowFreq ? 
+                            juce::jmin(500.0, nyquistFreq * 0.05) : 
+                            juce::jmin(2000.0, nyquistFreq * 0.2);
+            freqRange.setSkewForCentre(centreFreq);
+            freqRange.skew = 0.2;
+            
+            setNormalisableRange(freqRange);
+            
+            double newValue = getNormalisableRange().convertFrom0to1(normalizedValue);
+            setValue(newValue, juce::dontSendNotification);
+            
+            double defaultValue = m_type == LowFreq ? 
+                                juce::jmin(100.0, nyquistFreq * 0.01) : 
+                                juce::jmin(5000.0, nyquistFreq * 0.5);
+            setDoubleClickReturnValue(true, defaultValue);
+        }
+    }
+
 private:
     KnobType m_type;
     juce::Colour m_knobColor;

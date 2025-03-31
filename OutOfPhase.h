@@ -71,7 +71,7 @@ const struct
     const std::string ID = "lowfreq";
     const std::string name = "Low Frequency";
     const float minValue = 20.0f;
-    const float maxValue = 24000.0f;
+    // maxValue will be set dynamically based on sample rate
     const float defaultValue = 100.0f;
 } g_paramLowFreq;
 
@@ -80,7 +80,7 @@ const struct
     const std::string ID = "highfreq";
     const std::string name = "High Frequency";
     const float minValue = 20.0f;
-    const float maxValue = 24000.0f;
+    // maxValue will be set dynamically based on sample rate
     const float defaultValue = 5000.0f;
 } g_paramHighFreq;
 
@@ -98,6 +98,8 @@ public:
     
     // some necessary info for the host
     int getLatency(){return m_Latency;};
+
+	void updateFrequencyRange(double sampleRate);
 
 	std::vector<float> getPrePhaseData() {
         juce::ScopedLock lock(dataMutex);
@@ -161,6 +163,12 @@ public:
 	void resized() override;
 	void parentHierarchyChanged() override;
 	void updateModeButtonStates();
+
+	void updateFrequencyKnobRanges(double sampleRate)
+	{
+		m_LowFreqKnob.updateRange(sampleRate);
+		m_HighFreqKnob.updateRange(sampleRate);
+	}
 
 	void timerCallback() override;
 
