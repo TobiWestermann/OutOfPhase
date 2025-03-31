@@ -146,7 +146,9 @@ public:
     
     // Scale mousewheel sensitivity based on current value
     void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override
-    {   
+    {      
+        juce::ignoreUnused(e);
+
         auto currentValue = getValue();
         double scaleFactor = currentValue / 1000.0;
         scaleFactor = juce::jmax(0.05, scaleFactor);

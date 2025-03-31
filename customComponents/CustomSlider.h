@@ -40,6 +40,8 @@ private:
                              float sliderPos, float minSliderPos, float maxSliderPos,
                              const juce::Slider::SliderStyle style, juce::Slider& slider) override
         {
+            juce::ignoreUnused(minSliderPos, maxSliderPos);
+
             const bool isVertical = style == juce::Slider::LinearVertical;
             
             juce::Rectangle<int> bounds(x, y, width, height);

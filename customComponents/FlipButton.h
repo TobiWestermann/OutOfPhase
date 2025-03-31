@@ -104,7 +104,7 @@ public:
         }
 
         // Draw button text with animation
-        juce::Font textFont(20.0f);
+        juce::Font textFont = juce::FontOptions(20.0f);
         textFont.setBold(true);
         juce::String buttonText("F L I P");
         juce::Colour textColor = juce::Colours::black;
