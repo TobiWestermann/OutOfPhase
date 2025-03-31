@@ -33,8 +33,8 @@ void OutOfPhaseAudio::prepareToPlay(double sampleRate, int max_samplesPerBlock, 
         m_fftprocess.setFFTSize(synchronblocksize);
         
         
-        m_PrePhaseData = std::vector<float>(synchronblocksize/2+1, 0.0f);
-        m_PostPhaseData = std::vector<float>(synchronblocksize/2+1, 0.0f);
+        m_PrePhaseData = std::vector<float>(static_cast<std::size_t>(synchronblocksize/2+1), 0.0f);
+        m_PostPhaseData = std::vector<float>(static_cast<std::size_t>(synchronblocksize/2+1), 0.0f);
         initFrostPhaseData();
         
         m_realdata.setSize(max_channels, synchronblocksize/2+1);
@@ -105,12 +105,12 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
     if (data.getNumSamples() == 0 || m_synchronblocksize == 0)
         return 0;
 
-    if (m_tempPrePhaseData.size() != m_synchronblocksize/2+1) {
-        m_tempPrePhaseData.resize(m_synchronblocksize/2+1);
-        m_tempPostPhaseData.resize(m_synchronblocksize/2+1);
+    if (m_tempPrePhaseData.size() != static_cast<std::size_t>(m_synchronblocksize/2+1)) {
+        m_tempPrePhaseData.resize(static_cast<std::size_t>(m_synchronblocksize/2+1));
+        m_tempPostPhaseData.resize(static_cast<std::size_t>(m_synchronblocksize/2+1));
     }
 
-    float operatingMode = *m_processor->m_parameterVTS->getRawParameterValue(g_paramMode.ID);
+    int operatingMode = static_cast<int>(*m_processor->m_parameterVTS->getRawParameterValue(g_paramMode.ID));
     float dryWetMix = *m_processor->m_parameterVTS->getRawParameterValue(g_paramDryWet.ID);
     dryWetMix = juce::jlimit(0.0f, 1.0f, dryWetMix);
 
@@ -197,9 +197,9 @@ int OutOfPhaseAudio::processWOLA(juce::AudioBuffer<float> &data, juce::MidiBuffe
             }
             else if (operatingMode == 1) // frost
             {
-                if (nn < m_FrostPhaseData.size())
+                if (static_cast<size_t>(nn) < m_FrostPhaseData.size())
                 {
-                    processedPhase = m_FrostPhaseData[nn];
+                    processedPhase = m_FrostPhaseData[static_cast<size_t>(nn)];
                 }
                 else
                 {

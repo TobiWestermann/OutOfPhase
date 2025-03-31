@@ -72,14 +72,14 @@ public:
         juce::Path arcBackgroundPath;
         arcBackgroundPath.addArc(arcBounds.getX(), arcBounds.getY(), 
                        arcBounds.getWidth(), arcBounds.getHeight(),
-                       angleStart, angleStart + angleRange, arcThickness);
+                       angleStart, angleStart + angleRange, static_cast<int>(arcThickness));
         g.strokePath(arcBackgroundPath, juce::PathStrokeType(arcThickness, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
         
         g.setColour(m_knobColor);
         juce::Path arcPath;
         arcPath.addArc(arcBounds.getX(), arcBounds.getY(), 
                        arcBounds.getWidth(), arcBounds.getHeight(),
-                       angleStart, angleValue, arcThickness);
+                       angleStart, angleValue, static_cast<int>(arcThickness));
         g.strokePath(arcPath, juce::PathStrokeType(arcThickness, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
         
         // Draw pointer indicator

@@ -13,7 +13,7 @@ public:
         setTooltip("Sets all phase components to zero.");
         
         // Initialize wave positions
-        for (int i = 0; i < numWaves; ++i) {
+        for (std::size_t i = 0; i < numWaves; ++i) {
             wavePositions[i] = i * (1.0f / numWaves);
         }
         
@@ -91,7 +91,7 @@ public:
             
             // Draw animated expanding waves
             const float maxRadius = bounds.getWidth() * 0.7f;
-            for (int i = 0; i < numWaves; ++i) {
+            for (std::size_t i = 0; i < numWaves; ++i) {
                 float position = wavePositions[i];
                 float radius = position * maxRadius;
                 
@@ -190,7 +190,7 @@ private:
         
         if (getToggleState()) {
             // Update wave positions when active
-            for (int i = 0; i < numWaves; ++i) {
+            for (size_t i = 0; i < numWaves; ++i) {
                 wavePositions[i] += 0.008f;
                 
                 if (wavePositions[i] >= 1.0f) {

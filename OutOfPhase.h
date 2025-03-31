@@ -97,7 +97,7 @@ public:
     void prepareParameter(std::unique_ptr<juce::AudioProcessorValueTreeState>&  vts);
     
     // some necessary info for the host
-    int getLatency(){return m_Latency;};
+    int getLatency(){return m_Latency;}
 
 	void updateFrequencyRange(double sampleRate);
 
@@ -174,7 +174,7 @@ public:
 
 private:
 	OutOfPhaseAudioProcessor& m_processor;
-    juce::AudioProcessorValueTreeState& m_apvts; 
+    juce::AudioProcessorValueTreeState& m_apvts;
 
 	juce::Image m_paintImage;
 	juce::Image m_paperImage;

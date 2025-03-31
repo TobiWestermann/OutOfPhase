@@ -34,9 +34,10 @@ public:
         int currentIndex = 0;
         
         // Find current value index
-        for (int i = 0; i < values.size(); i++) {
+        size_t valuesSize = values.size();
+        for (size_t i = 0; i < valuesSize; i++) {
             if (std::abs(currentValue - values[i]) < 0.001) {
-                currentIndex = i;
+                currentIndex = static_cast<int>(i);
                 break;
             }
         }
@@ -51,7 +52,7 @@ public:
         }
         
         if (newIndex != currentIndex) {
-            setValue(values[newIndex], juce::sendNotificationAsync);
+            setValue(values[static_cast<size_t>(newIndex)], juce::sendNotificationAsync);
         }
     }
 };
