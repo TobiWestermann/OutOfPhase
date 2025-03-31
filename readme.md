@@ -1,18 +1,20 @@
 # OutOfPhase Audio Plugin
 
-A phase manipulation plugin for audio processing.
+A phase manipulation plugin for audio processing and sound design.
 Uses the [Advanced Audio Template](https://github.com/JoergBitzer/AdvancedAudioTemplate) by J. Bitzer and the FFT-Algorithm by U. Simmer.
 
 ## Core Functionality
 
-- **Phase Operations**: Provides phase freeze, flip, random phase and zero phase modes
-- **Frequency Band Processing**: Process specific frequency ranges independently
+- **4 different Phase Operations:**
+  - Phase Freeze,
+  - Phase Flip,
+  - Random Hhase
+  - Zero Phase
 
 ## Technical Details
 
 - FFT-based phase processing
 - Separate low and high frequency boundary control
-- Minimal CPU usage with optimized processing
 
 ## System Compatibility
 
