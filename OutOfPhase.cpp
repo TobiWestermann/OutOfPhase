@@ -487,13 +487,6 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
         m_FlipModeTextButton.getBottom() - m_ZeroModeTextButton.getY()
     );
     
-    g.drawText("Phase Mode", 
-        buttonGroupBounds.getX(),
-        static_cast<int>(buttonGroupBounds.getY() - 25 * m_processor.getScaleFactor()),
-        buttonGroupBounds.getWidth(), 
-        static_cast<int>(20 * m_processor.getScaleFactor()),
-        juce::Justification::centred);
-
     g.setFont(10.0f * m_processor.getScaleFactor());
 
     g.drawText("Zero-Phase", 

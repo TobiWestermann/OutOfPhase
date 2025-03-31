@@ -169,7 +169,7 @@ private:
         {
             auto* l = new juce::Label();
             
-            l->setFont(juce::Font("Arial", 14.0f, juce::Font::bold));
+            l->setFont(juce::Font(juce::FontOptions("Arial", 14.0f, juce::Font::bold)));
             l->setJustificationType(juce::Justification::centred);
             
             // Configure label colors

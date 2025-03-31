@@ -64,7 +64,7 @@ public:
         float letterY = bounds.getCentreY();
         float rightLetterX = bounds.getRight() - bounds.getHeight() / 2.0f;
         
-        g.setFont(juce::Font(bounds.getHeight() * 0.5f).boldened());
+        g.setFont(juce::Font(juce::FontOptions((bounds.getHeight() * 0.5f), juce::Font::bold)));
         
         // Draw U (Uniform) label
         g.setColour(getToggleState() ? 

@@ -97,16 +97,16 @@ public:
         
         // Draw frequency value text and labels
         juce::String valueText = formatFrequency(getValue());
-        g.setFont(juce::Font(radius * 0.45f).boldened());
+        g.setFont(juce::Font(juce::FontOptions((radius * 0.45f), juce::Font::bold)));
         g.setColour(juce::Colours::white);
         g.drawText(valueText, bounds, juce::Justification::centred);
         
-        g.setFont(juce::Font(radius * 0.35f));
+        g.setFont(juce::Font(juce::FontOptions(radius * 0.35f)));
         g.setColour(juce::Colours::lightgrey);
         g.drawText("Hz", bounds.translated(0.0f, radius * 0.4f), juce::Justification::centred);
         
         juce::String typeLabel = m_type == LowFreq ? "LOW" : "HIGH"; 
-        g.setFont(juce::Font(radius * 0.35f).boldened());
+        g.setFont(juce::Font(juce::FontOptions((radius * 0.35f), juce::Font::bold)));
         g.setColour(m_knobColor.brighter(0.5f));
         g.drawText(typeLabel, bounds.translated(0.0f, -radius * 0.4f), juce::Justification::centred);
     }

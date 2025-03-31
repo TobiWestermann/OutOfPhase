@@ -149,7 +149,7 @@ public:
         
         // Draw the "0" text
         float fontSize = isActive ? 32.0f : 24.0f;
-        g.setFont(juce::Font(fontSize).boldened());
+        g.setFont(juce::Font(juce::FontOptions(fontSize, juce::Font::bold)));
         
         if (isActive) {
             g.setColour(juce::Colours::black.withAlpha(0.4f));

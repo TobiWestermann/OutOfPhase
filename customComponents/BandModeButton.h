@@ -123,7 +123,7 @@ public:
         
         // Draw button text
         auto textBounds = bounds.reduced(4.0f);
-        g.setFont(juce::Font(bounds.getHeight() * 0.4f).boldened());
+        g.setFont(juce::Font(juce::FontOptions((bounds.getHeight() * 0.4f), juce::Font::bold)));
         
         g.setColour(juce::Colours::black.withAlpha(0.5f));
         g.drawText("BAND MODE", textBounds.translated(1, 1), juce::Justification::centred);
