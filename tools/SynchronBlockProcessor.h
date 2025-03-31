@@ -31,7 +31,7 @@ class SynchronBlockProcessor
 {
 public:
     SynchronBlockProcessor();
-    ~SynchronBlockProcessor(){};
+    ~SynchronBlockProcessor(){}
     /**
      * @brief preparetoprocess sets the desired blocksize for a given numer of channels
      * it can be called at any time (threadsafe), but it will cause audio-glitches (not realtime safe)

@@ -8,10 +8,10 @@ public:
 
     void processNextMidiBuffer (MidiBuffer& buffer,
                                 bool allowNewEvents);
-    void setPitchBendState(int pitchBend){m_PitchBendState = pitchBend; m_PitchBendChanged = true;};
-    void setModState(int mod){m_ModState = mod;m_ModChanged = true;};
-    int getPitchBendState(){return m_PitchBendState; };
-    int getModState(){return m_ModState;};    
+    void setPitchBendState(int pitchBend){m_PitchBendState = pitchBend; m_PitchBendChanged = true;}
+    void setModState(int mod){m_ModState = mod;m_ModChanged = true;}
+    int getPitchBendState(){return m_PitchBendState; }
+    int getModState(){return m_ModState;}
 private:
     int m_PitchBendState;
     int m_ModState;
@@ -26,7 +26,7 @@ public:
     MidiModPitchBendStateComponent(MidiModPitchBendState &state);
 	void paint(Graphics& g) override;
 	void resized() override;
-    void setScaleFactor(float newscale){m_scaleFactor = newscale;};
+    void setScaleFactor(float newscale){m_scaleFactor = newscale;}
     void timerCallback() override
     {
         auto modval = m_state.getModState();
@@ -35,7 +35,7 @@ public:
         m_PitchBendSlider.setValue(pbval,juce::NotificationType::dontSendNotification);
         //DBG(pbval);
         repaint();
-    };
+    }
 
 private:
     MidiModPitchBendState& m_state;

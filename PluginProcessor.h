@@ -46,8 +46,8 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    float getScaleFactor(){return m_pluginScaleFactor;};
-    void setScaleFactor(float newscalefactor){m_pluginScaleFactor = newscalefactor;};
+    float getScaleFactor(){return m_pluginScaleFactor;}
+    void setScaleFactor(float newscalefactor){m_pluginScaleFactor = newscalefactor;}
     
     // Algo component and ValueTreeState must be public to be accessed by the editor
     OutOfPhaseAudio m_algo;

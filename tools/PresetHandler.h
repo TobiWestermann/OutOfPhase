@@ -66,7 +66,7 @@ public:
 	int loadPresetAndActivate(String name);
 	int deletePresetFile(String name);
 	int loadfromFileAllUserPresets();
-	size_t getNrOfPresets() { return m_presetList.size(); };
+	size_t getNrOfPresets() { return m_presetList.size(); }
 	int getAllKeys(std::vector<String>& keys, std::vector<String>& presetcats);
 
 	bool isAlreadyAPreset(String name)
@@ -95,10 +95,10 @@ public:
 // new methods for categories
 	void addCategory(String newCat);
 	void addCategory(StringArray newCat);
-	bool gethasCategories(){return hasCategories;};
+	bool gethasCategories(){return hasCategories;}
 	std::vector<String> m_categoryList;
-	String getCurrentPresetName(){return m_curPresetName;};
-	void setCurrentPresetName(String newName){m_curPresetName = newName;};
+	String getCurrentPresetName(){return m_curPresetName;}
+	void setCurrentPresetName(String newName){m_curPresetName = newName;}
 // Factory Presets 
 #ifdef FACTORY_PRESETS
 	void DeployFactoryPresets();
@@ -135,7 +135,7 @@ public:
 	void resized() override;
 	void setSomethingChanged() {
 		m_somethingchanged = true; repaint();
-	};
+	}
 	void setNoCategory();
 
 private:
