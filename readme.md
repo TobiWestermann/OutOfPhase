@@ -8,18 +8,13 @@ Uses the [Advanced Audio Template](https://github.com/JoergBitzer/AdvancedAudioT
 - **4 different Phase Operations:**
   - Phase Freeze,
   - Phase Flip,
-  - Random Hhase
+  - Random Phase (Gaussian or Uniform Distribution)
   - Zero Phase
 
 ## Technical Details
 
 - FFT-based phase processing
 - Separate low and high frequency boundary control
-
-## System Compatibility
-
-- Formats: VST3, AU, AAX
-- OS: Windows 10+ or macOS 10.13+ (64-bit)
 
 ![OutOfPhase Plugin Screenshot](./extra/OutOfPhase_screenshot.png)
 
