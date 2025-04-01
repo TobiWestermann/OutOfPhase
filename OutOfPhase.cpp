@@ -464,16 +464,44 @@ void OutOfPhaseGUI::paint(juce::Graphics &g)
         m_DryWetSlider.getWidth() + static_cast<int>(20 * m_processor.getScaleFactor()),
         static_cast<int>(25 * m_processor.getScaleFactor())
     );
-    
+
     g.fillRoundedRectangle(dryWetLabelBg.toFloat(), 5.0f);
     
+    int labelWidth = static_cast<int>(40 * m_processor.getScaleFactor());
+    int labelHeight = static_cast<int>(16 * m_processor.getScaleFactor());
+    
+    juce::Rectangle<int> prePhaseLabel(
+        m_PrePhasePlot.getX() + (m_PrePhasePlot.getWidth() - labelWidth) / 2,
+        m_PrePhasePlot.getY() - labelHeight - static_cast<int>(5 * m_processor.getScaleFactor()) + 5,
+        labelWidth,
+        labelHeight
+    );
+
+    juce::Rectangle<int> postPhaseLabel(
+        m_PostPhasePlot.getX() + (m_PostPhasePlot.getWidth() - labelWidth) / 2,
+        m_PostPhasePlot.getY() - labelHeight - static_cast<int>(5 * m_processor.getScaleFactor()) + 5,
+        labelWidth,
+        labelHeight
+    );
+
+    g.fillRoundedRectangle(prePhaseLabel.toFloat(), 5.0f);
+    g.fillRoundedRectangle(postPhaseLabel.toFloat(), 5.0f);
+
     g.setColour(juce::Colours::darkslategrey);
     g.drawText("Block Size", 
         blockSizeLabelBg,
         juce::Justification::centred);
-    
+
     g.drawText("Dry/Wet", 
         dryWetLabelBg,
+        juce::Justification::centred);
+        
+    g.drawText("In", 
+        prePhaseLabel,
+        juce::Justification::centred);
+        
+    g.drawText("Out", 
+        postPhaseLabel,
         juce::Justification::centred);
 
     g.setFont(14.0f * m_processor.getScaleFactor());
